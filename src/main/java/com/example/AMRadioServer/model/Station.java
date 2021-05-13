@@ -1,0 +1,80 @@
+package com.example.AMRadioServer.model;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+
+import javax.persistence.*;
+import java.util.Date;
+
+@Entity
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@EqualsAndHashCode
+@Table(name = "Stations")
+public class Station
+{
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "station_id")
+    private int stationID;
+
+    @CreationTimestamp
+    @Temporal(TemporalType.TIMESTAMP)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "MM-dd-yyyy HH:mm:ss")
+    @Column(name = "station_created")
+    private Date stationCreated;
+
+    // Nullable because if it's null, then the playlist title in the spotify url should be used
+    @Column(name = "station_name")
+    private String stationName;
+
+    @Column(name = "station_creator")
+    private String stationCreator;
+
+    @Column(name = "station_url", nullable = false)
+    private String stationURL;
+
+    @Column(name = "station_info")
+    private String stationInfo;
+
+    /**
+     *      This is when the current song began
+     *      The idea is that anybody logging onto the station can use this, add the time it's been since this
+     *      and play the current song from that difference!
+     *
+     *      But with time zones, this falls apart...
+     *      UTC? Universal Time Zone?
+     *      ...
+     *      Looks like all Java.Util.Date are by default universal by how they work
+     *      So it should work... ah maybe lol
+     *      Maybe if the client and server are synchronized with the same world clock...?
+     */
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss")
+    @Column(name = "play_time")
+    private Date playTime;
+
+    // This should point to the current playing song
+    @Column(name = "current")
+    private String current;
+
+    // This should point to the next song to play
+    @Column(name = "next")
+    private String next;
+
+    /**
+     * This constructor is for new Stations, with most of the fields missing
+     *
+     * Either this or the controller should initialize the fields based on the Spotify api
+     */
+    public Station(String stationName, String stationURL) {
+        this.stationName = stationName;
+        this.stationURL = stationURL;
+    }
+}
