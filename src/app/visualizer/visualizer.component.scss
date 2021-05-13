@@ -1,0 +1,12 @@
+div {
+    display: flex;
+    justify-content: center;
+    align-content: center;
+}
+
+canvas {
+    background:#000;
+    border:1px solid #ccc;
+    width: 100vw;
+    height: 75vh;
+}

@@ -1,0 +1,11 @@
+#appDiv {
+    display: flex;
+    min-height: 98vh;
+    flex-direction: column;
+    overflow-x: hidden;
+    overflow-y: hidden;
+}
+
+#appWindow {
+    flex: 1;
+}

@@ -1,0 +1,18 @@
+#player {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: solid;
+}
+
+#currentDiv {
+    display: flex;
+    align-items: center;
+}
+
+#currentImage {
+    height: 100px;
+    width: 100px;
+    border: solid;
+    margin-right: 25px;
+}
