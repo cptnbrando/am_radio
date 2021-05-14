@@ -1,10 +1,11 @@
 <div id="appDiv">
-  <app-header></app-header>
+  <app-header id="appHeader"></app-header>
 
   <div id="appWindow">
-    <!-- <app-controls></app-controls> -->
-    <app-visualizer></app-visualizer>
+    <button *ngIf="authToken == ''" (click)="login()"><fa-icon [icon]="faSpotify"></fa-icon> Login with Spotify</button>
+    <app-controls id="controls" *ngIf="authToken != ''"></app-controls>
+    <app-visualizer id="visualizer" *ngIf="authToken != ''"></app-visualizer>
   </div>
 
-  <app-player></app-player>
+  <app-player id="appPlayer"></app-player>
 </div>

@@ -1,11 +1,23 @@
 #appDiv {
     display: flex;
-    min-height: 98vh;
     flex-direction: column;
-    overflow-x: hidden;
-    overflow-y: hidden;
+    min-height: 100vh;
+    // justify-content: space-between;
 }
 
 #appWindow {
+    display: flex;
     flex: 1;
+    align-items: center;
+    justify-content: center;
+
+    button {
+        width: 10%;
+    }
+}
+
+#controls {
+    position: absolute;
+    color: white;
+    z-index: 100;
 }
