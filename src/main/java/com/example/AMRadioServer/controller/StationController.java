@@ -17,28 +17,28 @@ import org.springframework.web.bind.annotation.*;
 @Setter
 public class StationController {
 
-    private StationService stationRepo;
+    private StationService stationService;
 
     @Autowired
-    public StationController(StationRepository stationRepo) {
-        this.stationRepo = stationRepo;
+    public StationController(StationService stationService) {
+        this.stationService = stationService;
     }
 
     @PutMapping(value = "/{stationID}/new")
     public ResponseMessage insertNewStation(@PathVariable("stationID") int stationID, @RequestBody Station station)
     {
-        if(stationRepo.existsById(stationID)) {
+        if(this.stationService.getStationRepo().existsById(stationID)) {
             return new ResponseMessage("Exists");
         }
 
         // TODO send back the link to the station of the URL in existence
-        if(stationRepo.existsByStationURL(station.getStationURL()))
+        if(this.stationService.getStationRepo().existsByStationURL(station.getStationURL()))
         {
             return new ResponseMessage("URL Exists");
         }
 
         try {
-            stationRepo.save(station);
+            this.stationService.getStationRepo().save(station);
             return new ResponseMessage("Yeehaw");
         }
         catch (Exception e)
@@ -51,7 +51,7 @@ public class StationController {
     @GetMapping(value = "/{stationID}")
     public Station getStation(@PathVariable("stationID") int stationID) {
         try{
-            return this.stationRepo.getOne(stationID);
+            return this.stationService.getStationRepo().getOne(stationID);
         }
         catch (Exception e)
         {
