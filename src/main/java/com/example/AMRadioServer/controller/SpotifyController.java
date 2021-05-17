@@ -18,8 +18,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URI;
@@ -31,15 +34,14 @@ import java.net.URI;
 @Setter
 @CrossOrigin
 public class SpotifyController {
-
+    private static final URI redirectURI = SpotifyHttpManager.makeUri("http://localhost:9015/api/spotify/getUserCode");
     private String code = "";
 
-    private SpotifyApi spotifyApi;
-
-    @Autowired
-    public SpotifyController(SpotifyApi spotifyApi) {
-        this.spotifyApi = spotifyApi;
-    }
+    private static final SpotifyApi spotifyApi = new SpotifyApi.Builder()
+            .setClientId(System.getenv("SPOTIFY_CLI_ID"))
+            .setClientSecret(System.getenv("SPOTIFY_CLI_SECRET"))
+            .setRedirectUri(redirectURI)
+            .build();
 
     /**
      * This is what the frontend hits when the user pushes the login button
@@ -91,8 +93,9 @@ public class SpotifyController {
         //TODO Refresh token logic
 
         // We got the access token, so route back to the page and somehow give it the token after a redirect
-        response.addHeader("accessToken", spotifyApi.getAccessToken());
-        response.addHeader("refreshToken", spotifyApi.getRefreshToken());
+//        response.addHeader("Access-Control-Expose-Headers", "x-some-header"); // set this to expose custom header
+//        response.addHeader("accessToken", spotifyApi.getAccessToken());
+//        response.addHeader("refreshToken", spotifyApi.getRefreshToken());
 
         // This should be changed in the future to just use the header
         // Now with the added refresh token, there's no way this can continue...
@@ -109,17 +112,16 @@ public class SpotifyController {
                 .build();
 
         try {
+            // Simplified playlists contain track collections, so it should work. Idk what makes them simplified lol
             final Paging<PlaylistSimplified> playlistPaging = getListOfCurrentUsersPlaylistsRequest.execute();
             return playlistPaging.getItems();
         }
         catch (Exception e)
         {
+            // An empty array is returned if it fails
             System.out.println("Error in getPlaylists: " + e.getMessage());
+            return null;
         }
-
-        // Simplified playlists contain track collections, so it should work. Idk what makes them simplified lol
-        // An empty array is returned if it fails
-        return new PlaylistSimplified[0];
     }
 
     @GetMapping(value = "/getUser")
@@ -131,5 +133,16 @@ public class SpotifyController {
             System.out.println(e.getMessage());
             return null;
         }
+    }
+
+    @GetMapping(value = "/getAccessToken")
+    public ResponseMessage getAccessToken() {
+        String accessToken = spotifyApi.getAccessToken();
+        if(this.getUserPlaylists() == null)
+        {
+            // TODO use refresh token to get a new access token
+            return new ResponseMessage("NO TOKEN FOUND");
+        }
+        return new ResponseMessage(spotifyApi.getAccessToken());
     }
 }

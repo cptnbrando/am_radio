@@ -8,13 +8,13 @@ import org.springframework.web.context.annotation.SessionScope;
 
 import java.net.URI;
 
-@Configuration
+//@Configuration
 public class SpotifyConfiguration {
 
     private static final URI redirectURI = SpotifyHttpManager.makeUri("http://localhost:9015/api/spotify/getUserCode");
 
-    @Bean
-    @SessionScope
+//    @Bean
+//    @SessionScope
     public SpotifyApi spotifyApi() {
         return new SpotifyApi.Builder()
                 .setClientId(System.getenv("SPOTIFY_CLI_ID"))
