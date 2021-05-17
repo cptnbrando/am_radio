@@ -1,7 +1,6 @@
 import { Component, Input, OnInit, Output } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { faSpotify } from '@fortawesome/free-brands-svg-icons';
-import { AuthService } from '../auth.service';
 import { SpotifyService } from '../spotify.service';
 
 @Component({
@@ -14,10 +13,10 @@ export class RadioPageComponent implements OnInit {
   faSpotify = faSpotify;
 
   // This will hold a spotify uri for the logged in user
-  @Input() spotifyUser: string = null;
+  @Input() user: object;
 
   // This will hold an array of playlist uris for the user
-  @Input() userPlaylists: string = null;
+  @Output() userPlaylists: object[];
 
   // What station the user is on, begins on 0
   @Output() stationNum: number = 0;
@@ -32,23 +31,29 @@ export class RadioPageComponent implements OnInit {
 
   authToken: string = "";
 
-  constructor(private spotifyService: SpotifyService, private route: ActivatedRoute, private authService: AuthService) {}
+  constructor(private spotifyService: SpotifyService) {}
 
   ngOnInit() {
-    // this.authService.accessToken = "";
-    // this.authService.refreshToken = "";
-    this.authToken = this.authService.accessToken;
-    console.log(this.authService.refreshToken);
-  }
-
-  login(): void {
-    this.spotifyService.getCodeURL().subscribe(data => {
-      if(data)
+    // Check for access token
+    this.spotifyService.getAccessToken().subscribe(data => {
+      if(data.message == "NO TOKEN FOUND")
       {
-        // This should use the interceptor and a pipe to set the tokens to the auth service!!!
-        window.location.replace(data.message);
+        window.location.replace(this.spotifyService.webURL);
       }
-    })
+      else
+      {
+        // When we load up, get the user and the user's playlists
+        this.spotifyService.getUser().subscribe(data => {
+          this.user = data;
+          console.log(this.user);
+        })
+
+        this.spotifyService.getUserPlaylists().subscribe(data => {
+          this.userPlaylists = data;
+          console.log(this.userPlaylists);
+        });
+      }
+    });
   }
 
   toggleBar(bar: number)

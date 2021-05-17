@@ -1,4 +1,9 @@
 <div id="playlistBar" *ngIf="showPlaylistBar">
-    <p>Current Playlist:</p>
+    <h2>Welcome {{user.displayName}}</h2>
     <p>My Playlists:</p>
+    <div>
+        <ol>
+            <li *ngFor="let list of userPlaylists">{{list.name}}</li>
+        </ol>
+    </div>
 </div>

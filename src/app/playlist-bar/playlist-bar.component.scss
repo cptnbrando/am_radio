@@ -1,11 +1,17 @@
-div{
+#playlistBar{
     position: absolute;
     left: 5px;
     float: right;
     width: 25em;
-    height:80%;
+    height: 80%;
     border: solid;
     border-color: red;
 
+    div {
+        border: solid;
+        // overflow-y: scroll;
+    }
+
     color: white;
+    overflow-y: scroll;
 }

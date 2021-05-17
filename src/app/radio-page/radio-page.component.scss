@@ -8,10 +8,10 @@
   display: flex;
   flex-direction: row;
   flex: 1;
+}
 
-  button {
-    width: 10%;
-  }
+#appPlayer {
+  z-index: 1000;
 }
 
 #sidebars {

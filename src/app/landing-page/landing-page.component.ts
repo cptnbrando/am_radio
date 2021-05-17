@@ -1,7 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
 import { faSpotify } from '@fortawesome/free-brands-svg-icons';
-import { AuthService } from '../auth.service';
 import { SpotifyService } from '../spotify.service';
 
 @Component({
@@ -12,9 +10,17 @@ import { SpotifyService } from '../spotify.service';
 export class LandingPageComponent implements OnInit {
   faSpotify = faSpotify;
 
-  constructor(private spotifyService: SpotifyService, private route: ActivatedRoute, private authService: AuthService) { }
+  constructor(private spotifyService: SpotifyService) { }
 
   ngOnInit(): void {
+    // Check if there's a token, if so go to application
+    this.spotifyService.getAccessToken().subscribe(data => {
+      console.log(data);
+      if(data.message != "NO TOKEN FOUND" && data.message.length > 25)
+      {
+        window.location.replace(this.spotifyService.webURL + "/app");
+      }
+    })
   }
 
   login(): void {

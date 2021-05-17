@@ -5,20 +5,16 @@ import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/cor
   templateUrl: './playlist-bar.component.html',
   styleUrls: ['./playlist-bar.component.scss']
 })
-export class PlaylistBarComponent implements OnInit, OnChanges {
+export class PlaylistBarComponent implements OnInit {
 
   @Input() showPlaylistBar: boolean;
+
+  @Input() user;
+  @Input() userPlaylists: string[];
 
   constructor() { }
 
   ngOnInit(): void {
-  }
-
-  ngOnChanges(changes: SimpleChanges)
-  {
-    console.log(changes);
-
-    console.log(this.showPlaylistBar);
   }
 
   loadUserPlaylists(): void
