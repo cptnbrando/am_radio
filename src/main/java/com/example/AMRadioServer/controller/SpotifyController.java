@@ -11,11 +11,13 @@ import com.wrapper.spotify.model_objects.specification.PlaylistSimplified;
 import com.wrapper.spotify.model_objects.specification.User;
 import com.wrapper.spotify.requests.authorization.authorization_code.AuthorizationCodeRequest;
 import com.wrapper.spotify.requests.authorization.authorization_code.AuthorizationCodeUriRequest;
+import com.wrapper.spotify.requests.data.playlists.GetListOfCurrentUsersPlaylistsRequest;
 import com.wrapper.spotify.requests.data.playlists.GetListOfUsersPlaylistsRequest;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -25,36 +27,49 @@ import java.net.URI;
 @RestController
 @RequestMapping("/api/spotify")
 @NoArgsConstructor
-@AllArgsConstructor
 @Getter
 @Setter
 @CrossOrigin
 public class SpotifyController {
 
-    private static final URI redirectURI = SpotifyHttpManager.makeUri("http://localhost:9015/api/spotify/getUserCode");
     private String code = "";
 
-    private static final SpotifyApi spotifyApi = new SpotifyApi.Builder()
-            .setClientId(System.getenv("SPOTIFY_CLI_ID"))
-            .setClientSecret(System.getenv("SPOTIFY_CLI_SECRET"))
-            .setRedirectUri(redirectURI)
-            .build();
+    private SpotifyApi spotifyApi;
 
+    @Autowired
+    public SpotifyController(SpotifyApi spotifyApi) {
+        this.spotifyApi = spotifyApi;
+    }
+
+    /**
+     * This is what the frontend hits when the user pushes the login button
+     * It will use show_dialog to redirect the user to a Spotify auth page
+     * Then the auth page will redirect to getUserCode() on successful login (done in spotify app dashboard)
+     *
+     * @return Response message with uri
+     */
     @GetMapping(value = "/login")
     public ResponseMessage spotifyLogin() {
-        System.out.println("In /login");
-
         AuthorizationCodeUriRequest authorizationCodeUriRequest = spotifyApi.authorizationCodeUri()
                 .scope("user-read-private, user-read-email, streaming")
                 .show_dialog(true)
                 .build();
 
         final URI uri = authorizationCodeUriRequest.execute();
-        System.out.println(uri.toString());
 
         return new ResponseMessage(uri.toString());
     }
 
+    /**
+     * The Spotify login page redirects to this route
+     * It will take in the given code and get an Access token to be used in the future
+     * Then it redirects to the frontend, with the token in the header
+     *
+     * @param userCode returned by Spotify login page
+     * @param response the client to be redirected
+     * @return a user access token
+     * @throws IOException
+     */
     @GetMapping(value = "/getUserCode")
     public String getSpotifyUserCode(@RequestParam("code") String userCode, HttpServletResponse response) throws IOException {
         System.out.println("In /getUserCode");
@@ -76,21 +91,25 @@ public class SpotifyController {
         //TODO Refresh token logic
 
         // We got the access token, so route back to the page and somehow give it the token after a redirect
-        response.addHeader("token", spotifyApi.getAccessToken());
-        response.sendRedirect("http://localhost:4200/?token=" + spotifyApi.getAccessToken());
+        response.addHeader("accessToken", spotifyApi.getAccessToken());
+        response.addHeader("refreshToken", spotifyApi.getRefreshToken());
+
+        // This should be changed in the future to just use the header
+        // Now with the added refresh token, there's no way this can continue...
+        response.sendRedirect("http://localhost:4200/app");
         return spotifyApi.getAccessToken();
     }
 
-    @GetMapping(value = "/getPlaylists")
-    public PlaylistSimplified[] getPlaylists() {
-        System.out.println("In /getPlaylists");
-        final GetListOfUsersPlaylistsRequest getListOfUsersPlaylistsRequest = spotifyApi.getListOfUsersPlaylists(spotifyApi.getClientId())
+    @GetMapping(value = "/getUserPlaylists")
+    public PlaylistSimplified[] getUserPlaylists()
+    {
+        final GetListOfCurrentUsersPlaylistsRequest getListOfCurrentUsersPlaylistsRequest = spotifyApi.getListOfCurrentUsersPlaylists()
                 .limit(25)
                 .offset(5)
                 .build();
 
         try {
-            final Paging<PlaylistSimplified> playlistPaging = getListOfUsersPlaylistsRequest.execute();
+            final Paging<PlaylistSimplified> playlistPaging = getListOfCurrentUsersPlaylistsRequest.execute();
             return playlistPaging.getItems();
         }
         catch (Exception e)
@@ -98,6 +117,8 @@ public class SpotifyController {
             System.out.println("Error in getPlaylists: " + e.getMessage());
         }
 
+        // Simplified playlists contain track collections, so it should work. Idk what makes them simplified lol
+        // An empty array is returned if it fails
         return new PlaylistSimplified[0];
     }
 
@@ -110,17 +131,5 @@ public class SpotifyController {
             System.out.println(e.getMessage());
             return null;
         }
-    }
-
-    @GetMapping(value = "/secret")
-    public ResponseMessage getClientSecret()
-    {
-        return new ResponseMessage(System.getenv("SPOTIFY_CLI_SECRET"));
-    }
-
-    @GetMapping(value = "/id")
-    public ResponseMessage getClientID()
-    {
-        return new ResponseMessage(System.getenv("SPOTIFY_CLI_ID"));
     }
 }
