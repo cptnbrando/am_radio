@@ -1,0 +1,15 @@
+<div id="appDiv">
+  <app-header id="appHeader" [showControls]="showControls" (toggleBarEvent)="toggleBar($event)" [stationNum]="stationNum" (changeStationEvent)="changeStation($event)"></app-header>
+
+  <div id="appWindow">
+    <app-visualizer id="visualizer"></app-visualizer>
+
+    <div id="settingBars">
+      <app-playlist-bar [showPlaylistBar]="showPlaylistBar"></app-playlist-bar>
+      <app-controls id="controls" [showControls]="showControls"></app-controls>
+      <app-station-bar [showStationBar]="showStationBar"></app-station-bar>
+    </div>
+  </div>
+
+  <app-player id="appPlayer" [showPlaylistBar]="showPlaylistBar" [showStationBar]="showStationBar" (toggleBarEvent)="toggleBar($event)" [isPlaying]="isPlaying" (isPlayingEvent)="togglePlayback()"></app-player>
+</div>

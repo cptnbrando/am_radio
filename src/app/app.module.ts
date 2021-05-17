@@ -12,6 +12,11 @@ import { HttpClientModule } from '@angular/common/http';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { TokenInterceptor } from './http-interceptors/token.interceptor';
 import { RouterModule } from '@angular/router';
+import { PlaylistBarComponent } from './playlist-bar/playlist-bar.component';
+import { StationBarComponent } from './station-bar/station-bar.component';
+import { LandingPageComponent } from './landing-page/landing-page.component';
+import { RadioPageComponent } from './radio-page/radio-page.component';
+import { AppRoutingModule } from './app-routing.module';
 
 @NgModule({
   declarations: [
@@ -19,15 +24,21 @@ import { RouterModule } from '@angular/router';
     VisualizerComponent,
     PlayerComponent,
     HeaderComponent,
-    ControlsComponent
+    ControlsComponent,
+    PlaylistBarComponent,
+    StationBarComponent,
+    LandingPageComponent,
+    RadioPageComponent
   ],
   imports: [
     BrowserModule,
     FontAwesomeModule,
     HttpClientModule,
     RouterModule.forRoot([
-      {path: '**', component: AppComponent}
-    ])
+      {path: '', component: LandingPageComponent},
+      {path: 'app', component: RadioPageComponent}
+    ]),
+    AppRoutingModule
   ],
   providers: [
     {

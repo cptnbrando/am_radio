@@ -1,11 +1,1 @@
-<div id="appDiv">
-  <app-header id="appHeader"></app-header>
-
-  <div id="appWindow">
-    <button *ngIf="authToken == ''" (click)="login()"><fa-icon [icon]="faSpotify"></fa-icon> Login with Spotify</button>
-    <app-controls id="controls" *ngIf="authToken != ''"></app-controls>
-    <app-visualizer id="visualizer" *ngIf="authToken != ''"></app-visualizer>
-  </div>
-
-  <app-player id="appPlayer"></app-player>
-</div>
+<router-outlet></router-outlet>

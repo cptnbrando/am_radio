@@ -1,7 +1,11 @@
 <div id="header">
-    <h2>am_radio</h2>
+    <h2 (click)="toggleBar(2)">am_radio</h2>
     <div id="scrollbar">
         <!-- This is where a scrollbar can goooo -->
     </div>
-    <span id="stationNum">000</span>
+    <div id="numBox">
+        <fa-icon [icon]="faPlus" class="numControl" (click)="changeStation(stationNum + 1)"></fa-icon>
+        <fa-icon [icon]="faMinus" class="numControl" (click)="changeStation(stationNum - 1)"></fa-icon>
+        <span id="stationNum" class="numControl">{{stationNumDisplay()}}</span>
+    </div>
 </div>

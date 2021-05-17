@@ -9,11 +9,19 @@ export class AuthService {
 
   // Uses getters and setters to get/set to local storage
   // this should not do this and do something more secure
-  get token(): string {
-    return localStorage.getItem("token");
+  get accessToken(): string {
+    return localStorage.getItem("accessToken");
   }
 
-  set token(token) {
-    localStorage.setItem("token", token);
+  set accessToken(token: string) {
+    localStorage.setItem("accessToken", token);
+  }
+
+  get refreshToken(): string {
+    return localStorage.getItem("refreshToken");
+  }
+
+  set refreshToken(token: string) {
+    localStorage.setItem("refreshToken", token);
   }
 }

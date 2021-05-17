@@ -2,7 +2,7 @@
     <span>Imma seek soon</span>
 </div>
 <div id="player">
-    <span id="currentDiv">
+    <span id="currentDiv" (click)="toggleBar(0)">
         <div id="currentImage">
             <img>
         </div>
@@ -12,11 +12,12 @@
         </div>
     </span>
 
-    <span id="playButton">
-        <span data-feather="circle"></span>
+    <span id="playButton" (click)="togglePlay()">
+        <fa-icon [icon]="faPlay" *ngIf="!isPlaying"></fa-icon>
+        <fa-icon [icon]="faPause" *ngIf="isPlaying"></fa-icon>
     </span>
 
-    <span id="stationInfo">
+    <span id="stationInfo" (click)="toggleBar(1)">
         <h4>Driving 6</h4>
         <h3>bdog66</h3>
         <img>

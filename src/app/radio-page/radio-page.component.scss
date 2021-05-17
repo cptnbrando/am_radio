@@ -1,0 +1,19 @@
+#appDiv {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+#appWindow {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+
+  button {
+    width: 10%;
+  }
+}
+
+#sidebars {
+  z-index: 100;
+}

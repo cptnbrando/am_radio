@@ -13,15 +13,23 @@ export class SpotifyService {
 
   constructor(private httpCli:HttpClient) { }
 
-  get headers() {
-    return new HttpHeaders({'Content-Type': 'application/json'});
-  }
-
-  loginUser(): Observable<any>{
+  getCodeURL(): Observable<any>{
     let url = this.serverURL + `api/spotify/login`;
 
-    return this.httpCli.get<any>(url, {
-      headers: this.headers
-    });
+    return this.httpCli.get<any>(url);
+  }
+
+  loginUser(myURL: string): Observable<any>{
+    return this.httpCli.get<any>(myURL);
+  }
+
+  logoutUser(): void{
+    localStorage.removeItem("token");
+  }
+
+  getUserPlaylists(): Observable<any>{
+    let url = this.serverURL + `api/spotify/getUserPlaylists`;
+
+    return this.httpCli.get<any>(url);
   }
 }

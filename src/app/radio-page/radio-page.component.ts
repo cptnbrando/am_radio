@@ -1,17 +1,16 @@
 import { Component, Input, OnInit, Output } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { faSpotify } from '@fortawesome/free-brands-svg-icons';
-import { AuthService } from './auth.service';
-import { SpotifyService } from './spotify.service';
-
+import { AuthService } from '../auth.service';
+import { SpotifyService } from '../spotify.service';
 
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  selector: 'app-radio-page',
+  templateUrl: './radio-page.component.html',
+  styleUrls: ['./radio-page.component.scss']
 })
-export class AppComponent implements OnInit {
-  title = 'am_radio';
+export class RadioPageComponent implements OnInit {
+
   faSpotify = faSpotify;
 
   // This will hold a spotify uri for the logged in user
@@ -78,4 +77,5 @@ export class AppComponent implements OnInit {
   {
     this.isPlaying = !this.isPlaying;
   }
+
 }
