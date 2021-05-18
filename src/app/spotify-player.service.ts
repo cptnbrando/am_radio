@@ -15,6 +15,10 @@ export class SpotifyPlayerService {
     return this.httpCli.get<any>(`${this.serverURL}/getPlayer`);
   }
 
+  getCurrentlyPlaying(): Observable<any> {
+    return this.httpCli.get<any>(`${this.serverURL}/getCurrentlyPlaying`);
+  }
+
   next(): Observable<any>{
     // The api doesn't need any body data... I don't think...?
     return this.httpCli.post<any>(`${this.serverURL}/next`, "yeet");
@@ -25,7 +29,7 @@ export class SpotifyPlayerService {
   }
 
   pause(): Observable<any>{
-    return this.httpCli.put<any>(`${this.serverURL}/play`, "yeet");
+    return this.httpCli.put<any>(`${this.serverURL}/pause`, "yeet");
   }
 
   seek(time: number): Observable<any>{

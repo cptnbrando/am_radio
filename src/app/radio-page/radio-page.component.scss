@@ -2,18 +2,39 @@
   display: flex;
   flex-direction: column;
   flex: 1;
+  padding: 3px;
+}
+
+#appHeader {
+  flex: 1;
+}
+
+#settingsBars {
+  display: flex;
+  justify-content: space-between;
 }
 
 #appWindow {
-  flex: 1;
-  align-items: center;
-  justify-content: center;
+  display: flex;
+  justify-content: space-between;
+  flex: 10;
+
+  .under {
+    display: inline-block;
+  }
+
+  .over {
+    display: flex;
+    position: absolute;
+    flex: 1;
+  }
+
+  .settings {
+    height: 100%;
+  }
 }
 
-// #appPlayer {
-//   z-index: 1000;
-// }
-
-#sidebars {
+#appPlayer {
+  flex: 2;
   z-index: 100;
 }

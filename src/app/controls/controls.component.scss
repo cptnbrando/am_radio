@@ -1,12 +1,14 @@
-div {
-  position: absolute;
-  float: left;
-  left: 25em;
-  width: 75em;
-  height: 80%;
-  margin-left: 20px;
+#controlsBar {
+  // position: absolute;
+  // float: inline-start;
+  // left: 25em;
+  // width: 70em;
+  // margin-left: 15px;
   border: solid;
   border-color: blue;
 
   color: white;
+  // flex-direction: row;
+
+  flex: 1;
 }

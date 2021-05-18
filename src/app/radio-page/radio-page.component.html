@@ -2,12 +2,12 @@
   <app-header id="appHeader" [showControls]="showControls" (toggleBarEvent)="toggleBar($event)" [stationNum]="stationNum" (changeStationEvent)="changeStation($event)"></app-header>
 
   <div id="appWindow">
-    <app-visualizer id="visualizer"></app-visualizer>
+    <app-visualizer class="under"></app-visualizer>
 
-    <div id="settingBars">
-      <app-playlist-bar [showPlaylistBar]="showPlaylistBar" [user]="user" [userPlaylists]="userPlaylists"></app-playlist-bar>
-      <app-controls id="controls" [showControls]="showControls"></app-controls>
-      <app-station-bar [showStationBar]="showStationBar"></app-station-bar>
+    <div id="settingsBars" class="over thirds">
+      <app-playlist-bar [showPlaylistBar]="showPlaylistBar" [user]="user" [userPlaylists]="userPlaylists" class="settings"></app-playlist-bar>
+      <app-controls [showControls]="showControls" class="settings"></app-controls>
+      <app-station-bar [showStationBar]="showStationBar" class="settings"></app-station-bar>
     </div>
   </div>
 

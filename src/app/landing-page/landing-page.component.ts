@@ -16,7 +16,7 @@ export class LandingPageComponent implements OnInit {
     // Check if there's an access token, if so set it to local storage and go to the app
     this.spotifyService.checkTokens().subscribe(data => 
     {
-      if(data.message)
+      if(data != null)
       {
         localStorage.setItem("accessToken", data.message);
         window.location.replace(this.spotifyService.webURL + "/app");

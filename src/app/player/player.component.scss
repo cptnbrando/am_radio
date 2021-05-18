@@ -5,14 +5,26 @@
     border-top: solid;
 }
 
-#currentDiv {
-    display: flex;
-    align-items: center;
+.buttonBox {
+    width: 15em;
+    padding: 5px;
 }
 
-#currentImage {
-    height: 100px;
-    width: 100px;
+#currentDiv {
+    columns: 6rem 2;
+    column-gap: 15px;
+}
+
+#stationInfo {
+
+}
+
+#currentImage img {
     border: solid;
-    margin-right: 25px;
+    max-width:100%;
+    max-height:100%;
+}
+
+#currentInfo {
+
 }

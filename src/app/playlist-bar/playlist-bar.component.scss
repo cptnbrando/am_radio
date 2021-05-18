@@ -1,17 +1,16 @@
-#playlistBar{
-    position: absolute;
-    left: 5px;
-    float: right;
-    width: 25em;
-    height: 80%;
+#playlistBar {
+    // position: absolute;
+    // left: 5px;
+    // float: left;
+    // width: 25em;
     border: solid;
-    border-color: red;
+    border-color: green;
 
-    div {
-        border: solid;
-        // overflow-y: scroll;
-    }
+    flex-grow: 0;
+    flex-shrink: 0;
+    flex-basis: 240px;
 
     color: white;
-    overflow-y: scroll;
+
+    // flex: 1;
 }

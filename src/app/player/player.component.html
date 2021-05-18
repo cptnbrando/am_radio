@@ -2,24 +2,24 @@
     <span>Imma seek soon</span>
 </div>
 <div id="player">
-    <span id="currentDiv" (click)="toggleBar(0)">
+    <div id="currentDiv" (click)="toggleBar(0)" class="buttonBox">
         <div id="currentImage">
-            <img>
+            <img [src]="currentlyPlayingImage">
         </div>
         <div id="currentInfo">
-            <h3 id="currentName">Better Life</h3>
-            <h5 id="currentArtist">3 Doors Down</h5>
+            <div id="currentName">{{this.currentlyPlayingSong}}</div>
+            <div id="currentArtist">{{this.currentlyPlayingArtist}}</div>
         </div>
-    </span>
+    </div>
 
-    <span id="playButton" (click)="togglePlay()">
+    <div id="playButton" (click)="togglePlay()">        
         <fa-icon [icon]="faPlay" *ngIf="!isPlaying"></fa-icon>
         <fa-icon [icon]="faPause" *ngIf="isPlaying"></fa-icon>
-    </span>
+    </div>
 
-    <span id="stationInfo" (click)="toggleBar(1)">
-        <h4>Driving 6</h4>
-        <h3>bdog66</h3>
-        <img>
-    </span>
+    <div id="stationInfo" (click)="toggleBar(1)" class="buttonBox">
+        <div>Driving 6</div>
+        <div>bdog66</div>
+        <div>{{this.currentDeviceName}}</div>
+    </div>
 </div>

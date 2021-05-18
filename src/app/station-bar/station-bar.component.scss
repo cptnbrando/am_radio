@@ -1,11 +1,19 @@
-div {
-    position: absolute;
-    right: 5px;
-    float: right;
-    width: 25em;
-    height:80%;
+#stationBar {
+    // position: absolute;
+    // width: 25em;
+    // float: right;
+    // right: 1px;
     border: solid;
-    border-color: green;
+    border-color: red;
+
+    // flex-wrap: nowrap;
+    // flex: 1;
 
     color: white;
+
+    flex-grow: 0;
+    flex-shrink: 0;
+    flex-basis: 240px;
+
+    // flex: 1;
 }
