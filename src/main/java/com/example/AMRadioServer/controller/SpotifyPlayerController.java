@@ -1,8 +1,10 @@
 package com.example.AMRadioServer.controller;
 
+import com.example.AMRadioServer.model.ResponseMessage;
 import com.google.gson.JsonArray;
 import com.wrapper.spotify.SpotifyApi;
 import com.wrapper.spotify.exceptions.SpotifyWebApiException;
+import com.wrapper.spotify.model_objects.miscellaneous.CurrentlyPlaying;
 import com.wrapper.spotify.model_objects.miscellaneous.CurrentlyPlayingContext;
 import lombok.NoArgsConstructor;
 import org.apache.hc.core5.http.ParseException;
@@ -31,39 +33,55 @@ public class SpotifyPlayerController
         }
     }
 
+    @GetMapping(value = "/getCurrentlyPlaying")
+    public CurrentlyPlaying getCurrentlyPlaying() {
+        try {
+            return this.spotifyApi.getUsersCurrentlyPlayingTrack().build().execute();
+        } catch (IOException | SpotifyWebApiException | ParseException e)
+        {
+            return null;
+        }
+    }
+
     @PostMapping(value = "/next")
-    public void next() {
+    public boolean next() {
         try {
             this.spotifyApi.skipUsersPlaybackToNextTrack().build().execute();
+            return true;
         }
         catch (IOException | SpotifyWebApiException | ParseException e)
         {
             System.out.println("Exception in player/next");
             e.printStackTrace();
+            return false;
         }
     }
 
     @PutMapping(value = "/play")
-    public void play() {
+    public boolean play() {
         try {
             this.spotifyApi.startResumeUsersPlayback().build().execute();
+            return true;
         }
         catch (IOException | SpotifyWebApiException | ParseException e)
         {
             System.out.println("Exception in player/play");
             e.printStackTrace();
+            return false;
         }
     }
 
     @PutMapping(value = "/pause")
-    public void pause() {
+    public boolean pause() {
         try {
             this.spotifyApi.pauseUsersPlayback().build().execute();
+            return true;
         }
         catch (IOException | SpotifyWebApiException | ParseException e)
         {
             System.out.println("Exception in player/pause");
             e.printStackTrace();
+            return false;
         }
     }
 
@@ -72,26 +90,30 @@ public class SpotifyPlayerController
      * @param time ms time
      */
     @PutMapping(value = "/seek")
-    public void seek(@RequestParam int time) {
+    public boolean seek(@RequestParam int time) {
         try {
             this.spotifyApi.seekToPositionInCurrentlyPlayingTrack(time).build().execute();
+            return true;
         }
         catch (IOException | SpotifyWebApiException | ParseException e)
         {
             System.out.println("Exception in player/seek");
             e.printStackTrace();
+            return false;
         }
     }
 
     @PutMapping(value = "/shuffle")
-    public void shuffle(@RequestParam boolean activate) {
+    public boolean shuffle(@RequestParam boolean activate) {
         try {
             this.spotifyApi.toggleShuffleForUsersPlayback(activate).build().execute();
+            return true;
         }
         catch (IOException | SpotifyWebApiException | ParseException e)
         {
             System.out.println("Exception in player/shuffle");
             e.printStackTrace();
+            return false;
         }
     }
 
@@ -117,15 +139,17 @@ public class SpotifyPlayerController
      * @param percent 0 - 100 percent int value
      */
     @PutMapping(value = "/volume")
-    public void volume(@RequestParam int percent)
+    public boolean volume(@RequestParam int percent)
     {
         try {
             this.spotifyApi.setVolumeForUsersPlayback(percent).build().execute();
+            return true;
         }
         catch (IOException | SpotifyWebApiException | ParseException e)
         {
             System.out.println("Exception in player/volume");
             e.printStackTrace();
+            return false;
         }
     }
 }

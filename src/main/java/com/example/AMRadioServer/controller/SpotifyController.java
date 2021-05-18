@@ -44,7 +44,9 @@ public class SpotifyController {
     @GetMapping(value = "/login")
     public ResponseMessage spotifyLogin() {
         AuthorizationCodeUriRequest authorizationCodeUriRequest = spotifyApi.authorizationCodeUri()
-                .scope("user-read-private, user-read-email, streaming")
+                .scope("user-read-private, user-read-email, streaming, " +
+                        "user-read-playback-state, user-read-currently-playing, " +
+                        "user-modify-playback-state, playlist-modify-public")
                 .show_dialog(true)
                 .build();
 
@@ -135,6 +137,28 @@ public class SpotifyController {
             e.printStackTrace();
             return null;
         }
+    }
+
+    /**
+     * There's only a route to get all of a user's available devices
+     * Loop through that and return it if it's active
+     * @return an active Device
+     */
+    @GetMapping(value = "/getCurrentDevice")
+    public Device getCurrentDevice() {
+        Device[] myDevices = this.getDevices();
+        if(myDevices != null)
+        {
+            for(Device device: myDevices)
+            {
+                if(device.getIs_active())
+                {
+                    return device;
+                }
+            }
+        }
+
+        return null;
     }
 
     /**
