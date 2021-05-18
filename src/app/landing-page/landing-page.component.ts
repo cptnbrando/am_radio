@@ -13,11 +13,12 @@ export class LandingPageComponent implements OnInit {
   constructor(private spotifyService: SpotifyService) { }
 
   ngOnInit(): void {
-    // Check if there's a token, if so go to application
-    this.spotifyService.getAccessToken().subscribe(data => {
-      console.log(data);
-      if(data.message != "NO TOKEN FOUND" && data.message.length > 25)
+    // Check if there's an access token, if so set it to local storage and go to the app
+    this.spotifyService.checkTokens().subscribe(data => 
+    {
+      if(data.message)
       {
+        localStorage.setItem("accessToken", data.message);
         window.location.replace(this.spotifyService.webURL + "/app");
       }
     })

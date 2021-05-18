@@ -1,7 +1,81 @@
-body, html {
+html, body {
+  width: 100%;
+  height: 100%;
   margin: 0;
-  padding: 0;
+}
+
+/* encapsulate the various syntax in helper clases */
+/* inspired by http://infrequently.org/2009/08/css-3-progress/ */
+
+/* items flex/expand vertically */
+// .vbox {
+//   /* current syntax */
+//   display: -webkit-flex;
+//   display: -moz-flex;
+//   display: -ms-flex;
+//   display: flex;
+
+//   -webkit-flex-direction: column;
+//   -moz-flex-direction: column;
+//   -ms-flex-direction: column;
+//   flex-direction: column;
+// }
+
+// /* items flex/expand horizontally */
+// .hbox {
+//   /* current syntax */
+//   display: -webkit-flex;
+//   display: -moz-flex;
+//   display: -ms-flex;
+//   display: flex;
+
+//   -webkit-flex-direction: row;
+//   -moz-flex-direction: row;
+//   -ms-flex-direction: row;
+//   flex-direction: row;
+// }
+
+app-root {
+  /* current syntax */
+  display: -webkit-flex;
+  display: -moz-flex;
+  display: -ms-flex;
+  display: flex;
+
+  height: 100%;
+
+  -webkit-flex-direction: column;
+  -moz-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+
+  box-sizing: border-box;
+
   font-family: 'Source Code Pro', monospace;
-  margin-left: 3px;
-  margin-right: 3px;
+
+  app-landing-page {
+    padding: 0.25em;
+    margin: 0.25em;
+
+    display: flex;
+
+    /* current syntax */
+    -webkit-flex: 1;
+    -moz-flex: 1;
+    -ms-flex: 1;
+    flex: 1;
+  }
+
+  app-radio-page {
+    padding: 0.25em;
+    margin: 0.25em;
+
+    display: flex;
+
+    /* current syntax */
+    -webkit-flex: 1;
+    -moz-flex: 1;
+    -ms-flex: 1;
+    flex: 1;
+  }
 }

@@ -19,9 +19,7 @@ export class SpotifyService {
   }
 
   getCodeURL(): Observable<any>{
-    let url = this.serverURL + `/login`;
-
-    return this.httpCli.get<any>(url);
+    return this.httpCli.get<any>(this.serverURL + `/login`);
   }
 
   loginUser(myURL: string): Observable<any>{
@@ -29,11 +27,13 @@ export class SpotifyService {
   }
 
   logoutUser(): void{
-    localStorage.removeItem("token");
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    window.location.replace(this.webURL);
   }
 
-  getAccessToken(): Observable<any>{
-    return this.httpCli.get<any>(this.serverURL + "/getAccessToken");
+  checkTokens(): Observable<any>{
+    return this.httpCli.get<any>(this.serverURL + "/checkTokens");
   }
 
   getUser(): Observable<any>{
@@ -41,8 +41,6 @@ export class SpotifyService {
   }
 
   getUserPlaylists(): Observable<any>{
-    let url = this.serverURL + `/getUserPlaylists`;
-
-    return this.httpCli.get<any>(url);
+    return this.httpCli.get<any>(this.serverURL + `/getUserPlaylists`);
   }
 }

@@ -1,6 +1,6 @@
 import { Component, Input, OnInit, Output } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
 import { faSpotify } from '@fortawesome/free-brands-svg-icons';
+import { ScriptService } from '../script.service';
 import { SpotifyService } from '../spotify.service';
 
 @Component({
@@ -29,36 +29,53 @@ export class RadioPageComponent implements OnInit {
   @Output() showStationBar: boolean = false;
   @Output() showControls: boolean = false;
 
-  authToken: string = "";
+  public static accessToken: string = "";
 
-  constructor(private spotifyService: SpotifyService) {}
+  constructor(private spotifyService: SpotifyService, private script: ScriptService) 
+  {
+  }
 
   ngOnInit() {
-    // Check for access token
-    this.spotifyService.getAccessToken().subscribe(data => {
-      if(data.message == "NO TOKEN FOUND")
-      {
-        window.location.replace(this.spotifyService.webURL);
-      }
-      else
-      {
-        // When we load up, get the user and the user's playlists
-        this.spotifyService.getUser().subscribe(data => {
-          this.user = data;
-          console.log(this.user);
-        })
+    // // Check for access token
+    // this.spotifyService.checkTokens().subscribe(data => {
+    //   if(data.message)
+    //   {
+    //     // We have to set it to local storage so the playback sdk js script can get it
+    //     localStorage.setItem("accessToken", data.message);
 
-        this.spotifyService.getUserPlaylists().subscribe(data => {
-          this.userPlaylists = data;
-          console.log(this.userPlaylists);
-        });
-      }
-    });
+    //     // We've got an access token, so let's make a spotify web sdk player
+    //     this.script.load('spotifyPlaybackSDK', 'spotifyPlayer').then(data => {
+    //       console.log('scripts loaded ', data);
+    //     }).catch(error => console.log(error));
+
+    //     // When we load up, get the user's playlists
+    //     this.spotifyService.getUser().subscribe(data => {
+    //       this.user = data;
+    //       console.log(this.user);
+    //     })
+
+    //     // Also get the User
+    //     this.spotifyService.getUserPlaylists().subscribe(data => {
+    //       this.userPlaylists = data;
+    //       console.log(this.userPlaylists);
+    //     });
+    //   }
+    //   else
+    //   {
+    //     // No access token, so we go away!
+    //     window.location.replace(this.spotifyService.webURL);
+    //     return;
+    //   }
+      
+    // }, error => {
+    //   // On error, go away!
+    //   window.location.replace(this.spotifyService.webURL);
+    // });
   }
 
   toggleBar(bar: number)
   {
-    // Playlist bar = 0, Station bar = 1
+    // Playlist bar = 0, Station bar = 1, Controls panel = 2
     switch(bar)
     {
       case 0:
