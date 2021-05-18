@@ -55,8 +55,9 @@ public class Station
      *      Maybe if the client and server are synchronized with the same world clock...?
      */
 
+    // This is the precise time the song began playback
     @Temporal(TemporalType.TIMESTAMP)
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss:SS")
     @Column(name = "play_time")
     private Date playTime;
 
