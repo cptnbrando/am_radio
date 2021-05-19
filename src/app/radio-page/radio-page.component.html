@@ -1,15 +1,38 @@
-<div id="appDiv">
+<div class="overlay">
+  <app-header [showControls]="showControls" (toggleBarEvent)="toggleBar($event)" [stationNum]="stationNum" (changeStationEvent)="changeStation($event)"></app-header>
+
+  <div id="settingsBars">
+    <app-playlist-bar class="side setting" [showPlaylistBar]="showPlaylistBar" [user]="user" [userPlaylists]="userPlaylists"></app-playlist-bar>
+    <app-controls class="mid setting" [showControls]="showControls"></app-controls>
+    <app-station-bar class="side setting" [showStationBar]="showStationBar"></app-station-bar>
+  </div>
+
+  <app-player id="appPlayer" [showPlaylistBar]="showPlaylistBar" [showStationBar]="showStationBar" (toggleBarEvent)="toggleBar($event)" [isPlaying]="isPlaying" (isPlayingEvent)="togglePlayback()"></app-player>
+  
+</div>
+
+<app-visualizer id="visualizer"></app-visualizer>
+
+<!-- <div id="appDiv">
   <app-header id="appHeader" [showControls]="showControls" (toggleBarEvent)="toggleBar($event)" [stationNum]="stationNum" (changeStationEvent)="changeStation($event)"></app-header>
 
   <div id="appWindow">
-    <app-visualizer class="under"></app-visualizer>
+    <div class="under">
+      <app-visualizer></app-visualizer>
+    </div>
 
     <div id="settingsBars" class="over thirds">
-      <app-playlist-bar [showPlaylistBar]="showPlaylistBar" [user]="user" [userPlaylists]="userPlaylists" class="settings"></app-playlist-bar>
-      <app-controls [showControls]="showControls" class="settings"></app-controls>
-      <app-station-bar [showStationBar]="showStationBar" class="settings"></app-station-bar>
+      <div id="playlistBar">
+        <app-playlist-bar [showPlaylistBar]="showPlaylistBar" [user]="user" [userPlaylists]="userPlaylists" class="settings"></app-playlist-bar>
+      </div>
+      <div id="controlsBar">
+        <app-controls [showControls]="showControls" class="settings"></app-controls>
+      </div>
+      <div id="playerBar">
+        <app-station-bar [showStationBar]="showStationBar" class="settings"></app-station-bar>
+      </div>
     </div>
   </div>
 
   <app-player id="appPlayer" [showPlaylistBar]="showPlaylistBar" [showStationBar]="showStationBar" (toggleBarEvent)="toggleBar($event)" [isPlaying]="isPlaying" (isPlayingEvent)="togglePlayback()"></app-player>
-</div>
+</div> -->

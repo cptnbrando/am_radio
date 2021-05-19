@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { faPause, faPlay } from '@fortawesome/free-solid-svg-icons';
+import { ScriptService } from '../script.service';
 import { SpotifyPlayerService } from '../spotify-player.service';
 import { SpotifyService } from '../spotify.service';
 
@@ -28,13 +29,19 @@ export class PlayerComponent implements OnInit {
   @Output() toggleBarEvent = new EventEmitter<number>();
   @Output() isPlayingEvent = new EventEmitter<boolean>();
 
-  constructor(private spotifyService: SpotifyService, private spotifyPlayer: SpotifyPlayerService) { }
+  constructor(private spotifyService: SpotifyService, private spotifyPlayer: SpotifyPlayerService, private script: ScriptService) {
+    // We've got an access token, so let's make a spotify web sdk player
+    this.script.load('spotifyPlaybackSDK', 'spotifyPlayer').then(data => {
+      console.log('scripts loaded ', data);
+    }).catch(error => console.log(error));
+  }
 
   ngOnInit(): void {
     // Next see if anything is playing and a device is active
     this.spotifyPlayer.getCurrentlyPlaying().subscribe(data => {
       if(data)
       {
+        // Set the data
         this.currentlyPlaying = data;
         this.currentlyPlayingSong = data.item.name
         this.currentlyPlayingArtist = data.item.artists[0].name;
@@ -54,6 +61,13 @@ export class PlayerComponent implements OnInit {
         })
       }
     });
+  }
+
+  setTrackInfo(data): void {
+    this.currentlyPlaying = data;
+    this.currentlyPlayingSong = data.item.name
+    this.currentlyPlayingArtist = data.item.artists[0].name;
+    this.currentlyPlayingImage = data.item.album.images[0].url;
   }
 
   toggleBar(bar: number) {

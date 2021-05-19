@@ -2,11 +2,11 @@
     <span>Imma seek soon</span>
 </div>
 <div id="player">
-    <div id="currentDiv" (click)="toggleBar(0)" class="buttonBox">
-        <div id="currentImage">
+    <div id="currentDiv" (click)="toggleBar(0)" class="buttonBox row">
+        <div id="currentImage" class="album column">
             <img [src]="currentlyPlayingImage">
         </div>
-        <div id="currentInfo">
+        <div id="currentInfo" class="info column">
             <div id="currentName">{{this.currentlyPlayingSong}}</div>
             <div id="currentArtist">{{this.currentlyPlayingArtist}}</div>
         </div>

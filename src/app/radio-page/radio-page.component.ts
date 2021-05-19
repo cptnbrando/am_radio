@@ -34,7 +34,7 @@ export class RadioPageComponent implements OnInit {
 
   public static accessToken: string = "";
 
-  constructor(private spotifyService: SpotifyService, private script: ScriptService) 
+  constructor(private spotifyService: SpotifyService) 
   {
     // Immediately check for an access token
     this.spotifyService.checkTokens().subscribe(data => {
@@ -56,11 +56,6 @@ export class RadioPageComponent implements OnInit {
   }
 
   ngOnInit() {
-
-    // We've got an access token, so let's make a spotify web sdk player
-    this.script.load('spotifyPlaybackSDK', 'spotifyPlayer').then(data => {
-      console.log('scripts loaded ', data);
-    }).catch(error => console.log(error));
 
     // When we load up, get the user's playlists
     this.spotifyService.getUser().subscribe(data => {

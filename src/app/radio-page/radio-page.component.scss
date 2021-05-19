@@ -1,40 +1,28 @@
-#appDiv {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  padding: 3px;
-}
+.overlay {
+  min-height: 100%;
+  min-width: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  overflow-x: hidden;
+  transition: 0.5s;
 
-#appHeader {
-  flex: 1;
-}
+  #settingsBars 
+  {
+    .setting {
+      min-height: 100%;
+      float: left;
+    }
 
-#settingsBars {
-  display: flex;
-  justify-content: space-between;
-}
+    .side {
+      width: 20%;
+    }
 
-#appWindow {
-  display: flex;
-  justify-content: space-between;
-  flex: 10;
-
-  .under {
-    display: inline-block;
+    .mid {
+      width: 60%;
+    }
   }
-
-  .over {
-    display: flex;
-    position: absolute;
-    flex: 1;
-  }
-
-  .settings {
-    height: 100%;
-  }
-}
-
-#appPlayer {
-  flex: 2;
-  z-index: 100;
 }

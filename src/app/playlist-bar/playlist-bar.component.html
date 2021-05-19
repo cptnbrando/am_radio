@@ -1,7 +1,7 @@
 <div id="playlistBar" *ngIf="showPlaylistBar">
     <h2>Welcome {{user.displayName}}</h2>
     <p>My Playlists:</p>
-    <div>
+    <div id="playlists">
         <ol>
             <li *ngFor="let list of userPlaylists">{{list.name}}</li>
         </ol>
