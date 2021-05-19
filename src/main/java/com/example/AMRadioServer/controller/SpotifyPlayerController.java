@@ -2,10 +2,12 @@ package com.example.AMRadioServer.controller;
 
 import com.example.AMRadioServer.model.ResponseMessage;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.wrapper.spotify.SpotifyApi;
 import com.wrapper.spotify.exceptions.SpotifyWebApiException;
 import com.wrapper.spotify.model_objects.miscellaneous.CurrentlyPlaying;
 import com.wrapper.spotify.model_objects.miscellaneous.CurrentlyPlayingContext;
+import com.wrapper.spotify.model_objects.miscellaneous.Device;
 import lombok.NoArgsConstructor;
 import org.apache.hc.core5.http.ParseException;
 import org.springframework.web.bind.annotation.*;
@@ -86,6 +88,30 @@ public class SpotifyPlayerController
     }
 
     /**
+     * There's no way to play directly from a URI
+     * ...sooo we set it to the queue, then skip to the next song
+     * this works for now, but might get stupid once the stations and queues are implemented
+     * @param trackURI
+     * @return
+     */
+    @PutMapping(value = "/playTrack")
+    public boolean playTrack(@RequestParam(name = "trackURI") String trackURI)
+    {
+        System.out.println(trackURI);
+        try {
+            this.spotifyApi.addItemToUsersPlaybackQueue(trackURI).build().execute();
+            this.spotifyApi.skipUsersPlaybackToNextTrack().build().execute();
+            return true;
+        }
+        catch (IOException | SpotifyWebApiException | ParseException e)
+        {
+            System.out.println("Exception in player/pause");
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
      * Give this a time in milliseconds and it will seek the current device to that time!
      * @param time ms time
      */
@@ -117,20 +143,85 @@ public class SpotifyPlayerController
         }
     }
 
+    @GetMapping(value = "/getDevices")
+    public Device[] getDevices() {
+        try {
+            return this.spotifyApi.getUsersAvailableDevices().build().execute();
+        } catch (IOException | SpotifyWebApiException | ParseException e) {
+            System.out.println("Exception in getDevices");
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * There's only a route to get all of a user's available devices
+     * Loop through that and return it if it's active
+     * Also get the currently playing track and return the device if there's a track there
+     * @return an active Device
+     */
+    @GetMapping(value = "/getCurrentDevice")
+    public Device getCurrentDevice() {
+        Device[] myDevices = this.getDevices();
+        CurrentlyPlaying track = this.getCurrentlyPlaying();
+        if(track != null && myDevices != null)
+        {
+            for(Device device: myDevices)
+            {
+                if(device.getIs_active())
+                {
+                    return device;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Goes through the list of devices and returns am_radio if it can be found
+     * Sets it to the active player and returns the device
+     * @return a spotify player device named am_radio
+     */
+    @GetMapping(value = "/getAMRadio")
+    public Device getAMRadio() {
+        Device[] myDevices = this.getDevices();
+        if(myDevices != null)
+        {
+            for(Device device: myDevices)
+            {
+                if(device.getName().equals("am_radio"))
+                {
+                    return this.playOn(device.getId());
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Transfers playback to the given device, if the given id is valid
+     * Returns the currently playing device, which should be am_radio
+     * @param deviceID
+     * @return the current device playing
+     */
     @PutMapping(value = "/playOn")
-    public void playOn(@RequestParam String deviceID)
+    public Device playOn(@RequestParam String deviceID)
     {
-        //Creating a JSON Array device_ids object
-        JsonArray device_ids = new JsonArray();
-        device_ids.add(deviceID);
+        //Create a JSONArray and add the ID
+        JsonArray deviceArray = new JsonArray();
+        deviceArray.add(deviceID);
 
         try {
-            this.spotifyApi.transferUsersPlayback(device_ids).build().execute();
+            this.spotifyApi.transferUsersPlayback(deviceArray).build().execute();
+            return this.getCurrentDevice();
         }
         catch (IOException | SpotifyWebApiException | ParseException e)
         {
             System.out.println("Exception in player/playOn");
             e.printStackTrace();
+            return null;
         }
     }
 

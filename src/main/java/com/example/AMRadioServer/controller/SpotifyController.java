@@ -6,9 +6,7 @@ import com.wrapper.spotify.SpotifyHttpManager;
 import com.wrapper.spotify.exceptions.SpotifyWebApiException;
 import com.wrapper.spotify.model_objects.credentials.AuthorizationCodeCredentials;
 import com.wrapper.spotify.model_objects.miscellaneous.Device;
-import com.wrapper.spotify.model_objects.specification.Paging;
-import com.wrapper.spotify.model_objects.specification.PlaylistSimplified;
-import com.wrapper.spotify.model_objects.specification.User;
+import com.wrapper.spotify.model_objects.specification.*;
 import com.wrapper.spotify.requests.authorization.authorization_code.AuthorizationCodeRequest;
 import com.wrapper.spotify.requests.authorization.authorization_code.AuthorizationCodeUriRequest;
 import com.wrapper.spotify.requests.data.playlists.GetListOfCurrentUsersPlaylistsRequest;
@@ -46,7 +44,8 @@ public class SpotifyController {
         AuthorizationCodeUriRequest authorizationCodeUriRequest = spotifyApi.authorizationCodeUri()
                 .scope("user-read-private, user-read-email, streaming, " +
                         "user-read-playback-state, user-read-currently-playing, " +
-                        "user-modify-playback-state, playlist-modify-public")
+                        "user-modify-playback-state, playlist-modify-public, " +
+                        "user-read-recently-played")
                 .show_dialog(true)
                 .build();
 
@@ -128,37 +127,16 @@ public class SpotifyController {
         }
     }
 
-    @GetMapping(value = "/getDevices")
-    public Device[] getDevices() {
+    @GetMapping(value = "/getRecentlyPlayed")
+    public TrackSimplified getRecentlyPlayed()
+    {
         try {
-            return spotifyApi.getUsersAvailableDevices().build().execute();
-        } catch (IOException | SpotifyWebApiException | ParseException e) {
-            System.out.println("Exception in getDevices");
-            e.printStackTrace();
+            return spotifyApi.getCurrentUsersRecentlyPlayedTracks().build().execute().getItems()[0].getTrack();
+        }
+        catch (IOException | SpotifyWebApiException | ParseException e) {
+            System.out.println("Exception caught in getRecentlyPlayed(): " + e.getMessage());
             return null;
         }
-    }
-
-    /**
-     * There's only a route to get all of a user's available devices
-     * Loop through that and return it if it's active
-     * @return an active Device
-     */
-    @GetMapping(value = "/getCurrentDevice")
-    public Device getCurrentDevice() {
-        Device[] myDevices = this.getDevices();
-        if(myDevices != null)
-        {
-            for(Device device: myDevices)
-            {
-                if(device.getIs_active())
-                {
-                    return device;
-                }
-            }
-        }
-
-        return null;
     }
 
     /**
