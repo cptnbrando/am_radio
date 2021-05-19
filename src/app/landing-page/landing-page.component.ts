@@ -18,9 +18,16 @@ export class LandingPageComponent implements OnInit {
     {
       if(data != null)
       {
+        localStorage.clear();
         localStorage.setItem("accessToken", data.message);
         window.location.replace(this.spotifyService.webURL + "/app");
       }
+      else
+      {
+        console.log("Server reached: no valid tokens found");
+      }
+    }, error => {
+      console.log("Error getting to server");
     })
   }
 

@@ -13,61 +13,62 @@ export class PlayerComponent implements OnInit {
   faPlay = faPlay;
   faPause = faPause;
 
-  @Input() showPlaylistBar: boolean;
-  @Input() showStationBar: boolean;
-  @Input() isPlaying: boolean;
-  @Input() accessToken: string;
+  // Setting bars
+  @Input() showPlaylistBar: boolean = false;
+  @Input() showStationBar: boolean = false;
 
-  currentDevice: any;
-  currentDeviceName: string = "No Current Device!";
-
-  currentlyPlaying: any;
-  currentlyPlayingSong: string = "Nothing";
-  currentlyPlayingArtist: string = "No Artist";
-  currentlyPlayingImage: string = "";
+  // Spotify data
+  @Input() isPlaying: boolean = false;
+  @Input() currentDevice: any = {};
+  @Input() currentlyPlaying: any = {};
 
   @Output() toggleBarEvent = new EventEmitter<number>();
   @Output() isPlayingEvent = new EventEmitter<boolean>();
 
-  constructor(private spotifyService: SpotifyService, private spotifyPlayer: SpotifyPlayerService, private script: ScriptService) {
-    // We've got an access token, so let's make a spotify web sdk player
-    this.script.load('spotifyPlaybackSDK', 'spotifyPlayer').then(data => {
-      console.log('scripts loaded ', data);
-    }).catch(error => console.log(error));
+  constructor(private spotifyService: SpotifyService, private playerService: SpotifyPlayerService) {
+
   }
 
-  ngOnInit(): void {
+  ngOnInit(): void 
+  {
+    // First, set default values
+    this.setDefaults();
+
     // Next see if anything is playing and a device is active
-    this.spotifyPlayer.getCurrentlyPlaying().subscribe(data => {
+    // this.setPlayerData();
+  }
+
+  // Player values set when nothing is playing
+  setDefaults(): void {
+    this.currentDevice.name = "No Current Device!";
+    
+    this.currentlyPlaying.album = {};
+    this.currentlyPlaying.album.images = [5];
+    this.currentlyPlaying.album.images[0] = {};
+    this.currentlyPlaying.album.images[0].url = "";
+    this.currentlyPlaying.artists = [5];
+    this.currentlyPlaying.artists[0] = {};
+    this.currentlyPlaying.artists[0].name = "No Artist";
+    this.currentlyPlaying.name = "Nothing Playing";
+  }
+
+  // This will get the current player and set the data to the UI
+  setPlayerData(): void {
+    this.playerService.getPlayer().subscribe(data => {
       if(data)
       {
         // Set the data
-        this.currentlyPlaying = data;
-        this.currentlyPlayingSong = data.item.name
-        this.currentlyPlayingArtist = data.item.artists[0].name;
-        this.currentlyPlayingImage = data.item.album.images[0].url;
+        this.currentlyPlaying = data.item;
+        this.currentDevice = data.device;
 
-        console.log(this.currentlyPlaying);
+        if(data.is_playing)
+        {
+          this.isPlayingEvent.emit(true);
+        }
 
-        this.spotifyService.getCurrentDevice().subscribe(data => {
-          if(data)
-          {
-            // If there's an active device, set the device and name, then toggle isPlaying to true
-            this.currentDevice = data;
-            this.currentDeviceName = data.name;
-            this.isPlayingEvent.emit(true);
-            console.log(this.currentDevice);
-          }
-        })
+        console.log(data);
       }
     });
-  }
-
-  setTrackInfo(data): void {
-    this.currentlyPlaying = data;
-    this.currentlyPlayingSong = data.item.name
-    this.currentlyPlayingArtist = data.item.artists[0].name;
-    this.currentlyPlayingImage = data.item.album.images[0].url;
   }
 
   toggleBar(bar: number) {
@@ -78,14 +79,14 @@ export class PlayerComponent implements OnInit {
     if(this.isPlaying)
     {
       // The player is playing, so we want to pause it!
-      this.spotifyPlayer.pause().subscribe(data => {
+      this.playerService.pause().subscribe(data => {
         this.isPlayingEvent.emit(data);
       })
     }
     else
     {
       // The player is not playing, so we want to play it!
-      this.spotifyPlayer.play().subscribe(data => {
+      this.playerService.play().subscribe(data => {
         this.isPlayingEvent.emit(data);
       })
     }

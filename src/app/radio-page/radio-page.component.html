@@ -7,11 +7,11 @@
     <app-station-bar class="side setting" [showStationBar]="showStationBar"></app-station-bar>
   </div>
 
-  <app-player id="appPlayer" [showPlaylistBar]="showPlaylistBar" [showStationBar]="showStationBar" (toggleBarEvent)="toggleBar($event)" [isPlaying]="isPlaying" (isPlayingEvent)="togglePlayback()"></app-player>
+  <app-player id="appPlayer" [currentDevice]="currentDevice" [showPlaylistBar]="showPlaylistBar" [showStationBar]="showStationBar" (toggleBarEvent)="toggleBar($event)" [currentlyPlaying]="currentlyPlaying" [isPlaying]="isPlaying" (isPlayingEvent)="togglePlayback()"></app-player>
   
 </div>
 
-<app-visualizer id="visualizer"></app-visualizer>
+<app-visualizer id="visualizer" appDomWatcher (dom-changed)="handleDomChange($event)"></app-visualizer>
 
 <!-- <div id="appDiv">
   <app-header id="appHeader" [showControls]="showControls" (toggleBarEvent)="toggleBar($event)" [stationNum]="stationNum" (changeStationEvent)="changeStation($event)"></app-header>

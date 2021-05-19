@@ -17,6 +17,7 @@ import { StationBarComponent } from './station-bar/station-bar.component';
 import { LandingPageComponent } from './landing-page/landing-page.component';
 import { RadioPageComponent } from './radio-page/radio-page.component';
 import { AppRoutingModule } from './app-routing.module';
+import { DomWatcherDirective } from './dom-watcher.directive';
 
 @NgModule({
   declarations: [
@@ -28,7 +29,8 @@ import { AppRoutingModule } from './app-routing.module';
     PlaylistBarComponent,
     StationBarComponent,
     LandingPageComponent,
-    RadioPageComponent
+    RadioPageComponent,
+    DomWatcherDirective
   ],
   imports: [
     BrowserModule,

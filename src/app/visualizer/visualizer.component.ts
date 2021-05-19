@@ -1,3 +1,4 @@
+import { AfterViewInit } from '@angular/core';
 import { HostListener } from '@angular/core';
 import { Component, OnInit } from '@angular/core';
 import butterchurn from 'butterchurn';
@@ -9,20 +10,15 @@ import { SpotifyService } from '../spotify.service';
   templateUrl: './visualizer.component.html',
   styleUrls: ['./visualizer.component.scss']
 })
-export class VisualizerComponent implements OnInit 
+export class VisualizerComponent implements OnInit, AfterViewInit
 {
-  canvas: any;
-
   constructor() {
 
   }
 
   ngOnInit(): void 
   {
-    // Get the canvas - set it's width and height to the right values
-    this.canvas = document.querySelector("canvas");
-    window.addEventListener('resize', this.resizeCanvas, false);
-    this.resizeCanvas();
+    // this.resizeCanvas();
 
     // const audioCtx = new AudioContext();
     // const analyserNode = new AnalyserNode(audioCtx, {
@@ -55,9 +51,14 @@ export class VisualizerComponent implements OnInit
     // visualizer.render();
   }
 
-  resizeCanvas(): void {
-    this.canvas.width = window.innerWidth;
-    this.canvas.height = window.innerHeight;
+  ngAfterViewInit(): void {
+    // window.addEventListener('resize', this.resizeCanvas, false);
+    // this.resizeCanvas();
   }
+
+  // resizeCanvas(): void {
+  //   this.canvas.width = window.innerWidth;
+  //   this.canvas.height = window.innerHeight;
+  // }
 
 }

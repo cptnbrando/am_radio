@@ -44,7 +44,11 @@ export class SpotifyService {
     return this.httpCli.get<any>(this.serverURL + `/getUserPlaylists`);
   }
 
-  getCurrentDevice(): Observable<any>{
-    return this.httpCli.get<any>(this.serverURL + "/getCurrentDevice");
+  getDevices(): Observable<any>{
+    return this.httpCli.get<any>(this.serverURL + "/player/getDevices");
+  }
+
+  getRecentlyPlayedTrack(): Observable<any>{
+    return this.httpCli.get<any>(this.serverURL + "/getRecentlyPlayed");
   }
 }

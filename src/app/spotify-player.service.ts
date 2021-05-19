@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
@@ -17,6 +17,21 @@ export class SpotifyPlayerService {
 
   getCurrentlyPlaying(): Observable<any> {
     return this.httpCli.get<any>(`${this.serverURL}/getCurrentlyPlaying`);
+  }
+
+  getCurrentDevice(): Observable<any>{
+    return this.httpCli.get<any>(this.serverURL + "/getCurrentDevice");
+  }
+
+  getAMRadio(): Observable<any>{
+    return this.httpCli.get<any>(this.serverURL + "/getAMRadio");
+  }
+
+  playTrack(uri: string): Observable<any>{
+    let params = new HttpParams();
+    params = params.append("trackURI", uri);
+    console.log(this.serverURL + `/playTrack?trackURI=${uri}`);
+    return this.httpCli.put<any>(this.serverURL + `/playTrack`, uri, {params: params});
   }
 
   next(): Observable<any>{
