@@ -12,9 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/station")
-@NoArgsConstructor
-@Getter
-@Setter
+@CrossOrigin(origins = "http://localhost:4200")
 public class StationController {
 
     private StationService stationService;

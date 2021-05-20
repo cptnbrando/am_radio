@@ -8,19 +8,29 @@ import com.wrapper.spotify.exceptions.SpotifyWebApiException;
 import com.wrapper.spotify.model_objects.miscellaneous.CurrentlyPlaying;
 import com.wrapper.spotify.model_objects.miscellaneous.CurrentlyPlayingContext;
 import com.wrapper.spotify.model_objects.miscellaneous.Device;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.apache.hc.core5.http.ParseException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import java.io.IOException;
 
 @RestController
+@CrossOrigin(originPatterns = "*", allowCredentials = "true")
+@SessionAttributes("spotifyApi")
 @RequestMapping("/api/spotify/player")
-@NoArgsConstructor
-@CrossOrigin
 public class SpotifyPlayerController
 {
-    private final SpotifyApi spotifyApi = SpotifyController.getSpotifyApi();
+    private SpotifyApi spotifyApi;
+
+    @Autowired
+    public SpotifyPlayerController(SpotifyApi spotifyApi) {
+        this.spotifyApi = spotifyApi;
+    }
 
     @GetMapping(value = "/getPlayer")
     public CurrentlyPlayingContext getPlayer() {

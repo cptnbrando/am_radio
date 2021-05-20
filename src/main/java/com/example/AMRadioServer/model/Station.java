@@ -1,6 +1,7 @@
 package com.example.AMRadioServer.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.wrapper.spotify.model_objects.specification.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -57,7 +58,7 @@ public class Station
 
     // This is the precise time the song began playback
     @Temporal(TemporalType.TIMESTAMP)
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss:SS")
+//    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss:SS")
     @Column(name = "play_time")
     private Date playTime;
 
@@ -68,6 +69,10 @@ public class Station
     // This should point to the next song to play
     @Column(name = "next")
     private String next;
+
+    // This is the creator of the station, linked via their spotify account URI
+    @Column(name = "creator")
+    private String creatorURI;
 
     /**
      * This constructor is for new Stations, with most of the fields missing
