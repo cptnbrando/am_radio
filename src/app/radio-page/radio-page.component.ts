@@ -1,4 +1,5 @@
 import { Component, Input, OnInit, Output } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { faSpotify } from '@fortawesome/free-brands-svg-icons';
 import { ScriptService } from '../script.service';
 import { SpotifyPlayerService } from '../spotify-player.service';
@@ -41,9 +42,13 @@ export class RadioPageComponent implements OnInit {
 
   public static accessToken: string = "";
 
-  constructor(private spotifyService: SpotifyService, private playerService: SpotifyPlayerService, private script: ScriptService) 
+  constructor(
+    private spotifyService: SpotifyService, 
+    private playerService: SpotifyPlayerService, 
+    private script: ScriptService) 
   {
-    // Immediately check for an access token
+    // Immediately check for valid tokens from the server
+    // This function will redirect the user back to the homepage if credentials can't be found
     this.checkTokens();
   }
 

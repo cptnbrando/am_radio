@@ -18,12 +18,20 @@ export class SpotifyService {
     return "http://localhost:4200";
   }
 
+  getSession(): Observable<any>{
+    return this.httpCli.get<any>(this.serverURL + `/getSession`);
+  }
+
   getCodeURL(): Observable<any>{
     return this.httpCli.get<any>(this.serverURL + `/login`);
   }
 
-  loginUser(myURL: string): Observable<any>{
-    return this.httpCli.get<any>(myURL);
+  setAccess(code: string): Observable<any>{
+    return this.httpCli.put<any>(this.serverURL + `/setAccess`, code);
+  }
+
+  loginSpotify(myURL: string): Observable<any>{
+    return this.httpCli.get<any>(myURL, {observe: "response"});
   }
 
   logoutUser(): void{

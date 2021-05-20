@@ -32,6 +32,7 @@ export class LandingPageComponent implements OnInit {
   }
 
   login(): void {
+    
     this.spotifyService.getCodeURL().subscribe(data => {
       if(data)
       {

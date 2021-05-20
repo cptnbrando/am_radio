@@ -18,6 +18,7 @@ import { LandingPageComponent } from './landing-page/landing-page.component';
 import { RadioPageComponent } from './radio-page/radio-page.component';
 import { AppRoutingModule } from './app-routing.module';
 import { DomWatcherDirective } from './dom-watcher.directive';
+import { RedirectComponent } from './redirect/redirect.component';
 
 @NgModule({
   declarations: [
@@ -30,16 +31,14 @@ import { DomWatcherDirective } from './dom-watcher.directive';
     StationBarComponent,
     LandingPageComponent,
     RadioPageComponent,
-    DomWatcherDirective
+    DomWatcherDirective,
+    RedirectComponent
   ],
   imports: [
     BrowserModule,
     FontAwesomeModule,
     HttpClientModule,
-    RouterModule.forRoot([
-      {path: '', component: LandingPageComponent},
-      {path: 'app', component: RadioPageComponent}
-    ]),
+    RouterModule,
     AppRoutingModule
   ],
   providers: [

@@ -12,12 +12,16 @@ export class TokenInterceptor implements HttpInterceptor
   
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> 
   {
+    console.log("interceptor");
     // We have to clone the request because it is immutable
     request = request.clone({
       setHeaders: {
         'Content-Type': 'application/json'
-      }
+      },
+      withCredentials: true
     });
+
+    console.log(request);
     
     return next.handle(request);
   }
