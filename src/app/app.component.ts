@@ -1,7 +1,6 @@
 import { Component, Input, OnInit, Output } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
 import { faSpotify } from '@fortawesome/free-brands-svg-icons';
-import { SpotifyService } from './spotify.service';
+import { SpotifyService } from './services/spotify.service';
 
 
 @Component({

@@ -30,6 +30,10 @@ export class SpotifyService {
     return this.httpCli.put<any>(this.serverURL + `/setAccess`, code);
   }
 
+  getNewTokens(): Observable<any>{
+    return this.httpCli.get<any>(this.serverURL + "/newTokens");
+  }
+
   loginSpotify(myURL: string): Observable<any>{
     return this.httpCli.get<any>(myURL, {observe: "response"});
   }

@@ -2,23 +2,22 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { AppComponent } from './app.component';
-import { VisualizerComponent } from './visualizer/visualizer.component';
-import { PlayerComponent } from './player/player.component';
-import { HeaderComponent } from './header/header.component';
-import { ControlsComponent } from './controls/controls.component';
+import { VisualizerComponent } from './components/visualizer/visualizer.component';
+import { PlayerComponent } from './components/player/player.component';
+import { HeaderComponent } from './components/header/header.component';
+import { ControlsComponent } from './components/controls/controls.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { HttpClientModule } from '@angular/common/http';
 
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
-import { TokenInterceptor } from './http-interceptors/token.interceptor';
+import { TokenInterceptor } from './shared/interceptors/token.interceptor';
 import { RouterModule } from '@angular/router';
-import { PlaylistBarComponent } from './playlist-bar/playlist-bar.component';
-import { StationBarComponent } from './station-bar/station-bar.component';
-import { LandingPageComponent } from './landing-page/landing-page.component';
-import { RadioPageComponent } from './radio-page/radio-page.component';
+import { PlaylistBarComponent } from './components/playlist-bar/playlist-bar.component';
+import { StationBarComponent } from './components/station-bar/station-bar.component';
+import { LandingPageComponent } from './components/landing-page/landing-page.component';
+import { RadioPageComponent } from './components/radio-page/radio-page.component';
 import { AppRoutingModule } from './app-routing.module';
-import { DomWatcherDirective } from './dom-watcher.directive';
-import { RedirectComponent } from './redirect/redirect.component';
+import { DomWatcherDirective } from './shared/directives/dom-watcher.directive';
 
 @NgModule({
   declarations: [
@@ -31,8 +30,7 @@ import { RedirectComponent } from './redirect/redirect.component';
     StationBarComponent,
     LandingPageComponent,
     RadioPageComponent,
-    DomWatcherDirective,
-    RedirectComponent
+    DomWatcherDirective
   ],
   imports: [
     BrowserModule,

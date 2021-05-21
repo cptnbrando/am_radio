@@ -1,9 +1,7 @@
 import { AfterViewInit } from '@angular/core';
 import { HostListener } from '@angular/core';
 import { Component, OnInit } from '@angular/core';
-import butterchurn from 'butterchurn';
-import butterchurnPresets from 'butterchurn-presets';
-import { SpotifyService } from '../spotify.service';
+import { SpotifyService } from '../../services/spotify.service';
 
 @Component({
   selector: 'app-visualizer',

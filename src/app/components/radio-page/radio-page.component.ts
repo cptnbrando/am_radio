@@ -1,9 +1,8 @@
 import { Component, Input, OnInit, Output } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
 import { faSpotify } from '@fortawesome/free-brands-svg-icons';
-import { ScriptService } from '../script.service';
-import { SpotifyPlayerService } from '../spotify-player.service';
-import { SpotifyService } from '../spotify.service';
+import { ScriptService } from '../../services/script.service';
+import { SpotifyPlayerService } from '../../services/spotify-player.service'
+import { SpotifyService } from '../../services/spotify.service';
 
 @Component({
   selector: 'app-radio-page',
