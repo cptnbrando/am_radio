@@ -163,15 +163,16 @@ public class SpotifyController {
     @GetMapping(value = "/checkTokens")
     public ResponseMessage checkTokens()
     {
-        if(this.getUserPlaylists() == null)
+        if(this.getAccessToken() == null || this.getUserPlaylists() == null)
         {
             // This should get new tokens from the current refresh token, if there's one there
             String[] tokens;
 
             try {
                 tokens = this.getNewTokens();
+                this.spotifyApi.setAccessToken(tokens[0]);
+                this.spotifyApi.setRefreshToken(tokens[1]);
             } catch (IOException | SpotifyWebApiException | ParseException e) {
-//                System.out.println("Exception caught in checkTokens(): " + e.getMessage());
                 return null;
             }
 
@@ -183,6 +184,24 @@ public class SpotifyController {
         {
             // If the playlists can be good, then the token is good!
             return new ResponseMessage(spotifyApi.getAccessToken());
+        }
+    }
+
+    /**
+     * Gets new valid access/refresh tokens and sets them to the api
+     *
+     * @return a valid access token
+     */
+    @GetMapping(value = "/newTokens")
+    public ResponseMessage newTokens() {
+        try {
+            String[] tokens = this.getNewTokens();
+            this.spotifyApi.setAccessToken(tokens[0]);
+            this.spotifyApi.setRefreshToken(tokens[1]);
+            return new ResponseMessage(this.spotifyApi.getAccessToken());
+        } catch (IOException | SpotifyWebApiException | ParseException e) {
+            System.out.println("Exception caught in newTokens(): " + e.getMessage());
+            return null;
         }
     }
 
