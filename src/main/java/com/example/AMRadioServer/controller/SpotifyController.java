@@ -2,45 +2,32 @@ package com.example.AMRadioServer.controller;
 
 import com.example.AMRadioServer.model.ResponseMessage;
 import com.wrapper.spotify.SpotifyApi;
-import com.wrapper.spotify.SpotifyHttpManager;
 import com.wrapper.spotify.exceptions.SpotifyWebApiException;
 import com.wrapper.spotify.model_objects.credentials.AuthorizationCodeCredentials;
-import com.wrapper.spotify.model_objects.miscellaneous.Device;
-import com.wrapper.spotify.model_objects.specification.*;
+import com.wrapper.spotify.model_objects.specification.Paging;
+import com.wrapper.spotify.model_objects.specification.PlaylistSimplified;
+import com.wrapper.spotify.model_objects.specification.TrackSimplified;
+import com.wrapper.spotify.model_objects.specification.User;
 import com.wrapper.spotify.requests.authorization.authorization_code.AuthorizationCodeRequest;
 import com.wrapper.spotify.requests.authorization.authorization_code.AuthorizationCodeUriRequest;
 import com.wrapper.spotify.requests.data.playlists.GetListOfCurrentUsersPlaylistsRequest;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import org.apache.hc.core5.http.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.net.URI;
 
 @RestController
+// If you're wondering why you have CORS issues with a Controller and withCredentials, boy do I have the annotation for you
 @CrossOrigin(originPatterns = "*", allowCredentials = "true")
 @SessionAttributes("spotifyApi")
 @RequestMapping("/api/spotify")
 public class SpotifyController {
-//    private static final URI redirectURI = SpotifyHttpManager.makeUri("http://localhost:9015/api/spotify/getUserCode");
-//    private static final URI redirectURI2 = SpotifyHttpManager.makeUri("http://localhost:4200/app");
-//
-//    private @Getter static final SpotifyApi spotifyApi = new SpotifyApi.Builder()
-//            .setClientId(System.getenv("SPOTIFY_CLI_ID"))
-//            .setClientSecret(System.getenv("SPOTIFY_CLI_SECRET"))
-//            .setRedirectUri(redirectURI2)
-//            .build();
 
-    private SpotifyApi spotifyApi;
+    private final SpotifyApi spotifyApi;
 
     @Autowired
     public SpotifyController(SpotifyApi spotifyApi) {
@@ -49,8 +36,8 @@ public class SpotifyController {
 
     /**
      * This is what the frontend hits when the user pushes the login button
-     * It will use show_dialog to redirect the user to a Spotify auth page
-     * Then the auth page will redirect to getUserCode() on successful login (done in spotify app dashboard)
+     * It will use show_dialog to generate the proper url for the user to a Spotify auth page
+     * We return the uri, then redirect on the client side (Spotify doesn't like it if you do it server side :/)
      *
      * @return Response message with uri
      */
@@ -65,11 +52,6 @@ public class SpotifyController {
                 .build();
 
         final URI uri = authorizationCodeUriRequest.execute();
-
-        System.out.println(response.getHeaderNames());
-
-        System.out.println(session.getId());
-//        response.getHeaderNames();
 
         return new ResponseMessage(uri.toString());
     }
@@ -89,17 +71,11 @@ public class SpotifyController {
     {
         AuthorizationCodeRequest authorizationCodeRequest = spotifyApi.authorizationCode(userCode).build();
 
-        String access = "";
-        String refresh = "";
-
         try {
             final AuthorizationCodeCredentials authorizationCodeCredentials = authorizationCodeRequest.execute();
 
-            access = authorizationCodeCredentials.getAccessToken();
-            refresh = authorizationCodeCredentials.getRefreshToken();
-
-            spotifyApi.setAccessToken(access);
-            spotifyApi.setRefreshToken(refresh);
+            spotifyApi.setAccessToken(authorizationCodeCredentials.getAccessToken());
+            spotifyApi.setRefreshToken(authorizationCodeCredentials.getRefreshToken());
 
             System.out.println("Access: " + spotifyApi.getAccessToken());
             System.out.println("Refresh: " + spotifyApi.getRefreshToken());
@@ -111,67 +87,17 @@ public class SpotifyController {
             response.sendRedirect("http://localhost:4200/");
         }
 
-        // We got the access token, so route back to the page and somehow give it the token after a redirect
-        //        response.addHeader("Access-Control-Expose-Headers", "x-some-header"); // set this to expose custom header
-//        response.setHeader("accessToken", spotifyApi.getAccessToken());
-//        response.setHeader("refreshToken", spotifyApi.getRefreshToken());
-
-        // Getting headers in Angular from a redirect is a quest I will never complete...
-        // Maybe cookies will work...???
-        // ...nope :(
-//        Cookie accessCookie = new Cookie("accessToken", access);
-//        response.addCookie(accessCookie);
-//        response.addCookie(new Cookie("refreshToken", refresh));
-
-        // This should be changed in the future to just use the header
-        // Now with the added refresh token, there's no way this can continue...
         response.sendRedirect("http://localhost:4200/app");
-
-//        response.setHeader("Location", "http://localhost:4200/app");
-//        response.setStatus(302);
 
         return spotifyApi.getAccessToken();
     }
 
-    @GetMapping(value = "/getSession")
-    public ResponseMessage getSession(HttpSession session) {
-        if(session.isNew())
-        {
-            return new ResponseMessage(session.getId());
-        }
-
-        return null;
-    }
-
-    @PutMapping(value = "/setAccess")
-    public ResponseMessage setAccess(@RequestBody String code, HttpSession session)
-    {
-        AuthorizationCodeRequest authorizationCodeRequest = spotifyApi.authorizationCode(code).build();
-
-        try {
-            final AuthorizationCodeCredentials authorizationCodeCredentials = authorizationCodeRequest.execute();
-
-            String access = authorizationCodeCredentials.getAccessToken();
-            String refresh = authorizationCodeCredentials.getRefreshToken();
-
-            spotifyApi.setAccessToken(access);
-            spotifyApi.setRefreshToken(refresh);
-
-            System.out.println("Access: " + spotifyApi.getAccessToken());
-            System.out.println("Refresh: " + spotifyApi.getRefreshToken());
-
-            System.out.println("Expires in: " + authorizationCodeCredentials.getExpiresIn());
-
-            System.out.println(session.getId());
-
-            return new ResponseMessage(access);
-
-        } catch (IOException | SpotifyWebApiException | org.apache.hc.core5.http.ParseException e) {
-            System.out.println("Error: " + e.getMessage());
-            return null;
-        }
-    }
-
+    /**
+     * Get all playlists for the signed in user
+     *
+     * @return PlaylistSimplified[] array of Playlists
+     * (Spotify doesn't like returning actual Playlist objects, but a PlaylistSimplified has pretty much everything)
+     */
     @GetMapping(value = "/getUserPlaylists")
     public PlaylistSimplified[] getUserPlaylists()
     {
@@ -187,24 +113,35 @@ public class SpotifyController {
         }
         catch (IOException | SpotifyWebApiException | ParseException e)
         {
-            System.out.println("Exception in getUserPlaylists");
-//            e.printStackTrace();
+            System.out.println("Exception caught in getUserPlaylists");
+            System.out.println(e.getMessage());
             return null;
         }
     }
 
+    /**
+     * Get the signed in user's profile
+     *
+     * @return User object of signed in user
+     */
     @GetMapping(value = "/getUser")
     public User getUser() {
         try {
             return spotifyApi.getCurrentUsersProfile().build().execute();
         } catch (IOException | SpotifyWebApiException | ParseException e)
         {
-            System.out.println("Exception in getUser");
-            e.printStackTrace();
+            System.out.println("Exception caught in getUser");
+            System.out.println(e.getMessage());
             return null;
         }
     }
 
+    /**
+     * Get the most recently played track
+     *
+     * @return TrackSimplified object of the most recently played track
+     * (Spotify doesn't like returning actual Track objects, but a TrackSimplified has pretty much everything)
+     */
     @GetMapping(value = "/getRecentlyPlayed")
     public TrackSimplified getRecentlyPlayed()
     {
@@ -212,13 +149,15 @@ public class SpotifyController {
             return spotifyApi.getCurrentUsersRecentlyPlayedTracks().build().execute().getItems()[0].getTrack();
         }
         catch (IOException | SpotifyWebApiException | ParseException e) {
-            System.out.println("Exception caught in getRecentlyPlayed(): " + e.getMessage());
+            System.out.println("Exception caught in getRecentlyPlayed()");
+            System.out.println(e.getMessage());
             return null;
         }
     }
 
     /**
      * Attempts to access user data and if rejected, refreshes the tokens and returns new ones
+     *
      * @return a valid access token
      */
     @GetMapping(value = "/checkTokens")
@@ -232,7 +171,7 @@ public class SpotifyController {
             try {
                 tokens = this.getNewTokens();
             } catch (IOException | SpotifyWebApiException | ParseException e) {
-                System.out.println("Exception caught in checkTokens(): " + e.getMessage());
+//                System.out.println("Exception caught in checkTokens(): " + e.getMessage());
                 return null;
             }
 
@@ -242,6 +181,7 @@ public class SpotifyController {
         }
         else
         {
+            // If the playlists can be good, then the token is good!
             return new ResponseMessage(spotifyApi.getAccessToken());
         }
     }
@@ -268,6 +208,7 @@ public class SpotifyController {
 
     /**
      * Trade the current refresh token for a new access token
+     *
      * @return access token and refresh token
      */
     protected String[] getNewTokens() throws IOException, ParseException, SpotifyWebApiException {
@@ -275,7 +216,7 @@ public class SpotifyController {
         String clientSecret = spotifyApi.getClientSecret();
         String refreshToken = spotifyApi.getRefreshToken();
 
-        if(refreshToken == null)
+        if(refreshToken == null || clientID == null || clientSecret == null)
         {
             throw new SpotifyWebApiException("No refresh token found");
         }

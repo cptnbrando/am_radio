@@ -24,6 +24,8 @@ public class Station
     @Column(name = "station_id")
     private int stationID;
 
+    // This is the date the station was created
+    // idk if we need it in ms... ah crap maybe...
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "MM-dd-yyyy HH:mm:ss")
@@ -34,6 +36,7 @@ public class Station
     @Column(name = "station_name")
     private String stationName;
 
+    // The URI of the Spotify Account that created this station
     @Column(name = "station_creator")
     private String stationCreator;
 
@@ -57,8 +60,8 @@ public class Station
      */
 
     // This is the precise time the song began playback
+    // We want it in ms because then we can calculate where to play the song at
     @Temporal(TemporalType.TIMESTAMP)
-//    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss:SS")
     @Column(name = "play_time")
     private Date playTime;
 

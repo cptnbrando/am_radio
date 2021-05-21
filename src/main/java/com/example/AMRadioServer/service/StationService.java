@@ -34,19 +34,29 @@ public class StationService {
 
     /**
      * Saves a new Station to the db
-     * @param station
+     *
+     * @param station a new Station object
      */
-    public void createStation(Station station)
+    public ResponseMessage createStation(Station station)
     {
         try {
             this.stationRepo.save(station);
+            return new ResponseMessage("Created");
         }
         catch (Exception e)
         {
+            System.out.println("Exception caught in StationService createStation");
             e.printStackTrace();
+            return null;
         }
     }
 
+    /**
+     * Get the current song for a specified station
+     *
+     * @param station the station to get data for
+     * @return the URI of a currently playing song
+     */
     public String getCurrentSong(Station station)
     {
         return station.getCurrent();

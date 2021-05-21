@@ -1,22 +1,15 @@
 package com.example.AMRadioServer.controller;
 
-import com.example.AMRadioServer.model.ResponseMessage;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import com.wrapper.spotify.SpotifyApi;
 import com.wrapper.spotify.exceptions.SpotifyWebApiException;
 import com.wrapper.spotify.model_objects.miscellaneous.CurrentlyPlaying;
 import com.wrapper.spotify.model_objects.miscellaneous.CurrentlyPlayingContext;
 import com.wrapper.spotify.model_objects.miscellaneous.Device;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import org.apache.hc.core5.http.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
 import java.io.IOException;
 
 @RestController
@@ -25,13 +18,18 @@ import java.io.IOException;
 @RequestMapping("/api/spotify/player")
 public class SpotifyPlayerController
 {
-    private SpotifyApi spotifyApi;
+    private final SpotifyApi spotifyApi;
 
     @Autowired
     public SpotifyPlayerController(SpotifyApi spotifyApi) {
         this.spotifyApi = spotifyApi;
     }
 
+    /**
+     * Get the Player
+     *
+     * @return CurrentlyPlayingContext for the Player
+     */
     @GetMapping(value = "/getPlayer")
     public CurrentlyPlayingContext getPlayer() {
         try {
@@ -40,21 +38,33 @@ public class SpotifyPlayerController
         catch (IOException | SpotifyWebApiException | ParseException e)
         {
             System.out.println("Exception in player/getPlayer");
-            e.printStackTrace();
+            System.out.println(e.getMessage());
             return null;
         }
     }
 
+    /**
+     * Get the currently playing track, if there is one
+     *
+     * @return CurrentlyPlaying for track
+     */
     @GetMapping(value = "/getCurrentlyPlaying")
     public CurrentlyPlaying getCurrentlyPlaying() {
         try {
             return this.spotifyApi.getUsersCurrentlyPlayingTrack().build().execute();
         } catch (IOException | SpotifyWebApiException | ParseException e)
         {
+            System.out.println("Exception in player/getCurrentlyPlaying");
+            System.out.println(e.getMessage());
             return null;
         }
     }
 
+    /**
+     * Skip to the next track in a User's queue
+     *
+     * @return true if successful, false if not
+     */
     @PostMapping(value = "/next")
     public boolean next() {
         try {
@@ -64,11 +74,16 @@ public class SpotifyPlayerController
         catch (IOException | SpotifyWebApiException | ParseException e)
         {
             System.out.println("Exception in player/next");
-            e.printStackTrace();
+            System.out.println(e.getMessage());
             return false;
         }
     }
 
+    /**
+     * Play the Player
+     *
+     * @return true if successful, false if not
+     */
     @PutMapping(value = "/play")
     public boolean play() {
         try {
@@ -78,11 +93,16 @@ public class SpotifyPlayerController
         catch (IOException | SpotifyWebApiException | ParseException e)
         {
             System.out.println("Exception in player/play");
-            e.printStackTrace();
+            System.out.println(e.getMessage());
             return false;
         }
     }
 
+    /**
+     * Pause the Player
+     *
+     * @return true if successful, false if not
+     */
     @PutMapping(value = "/pause")
     public boolean pause() {
         try {
@@ -92,7 +112,7 @@ public class SpotifyPlayerController
         catch (IOException | SpotifyWebApiException | ParseException e)
         {
             System.out.println("Exception in player/pause");
-            e.printStackTrace();
+            System.out.println(e.getMessage());
             return false;
         }
     }
@@ -100,14 +120,14 @@ public class SpotifyPlayerController
     /**
      * There's no way to play directly from a URI
      * ...sooo we set it to the queue, then skip to the next song
-     * this works for now, but might get stupid once the stations and queues are implemented
-     * @param trackURI
-     * @return
+     * this works for now, but might get stupid once the stations and queues are used more...
+     *
+     * @param trackURI track to play
+     * @return true if successful, false if not
      */
     @PutMapping(value = "/playTrack")
     public boolean playTrack(@RequestParam(name = "trackURI") String trackURI)
     {
-        System.out.println(trackURI);
         try {
             this.spotifyApi.addItemToUsersPlaybackQueue(trackURI).build().execute();
             this.spotifyApi.skipUsersPlaybackToNextTrack().build().execute();
@@ -115,14 +135,15 @@ public class SpotifyPlayerController
         }
         catch (IOException | SpotifyWebApiException | ParseException e)
         {
-            System.out.println("Exception in player/pause");
-            e.printStackTrace();
+            System.out.println("Exception caught in player/pause");
+            System.out.println(e.getMessage());
             return false;
         }
     }
 
     /**
      * Give this a time in milliseconds and it will seek the current device to that time!
+     *
      * @param time ms time
      */
     @PutMapping(value = "/seek")
@@ -133,12 +154,18 @@ public class SpotifyPlayerController
         }
         catch (IOException | SpotifyWebApiException | ParseException e)
         {
-            System.out.println("Exception in player/seek");
-            e.printStackTrace();
+            System.out.println("Exception caught in player/seek");
+            System.out.println(e.getMessage());
             return false;
         }
     }
 
+    /**
+     * Toggle shuffle mode for the player
+     *
+     * @param activate whether to shuffle it or not
+     * @return true if successful, false if not
+     */
     @PutMapping(value = "/shuffle")
     public boolean shuffle(@RequestParam boolean activate) {
         try {
@@ -147,19 +174,24 @@ public class SpotifyPlayerController
         }
         catch (IOException | SpotifyWebApiException | ParseException e)
         {
-            System.out.println("Exception in player/shuffle");
-            e.printStackTrace();
+            System.out.println("Exception caught in player/shuffle");
+            System.out.println(e.getMessage());
             return false;
         }
     }
 
+    /**
+     * Get all currently available devices for the user
+     *
+     * @return Device[] of all found Devices
+     */
     @GetMapping(value = "/getDevices")
     public Device[] getDevices() {
         try {
             return this.spotifyApi.getUsersAvailableDevices().build().execute();
         } catch (IOException | SpotifyWebApiException | ParseException e) {
-            System.out.println("Exception in getDevices");
-            e.printStackTrace();
+            System.out.println("Exception caught in player/getDevices");
+            System.out.println(e.getMessage());
             return null;
         }
     }
@@ -167,14 +199,14 @@ public class SpotifyPlayerController
     /**
      * There's only a route to get all of a user's available devices
      * Loop through that and return it if it's active
-     * Also get the currently playing track and return the device if there's a track there
+     *
      * @return an active Device
      */
     @GetMapping(value = "/getCurrentDevice")
     public Device getCurrentDevice() {
         Device[] myDevices = this.getDevices();
-        CurrentlyPlaying track = this.getCurrentlyPlaying();
-        if(track != null && myDevices != null)
+
+        if(myDevices != null)
         {
             for(Device device: myDevices)
             {
@@ -190,7 +222,8 @@ public class SpotifyPlayerController
 
     /**
      * Goes through the list of devices and returns am_radio if it can be found
-     * Sets it to the active player and returns the device
+     * Sets it to the active player, plays the track, and returns the device
+     *
      * @return a spotify player device named am_radio
      */
     @GetMapping(value = "/getAMRadio")
@@ -213,7 +246,8 @@ public class SpotifyPlayerController
     /**
      * Transfers playback to the given device, if the given id is valid
      * Returns the currently playing device, which should be am_radio
-     * @param deviceID
+     *
+     * @param deviceID id of valid available device
      * @return the current device playing
      */
     @PutMapping(value = "/playOn")
@@ -230,14 +264,16 @@ public class SpotifyPlayerController
         catch (IOException | SpotifyWebApiException | ParseException e)
         {
             System.out.println("Exception in player/playOn");
-            e.printStackTrace();
+            System.out.println(e.getMessage());
             return null;
         }
     }
 
     /**
      * Change the volume of the spotify player
+     *
      * @param percent 0 - 100 percent int value
+     * @return true if successful, false if not
      */
     @PutMapping(value = "/volume")
     public boolean volume(@RequestParam int percent)
@@ -249,7 +285,7 @@ public class SpotifyPlayerController
         catch (IOException | SpotifyWebApiException | ParseException e)
         {
             System.out.println("Exception in player/volume");
-            e.printStackTrace();
+            System.out.println(e.getMessage());
             return false;
         }
     }

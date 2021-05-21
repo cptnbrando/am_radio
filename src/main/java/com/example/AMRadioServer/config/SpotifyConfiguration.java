@@ -2,17 +2,13 @@ package com.example.AMRadioServer.config;
 
 import com.wrapper.spotify.SpotifyApi;
 import com.wrapper.spotify.SpotifyHttpManager;
-import lombok.Getter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.ScopedProxyMode;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.context.annotation.SessionScope;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import java.net.URI;
 
+// Maybe I should do more with this class... ah well lol
 @Configuration
 public class SpotifyConfiguration {
 

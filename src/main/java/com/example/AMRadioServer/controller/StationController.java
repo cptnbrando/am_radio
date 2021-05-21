@@ -2,26 +2,29 @@ package com.example.AMRadioServer.controller;
 
 import com.example.AMRadioServer.model.ResponseMessage;
 import com.example.AMRadioServer.model.Station;
-import com.example.AMRadioServer.repository.StationRepository;
 import com.example.AMRadioServer.service.StationService;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@CrossOrigin(originPatterns = "*", allowCredentials = "true")
 @RequestMapping("/api/station")
-@CrossOrigin(origins = "http://localhost:4200")
 public class StationController {
 
-    private StationService stationService;
+    private final StationService stationService;
 
     @Autowired
     public StationController(StationService stationService) {
         this.stationService = stationService;
     }
 
+    /**
+     * Create a new Station, if it's available
+     *
+     * @param stationID
+     * @param station
+     * @return
+     */
     @PutMapping(value = "/{stationID}/new")
     public ResponseMessage insertNewStation(@PathVariable("stationID") int stationID, @RequestBody Station station)
     {
