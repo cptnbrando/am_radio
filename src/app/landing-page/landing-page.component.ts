@@ -13,11 +13,19 @@ export class LandingPageComponent implements OnInit {
   constructor(private spotifyService: SpotifyService) { }
 
   ngOnInit(): void {
-    // Check if there's an access token, if so set it to local storage and go to the app
+    // Check if there's an access token in local storage
+    if(!localStorage.getItem("accessToken"))
+    {
+      // null value means no sign in
+      return;
+    }
+
+    // If so, check the server for valid tokens
     this.spotifyService.checkTokens().subscribe(data => 
     {
-      if(data != null)
+      if(data)
       {
+        // Valid tokens found, set them to local storage and go to the app
         localStorage.clear();
         localStorage.setItem("accessToken", data.message);
         window.location.replace(this.spotifyService.webURL + "/app");
@@ -32,7 +40,7 @@ export class LandingPageComponent implements OnInit {
   }
 
   login(): void {
-    
+    // Get a login URI from the server
     this.spotifyService.getCodeURL().subscribe(data => {
       if(data)
       {

@@ -80,15 +80,15 @@ export class PlayerComponent implements OnInit {
     {
       // The player is playing, so we want to pause it!
       this.playerService.pause().subscribe(data => {
-        this.isPlayingEvent.emit(data);
-      })
+        // this.isPlayingEvent.emit(data);
+      });
     }
     else
     {
       // The player is not playing, so we want to play it!
       this.playerService.play().subscribe(data => {
-        this.isPlayingEvent.emit(data);
-      })
+        // this.isPlayingEvent.emit(data);
+      });
     }
   }
 }

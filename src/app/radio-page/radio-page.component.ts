@@ -40,63 +40,83 @@ export class RadioPageComponent implements OnInit {
   @Output() showStationBar: boolean = false;
   @Output() showControls: boolean = false;
 
+  // This is the canvas element
+  // We update attributes of it to display changes to the player
+  canvas: any;
+
   public static accessToken: string = "";
 
-  constructor(
-    private spotifyService: SpotifyService, 
-    private playerService: SpotifyPlayerService, 
-    private script: ScriptService) 
-  {
-    // Immediately check for valid tokens from the server
-    // This function will redirect the user back to the homepage if credentials can't be found
-    this.checkTokens();
-  }
+  constructor(private spotifyService: SpotifyService, private playerService: SpotifyPlayerService, private script: ScriptService) { }
 
   ngOnInit() {
-    // When we load up, get the User
+    // Immediately check for valid tokens from the server
+    // This function will redirect the user back to the homepage if credentials can't be found
+    if(!this.checkTokens())
+    {
+      window.location.replace(this.spotifyService.webURL);
+      return;
+    }
+
+    // When we load up, set the User
     this.setUser();
 
-    // Also get the UserPlaylists
+    // Also set the UserPlaylists
     this.setPlaylists();
 
-    // Also get all available devices
+    // Also set userDevices
     this.setDevices();
+
+    // Also set currentDevice
+    this.getCurrentDevice();
+
+    this.canvas = document.querySelector("canvas");
   }
 
+  // Get the user's playlists and set them to the userPlaylists variable
   setPlaylists(): any {
     this.spotifyService.getUserPlaylists().subscribe(data => {
-      this.userPlaylists = data;
+      if(data) this.userPlaylists = data;
       return data;
     });
   }
 
+  // Get the user and set them to the user variable
   setUser(): any {
     this.spotifyService.getUser().subscribe(data => {
-      this.user = data;
+      if(data) this.user = data;
       return data;
     });
   }
 
+  // Get the user's devices and set them to the userDevices variable
   setDevices(): any {
     this.spotifyService.getDevices().subscribe(data => {
-      this.devices = data;
+      if(data) this.devices = data;
       return data;
     });
   }
 
-  setCurrentDevice(deviceID: string) {
+  // Set the user's current device to a different one
+  setCurrentDevice(deviceID: string): any {
     this.playerService.playOn(deviceID).subscribe(data => {
-      if(data)
-      {
-        this.currentDevice = data;
-      }
+      if(data) this.currentDevice = data;
+      return data;
+    });
+  }
+
+  // Get the user's current device and set it to the currentDevice variable
+  getCurrentDevice(): any {
+    this.playerService.getCurrentDevice().subscribe(data => {
+      if(data) this.currentDevice = data;
+      console.log(data);
+      this.isPlaying = this.currentDevice.is_playing;
+      return data;
     })
   }
 
-  // This is the event handler for the js script event
-  handleDomChange(event: any) {
-    console.log("SDK Event found");
-    console.log(event);
+  // This is the event handler for the playerReady sdk js script events
+  // It uses dom-watcher to watch the canvas element for attribute changes, updated by the spotifyPlayerSDK.js in /assets
+  onPlayerReady(event: any) {
     this.playerReady = event.returnValue;
     
     // Once the radio player is ready, we should prompt the user to swap to the new player
@@ -106,6 +126,11 @@ export class RadioPageComponent implements OnInit {
       // Device toggling done via Station Bar
       this.toggleBar(1);
       this.setPlayerData();
+
+      // We get the currently playing player
+      this.playerService.getPlayer().subscribe(data => {
+        if(data) this.currentDevice = data;
+      })
     }
     else
     {
@@ -116,27 +141,39 @@ export class RadioPageComponent implements OnInit {
           console.log("Found am_radio");
           console.log(data);
           this.currentDevice = data;
-        }
 
-        // Attempt to play most recently played track on am_radio
-        this.spotifyService.getRecentlyPlayedTrack().subscribe(data => {
-          if(data)
-          {
-            console.log("Found most recently played track");
-            console.log(data);
-            this.playerService.playTrack(data.uri).subscribe(data => {
-              if(data)
-              {
-                // We have successfully played the track in the browser, now we just have to update the UI
-                console.log("playing...");
-                this.isPlaying = true;
-                this.setPlayerData();
-              }
-            });
-          }
-        });
+          // Attempt to play most recently played track on am_radio
+          this.spotifyService.getRecentlyPlayedTrack().subscribe(data => {
+            if(data)
+            {
+              console.log("Found most recently played track");
+              console.log(data);
+              this.playerService.playTrack(data.uri).subscribe(data => {
+                if(data)
+                {
+                  // We have successfully played the track in the browser, now we just have to update the UI
+                  console.log("playing...");
+                  this.isPlaying = true;
+                  this.setPlayerData();
+                }
+              });
+            }
+          });
+        }
       });
     }
+  }
+
+  onPlaybackChange(event: any): void {
+    console.log("playback change event handler");
+    console.log(event);
+
+    this.isPlaying = !(this.canvas.getAttribute("paused") === "true");
+  }
+
+  onTrackChange(event: any): void {
+    // console.log("track change event handler");
+    this.setPlayerData();
   }
 
   getInfoFromPlayer(): void {
@@ -180,31 +217,33 @@ export class RadioPageComponent implements OnInit {
     this.stationNum = stationNum;
   }
 
-  togglePlayback()
+  async checkTokens(): Promise<boolean>
   {
-    this.isPlaying = !this.isPlaying;
-  }
-
-  async checkTokens()
-  {
-    await this.spotifyService.checkTokens().subscribe(data => {
+    await this.spotifyService.checkTokens().subscribe(data => 
+    {
       if(data == null)
       {
         // No access token, so we go away!
         window.location.replace(this.spotifyService.webURL);
+        return false;
       }
-      if(data.message)
+      else
       {
         // We have to set it to local storage so the playback sdk js script can get it
         localStorage.setItem("accessToken", data.message);
 
         // We've got an access token, so let's make a spotify web sdk player
         this.loadPlayerScript();
+
+        return true;
       }
     }, error => {
       // On error, go away!
       window.location.replace(this.spotifyService.webURL);
+      return false;
     });
+
+    return false;
   }
 
   loadPlayerScript(): void {

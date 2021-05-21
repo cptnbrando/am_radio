@@ -5,10 +5,14 @@ import { Directive, ElementRef, OnInit } from '@angular/core';
 })
 export class DomWatcherDirective implements OnInit {
 
+  canvas: any;
+  currentlyPlaying: string;
+
   constructor(private elRef: ElementRef) { }
 
   ngOnInit() {
     this.registerDomChangedEvent(this.elRef.nativeElement);
+    this.canvas = document.querySelector("canvas");
   }
   
   registerDomChangedEvent(el) {
@@ -16,10 +20,17 @@ export class DomWatcherDirective implements OnInit {
       if(list[0].attributeName === "state")
       {
         // This means the js file set the state of the viisualizer and the radio player is ready!
-        // console.log(list);
-        const evt =
-          new CustomEvent('dom-changed', {detail: list, bubbles: true});
-        el.dispatchEvent(evt);
+        el.dispatchEvent(new CustomEvent('ready', {detail: list, bubbles: true}));
+      }
+      if(list[0].attributeName === "current")
+      {
+        // This means the player has detected a change in song
+        el.dispatchEvent(new CustomEvent('trackChange', {detail: list, bubbles: true}));
+      }
+      if(list[0].attributeName === "paused")
+      {
+        // This means the player has detected a playback change
+        el.dispatchEvent(new CustomEvent('playbackChange', {detail: list[0].target, bubbles: true}));
       }
     });
     const attributes = true;
