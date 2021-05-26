@@ -1,5 +1,6 @@
 import { Component, Input, OnInit, Output } from '@angular/core';
 import { faSpotify } from '@fortawesome/free-brands-svg-icons';
+import { Station } from 'src/app/shared/models/station.model';
 import { ScriptService } from '../../services/script.service';
 import { SpotifyPlayerService } from '../../services/spotify-player.service'
 import { SpotifyService } from '../../services/spotify.service';
@@ -21,6 +22,7 @@ export class RadioPageComponent implements OnInit {
 
   // What station the user is on, begins on 0
   @Output() stationNum: number = 0;
+  @Output() currentStation: Station = null;
 
   // Current track information
   @Output() currentlyPlaying: any = {};
@@ -116,6 +118,7 @@ export class RadioPageComponent implements OnInit {
   // This is the event handler for the playerReady sdk js script events
   // It uses dom-watcher to watch the canvas element for attribute changes, updated by the spotifyPlayerSDK.js in /assets
   onPlayerReady(event: any) {
+    console.log("onPlayerReady");
     this.playerReady = event.returnValue;
     
     // Once the radio player is ready, we should prompt the user to swap to the new player
@@ -129,38 +132,46 @@ export class RadioPageComponent implements OnInit {
       // We get the currently playing player
       this.playerService.getPlayer().subscribe(data => {
         if(data) this.currentDevice = data;
-      })
+      });
     }
     else
     {
-      // Get am_radio (this will find it and set it as the active player)
-      this.playerService.getAMRadio().subscribe(data => {
-        if(data)
-        {
-          console.log("Found am_radio");
-          console.log(data);
-          this.currentDevice = data;
-
-          // Attempt to play most recently played track on am_radio
-          this.spotifyService.getRecentlyPlayedTrack().subscribe(data => {
-            if(data)
-            {
-              console.log("Found most recently played track");
-              console.log(data);
-              this.playerService.playTrack(data.uri).subscribe(data => {
-                if(data)
-                {
-                  // We have successfully played the track in the browser, now we just have to update the UI
-                  console.log("playing...");
-                  this.isPlaying = true;
-                  this.setPlayerData();
-                }
-              });
-            }
-          });
-        }
-      });
+      // If nothing is playing, we get am_radio from the server, then attempt to play the most recently played track
+      this.beginAMRadio();
     }
+  }
+
+  beginAMRadio(): void 
+  {
+    console.log("beginAMRadio()");
+    // Get am_radio (This server endpoint find am_radio and sets it as the active device in the Spotify API)
+    this.playerService.getAMRadio().subscribe(data => {
+      if(data)
+      {
+        console.log("Found am_radio");
+        console.log(data);
+        // If found, set it as the active player in the front end aka this component
+        this.currentDevice = data;
+
+        // Attempt to play most recently played track on am_radio
+        this.spotifyService.getRecentlyPlayedTrack().subscribe(data => {
+          if(data)
+          {
+            console.log("Found most recently played track");
+            console.log(data);
+            this.playerService.playTrack(data.uri).subscribe(data => {
+              if(data)
+              {
+                // We have successfully played the track in the browser, now we just have to update the UI
+                console.log("playing...");
+                this.isPlaying = true;
+                this.setPlayerData();
+              }
+            });
+          }
+        });
+      }
+    });
   }
 
   onPlaybackChange(event: any): void {
@@ -171,7 +182,7 @@ export class RadioPageComponent implements OnInit {
   }
 
   onTrackChange(event: any): void {
-    // console.log("track change event handler");
+    console.log("track change event handler");
     this.setPlayerData();
   }
 
@@ -214,6 +225,10 @@ export class RadioPageComponent implements OnInit {
   changeStation(stationNum: number)
   {
     this.stationNum = stationNum;
+    if(stationNum === 0)
+    {
+      this.currentStation = null;
+    }
   }
 
   async checkTokens(): Promise<boolean>

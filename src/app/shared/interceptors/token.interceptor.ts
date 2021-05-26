@@ -1,4 +1,4 @@
-import { HttpRequest, HttpHandler, HttpEvent, HttpInterceptor, HttpResponse, HttpHeaders } from '@angular/common/http';
+import { HttpRequest, HttpHandler, HttpEvent, HttpInterceptor } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 
@@ -6,13 +6,10 @@ import { Observable, of } from 'rxjs';
 export class TokenInterceptor implements HttpInterceptor 
 {  
   
-  constructor() {
-
-  }
+  constructor() { }
   
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> 
   {
-    console.log("interceptor");
     // We have to clone the request because it is immutable
     request = request.clone({
       setHeaders: {
@@ -21,7 +18,7 @@ export class TokenInterceptor implements HttpInterceptor
       withCredentials: true
     });
 
-    console.log(request);
+    console.log(`Intercepted at ${request.url}`);
     
     return next.handle(request);
   }

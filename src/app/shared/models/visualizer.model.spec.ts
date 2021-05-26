@@ -1,4 +1,4 @@
-import { Visualizer } from './visualizer.model';
+import Visualizer from './visualizer.model';
 
 describe('Visualizer', () => {
   it('should create an instance', () => {

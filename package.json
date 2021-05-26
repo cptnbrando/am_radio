@@ -29,7 +29,9 @@
     "d3-interpolate": "^2.0.1",
     "d3-scale": "^3.3.0",
     "rxjs": "~6.6.0",
+    "sockjs": "^0.3.21",
     "spotify-web-api-node": "^5.0.2",
+    "stompjs": "^2.3.3",
     "tslib": "^2.0.0",
     "zone.js": "~0.11.3"
   },

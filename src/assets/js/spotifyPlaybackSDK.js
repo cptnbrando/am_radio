@@ -16,12 +16,13 @@ window.onSpotifyWebPlaybackSDKReady = () => {
     canvas.setAttribute("state", "false");
     canvas.setAttribute("current", "");
     canvas.setAttribute("paused", "true");
+    canvas.setAttribute("badState", "false");
   }
 
   // Error handling
   const error = (message) => {
     console.error(message);
-    canvas.setAttribute("state", "false");
+    canvas.setAttribute("badState", "true");
   }
   
   player.addListener('initialization_error', ({ message }) => { error(message); });
@@ -38,8 +39,6 @@ window.onSpotifyWebPlaybackSDKReady = () => {
     // duration,
     track_window: { previous_tracks, current_track, next_tracks }
   }) => {
-    // console.log('Currently Playing', current_track);
-
     // Detects for playback changes
     player.getCurrentState().then(data => {
       console.log("Current paused value:", (canvas.getAttribute("paused") === "true"));
@@ -55,7 +54,7 @@ window.onSpotifyWebPlaybackSDKReady = () => {
     // Detects for track changes
     if(canvas.getAttribute("current") != current_track.uri)
     {
-      // console.log('Track change detected!', current_track);
+      console.log('Track change detected!', current_track);
       canvas.setAttribute("current", current_track.uri);
     }
 
@@ -78,7 +77,7 @@ window.onSpotifyWebPlaybackSDKReady = () => {
   // Not Ready
   player.addListener('not_ready', ({ device_id }) => {
     console.log('Device ID has gone offline', device_id);
-    canvas.setAttribute("state", "false");
+    canvas.setAttribute("badState", "true");
   });
 
   // Connect to the player!
