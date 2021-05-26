@@ -21,44 +21,24 @@ public class StationController {
     /**
      * Create a new Station, if it's available
      *
-     * @param stationID
-     * @param station
-     * @return
+     * @param stationID ID of the Station
+     * @param station Station object
+     * @return Response Message with details
      */
-    @PutMapping(value = "/{stationID}/new")
+    @PutMapping(value = "/{stationID}")
     public ResponseMessage insertNewStation(@PathVariable("stationID") int stationID, @RequestBody Station station)
     {
-        if(this.stationService.getStationRepo().existsById(stationID)) {
-            return new ResponseMessage("Exists");
-        }
-
-        // TODO send back the link to the station of the URL in existence
-        if(this.stationService.getStationRepo().existsByStationURL(station.getStationURL()))
-        {
-            return new ResponseMessage("URL Exists");
-        }
-
-        try {
-            this.stationService.getStationRepo().save(station);
-            return new ResponseMessage("Yeehaw");
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            return new ResponseMessage("Error");
-        }
+        return this.stationService.createStation(stationID, station);
     }
 
+    /**
+     * Get a Station, if it exists
+     *
+     * @param stationID the ID of the Station
+     * @return a Station object
+     */
     @GetMapping(value = "/{stationID}")
     public Station getStation(@PathVariable("stationID") int stationID) {
-        try{
-            return this.stationService.getStationRepo().getOne(stationID);
-        }
-        catch (Exception e)
-        {
-            // Maybe the station doesn't exist
-            e.printStackTrace();
-            return null;
-        }
+        return this.stationService.getStation(stationID);
     }
 }

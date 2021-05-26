@@ -11,5 +11,5 @@ public interface StationRepository extends JpaRepository<Station, Integer>
     @Override
     boolean existsById(Integer stationID);
 
-    boolean existsByStationURL(String stationURL);
+    boolean existsByPlaylist(String playlist);
 }

@@ -21,9 +21,9 @@ import org.springframework.stereotype.Service;
  * - next
  */
 @Service("StationService")
-@NoArgsConstructor
 @Getter
 @Setter
+@NoArgsConstructor
 public class StationService {
     private StationRepository stationRepo;
 
@@ -35,30 +35,54 @@ public class StationService {
     /**
      * Saves a new Station to the db
      *
+     * @param stationID the ID attempting to be created
      * @param station a new Station object
+     * @return ResponseMessage with details
      */
-    public ResponseMessage createStation(Station station)
+    public ResponseMessage createStation(int stationID, Station station)
     {
+        // If there's already a Playlist in the Station number being created
+        if(this.stationRepo.existsById(stationID)) {
+            return new ResponseMessage("Station Exists");
+        }
+
+        // If there's already a Station with the given Playlist
+        if(this.stationRepo.existsByPlaylist(station.getPlaylist())) {
+            return new ResponseMessage("Playlist Exists:" + station.getStationID());
+        }
+
+        // If for some reason stationID and ID of the station do not match
+        if(stationID != station.getStationID()) {
+            return new ResponseMessage("ID and StationID do not match!");
+        }
+
         try {
             this.stationRepo.save(station);
             return new ResponseMessage("Created");
         }
-        catch (Exception e)
-        {
+        catch (Exception e) {
             System.out.println("Exception caught in StationService createStation");
-            e.printStackTrace();
-            return null;
+            System.out.println(e.getMessage());
+            return new ResponseMessage("Server Error StationService createStation");
         }
     }
 
     /**
-     * Get the current song for a specified station
+     * Get a station from an ID
      *
-     * @param station the station to get data for
-     * @return the URI of a currently playing song
+     * @param stationID ID of station
+     * @return a Station if it exists, null if it cannot be found
      */
-    public String getCurrentSong(Station station)
+    public Station getStation(int stationID)
     {
-        return station.getCurrent();
+        try {
+            return this.stationRepo.getOne(stationID);
+        }
+        catch (Exception e)
+        {
+            System.out.println("Exception caught in StationService getStation");
+            System.out.println(e.getMessage());
+            return null;
+        }
     }
 }

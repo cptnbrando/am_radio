@@ -254,6 +254,7 @@ public class SpotifyPlayerController
      * Sets it to the active player, plays the track, and returns the device
      *
      * @return a spotify player device named am_radio
+     * TODO: if there's another am_radio instance connected, set it to that one and return a bad response
      */
     @GetMapping(value = "/getAMRadio")
     public Device getAMRadio() {
