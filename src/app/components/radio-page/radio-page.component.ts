@@ -1,5 +1,7 @@
 import { Component, Input, OnInit, Output } from '@angular/core';
 import { faSpotify } from '@fortawesome/free-brands-svg-icons';
+import { AppComponent } from 'src/app/app.component';
+import { RadioService } from 'src/app/services/radio.service';
 import { Station } from 'src/app/shared/models/station.model';
 import { ScriptService } from '../../services/script.service';
 import { SpotifyPlayerService } from '../../services/spotify-player.service'
@@ -16,6 +18,9 @@ export class RadioPageComponent implements OnInit {
 
   // This will hold a spotify uri for the logged in user
   @Input() user: any = {};
+
+  // This will hold the selected playlist
+  @Output() selectedPlaylist: any = null;
 
   // This will hold an array of playlist uris for the user
   @Output() userPlaylists: any = {};
@@ -47,14 +52,14 @@ export class RadioPageComponent implements OnInit {
 
   public static accessToken: string = "";
 
-  constructor(private spotifyService: SpotifyService, private playerService: SpotifyPlayerService, private script: ScriptService) { }
+  constructor(private spotifyService: SpotifyService, private playerService: SpotifyPlayerService, private script: ScriptService, private radioService: RadioService) { }
 
   ngOnInit() {
     // Immediately check for valid tokens from the server
     // This function will redirect the user back to the homepage if credentials can't be found
     if(!this.checkTokens())
     {
-      window.location.replace(this.spotifyService.webURL);
+      window.location.replace(AppComponent.webURL);
       return;
     }
 
@@ -144,6 +149,10 @@ export class RadioPageComponent implements OnInit {
   beginAMRadio(): void 
   {
     console.log("beginAMRadio()");
+
+    // So that the station bar doesn't tweak from missing fields
+    this.currentStation = new Station();
+
     // Get am_radio (This server endpoint find am_radio and sets it as the active device in the Spotify API)
     this.playerService.getAMRadio().subscribe(data => {
       if(data)
@@ -186,10 +195,9 @@ export class RadioPageComponent implements OnInit {
     this.setPlayerData();
   }
 
-  getInfoFromPlayer(): void {
-    let canvas = document.querySelector("canvas");
-    // this.currentlyPlaying.
-  }
+  // getInfoFromPlayer(): void {
+  //   let canvas = document.querySelector("canvas");
+  // }
 
   // This will get the current player and set the data to the UI
   setPlayerData(): void {
@@ -205,7 +213,17 @@ export class RadioPageComponent implements OnInit {
     });
   }
 
-  toggleBar(bar: number)
+  setStation(): void {
+    this.radioService.getStation(this.stationNum).subscribe(data => {
+      if(data) this.currentStation = data;
+    });
+  }
+
+  createdStation(): void {
+    this.setStation();
+  }
+
+  toggleBar(bar: number): void
   {
     // Playlist bar = 0, Station bar = 1, Controls panel = 2
     switch(bar)
@@ -222,13 +240,47 @@ export class RadioPageComponent implements OnInit {
     }
   }
 
+  changePlaylist(playlist: any)
+  {
+    console.log("changePlaylist");
+    console.log(playlist);
+    this.selectedPlaylist = playlist;
+  }
+
+  // This is called by the EventEmitter in the header component
   changeStation(stationNum: number)
   {
     this.stationNum = stationNum;
+
+    // Pause the player to begin
+    if(this.isPlaying){ 
+      this.playerService.pause().subscribe(data => {
+        console.log(data);
+      });
+    }
+
+    // BeginAMRadio on station 000
     if(stationNum === 0)
     {
-      this.currentStation = null;
+      this.beginAMRadio();
+      return;
     }
+
+    // Get station at given number
+    this.radioService.getStation(stationNum).subscribe(data => {
+      // This route checks if it exists first, if not it returns back null
+      if(data)
+      {
+        this.currentStation = data;
+      }
+      else
+      {
+        this.currentStation = new Station(stationNum);
+        if(!this.showPlaylistBar) this.toggleBar(0);
+        if(!this.showStationBar) this.toggleBar(1);
+      }
+    });
+
   }
 
   async checkTokens(): Promise<boolean>
@@ -238,7 +290,7 @@ export class RadioPageComponent implements OnInit {
       if(data == null)
       {
         // No access token, so we go away!
-        window.location.replace(this.spotifyService.webURL);
+        window.location.replace(AppComponent.webURL);
         return false;
       }
       else
@@ -253,7 +305,7 @@ export class RadioPageComponent implements OnInit {
       }
     }, error => {
       // On error, go away!
-      window.location.replace(this.spotifyService.webURL);
+      window.location.replace(AppComponent.webURL);
       return false;
     });
 

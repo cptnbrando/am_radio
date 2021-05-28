@@ -1,9 +1,24 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { AppComponent } from '../app.component';
 
 @Injectable({
   providedIn: 'root'
 })
 export class RadioService {
 
-  constructor() { }
+  private serverURL = `${AppComponent.serverRoot}/station`;
+
+  constructor(private httpCli:HttpClient) { }
+
+  getStation(num: number): Observable<any>{
+    return this.httpCli.get<any>(`${this.serverURL}/${num}`);
+  }
+
+  createStation(num: number, playlist: any): Observable<any>{
+    return this.httpCli.post<any>(`${this.serverURL}/${num}`, playlist);
+  }
+
+  
 }

@@ -4,8 +4,6 @@
         <!-- This is where a scrollbar can goooo -->
     </div>
     <div id="numBox">
-        <fa-icon [icon]="faPlus" class="numControl" (click)="changeStation(stationNum + 1)"></fa-icon>
-        <fa-icon [icon]="faMinus" class="numControl" (click)="changeStation(stationNum - 1)"></fa-icon>
-        <span id="stationNum" class="numControl">{{stationNumDisplay()}}</span>
+        <span id="stationNum" class="numControl" (click)="changeStation(stationNum + 1)" (contextmenu)="changeStation(stationNum - 1)">{{stationNumDisplay()}}</span>
     </div>
 </div>

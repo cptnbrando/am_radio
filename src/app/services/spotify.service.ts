@@ -1,6 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { AppComponent } from '../app.component';
 
 @Injectable({
   providedIn: 'root'
@@ -9,14 +10,15 @@ export class SpotifyService {
 
   private spotifyURL = `https://api.spotify.com/`;
   private accountsURL = `https://accounts.spotify.com/`;
-  private serverURL = `http://localhost:9015/api/spotify`;
+  private serverURL = `${AppComponent.serverRoot}/spotify`;
+  private webURL = `${AppComponent.webURL}`;
 
   constructor(private httpCli:HttpClient) { }
 
-  // USE THIS SO DEPLOYING WON't BE SO AWFUL
-  get webURL() {
-    return "http://localhost:4200";
-  }
+  // // USE THIS SO DEPLOYING WON't BE SO AWFUL
+  // get webURL() {
+  //   return "http://localhost:4200";
+  // }
 
   getSession(): Observable<any>{
     return this.httpCli.get<any>(this.serverURL + `/getSession`);
@@ -54,6 +56,10 @@ export class SpotifyService {
 
   getUserPlaylists(): Observable<any>{
     return this.httpCli.get<any>(this.serverURL + `/getUserPlaylists`);
+  }
+
+  getPlaylistTracks(playlistID: string): Observable<any>{
+    return this.httpCli.get<any>(this.serverURL + `/getPlaylistTracks/?playlistID=${playlistID}`);
   }
 
   getDevices(): Observable<any>{

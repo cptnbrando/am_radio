@@ -2,9 +2,9 @@
   <app-header [showControls]="showControls" (toggleBarEvent)="toggleBar($event)" [stationNum]="stationNum" (changeStationEvent)="changeStation($event)"></app-header>
 
   <div id="settingsBars">
-    <app-playlist-bar class="side setting" [showPlaylistBar]="showPlaylistBar" [user]="user" [userPlaylists]="userPlaylists"></app-playlist-bar>
+    <app-playlist-bar class="side setting" [showPlaylistBar]="showPlaylistBar" [selectedPlaylist]="selectedPlaylist" [userPlaylists]="userPlaylists" (changePlaylistEvent)="changePlaylist($event)"></app-playlist-bar>
     <app-controls class="mid setting" [showControls]="showControls"></app-controls>
-    <app-station-bar class="side setting" [showStationBar]="showStationBar"></app-station-bar>
+    <app-station-bar class="side setting" [stationNum]="stationNum" [showStationBar]="showStationBar" [currentStation]="currentStation" [selectedPlaylist]="selectedPlaylist" (createdStation)="createdStation()"></app-station-bar>
   </div>
 
   <app-player id="appPlayer" [currentDevice]="currentDevice" [showPlaylistBar]="showPlaylistBar" [showStationBar]="showStationBar" (toggleBarEvent)="toggleBar($event)" [currentlyPlaying]="currentlyPlaying" [isPlaying]="isPlaying"></app-player>
@@ -12,27 +12,3 @@
 </div>
 
 <app-visualizer id="visualizer" appDomWatcher (ready)="onPlayerReady($event)" (trackChange)="onTrackChange($event)" (playbackChange)="onPlaybackChange($event)"></app-visualizer>
-
-<!-- <div id="appDiv">
-  <app-header id="appHeader" [showControls]="showControls" (toggleBarEvent)="toggleBar($event)" [stationNum]="stationNum" (changeStationEvent)="changeStation($event)"></app-header>
-
-  <div id="appWindow">
-    <div class="under">
-      <app-visualizer></app-visualizer>
-    </div>
-
-    <div id="settingsBars" class="over thirds">
-      <div id="playlistBar">
-        <app-playlist-bar [showPlaylistBar]="showPlaylistBar" [user]="user" [userPlaylists]="userPlaylists" class="settings"></app-playlist-bar>
-      </div>
-      <div id="controlsBar">
-        <app-controls [showControls]="showControls" class="settings"></app-controls>
-      </div>
-      <div id="playerBar">
-        <app-station-bar [showStationBar]="showStationBar" class="settings"></app-station-bar>
-      </div>
-    </div>
-  </div>
-
-  <app-player id="appPlayer" [showPlaylistBar]="showPlaylistBar" [showStationBar]="showStationBar" (toggleBarEvent)="toggleBar($event)" [isPlaying]="isPlaying" (isPlayingEvent)="togglePlayback()"></app-player>
-</div> -->

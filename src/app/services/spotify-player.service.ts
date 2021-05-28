@@ -1,13 +1,14 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { AppComponent } from '../app.component';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SpotifyPlayerService {
 
-  private serverURL = `http://localhost:9015/api/spotify/player`;
+  private serverURL = `${AppComponent.serverRoot}/spotify/player`;
 
   constructor(private httpCli:HttpClient) { }
 

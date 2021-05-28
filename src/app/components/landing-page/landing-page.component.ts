@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { faSpotify } from '@fortawesome/free-brands-svg-icons';
+import { AppComponent } from 'src/app/app.component';
 import { SpotifyService } from '../../services/spotify.service';
 
 @Component({
@@ -28,7 +29,7 @@ export class LandingPageComponent implements OnInit {
         // Valid tokens found, set them to local storage and go to the app
         localStorage.clear();
         localStorage.setItem("accessToken", data.message);
-        window.location.replace(this.spotifyService.webURL + "/app");
+        window.location.replace(AppComponent.webURL + "/app");
       }
       else
       {

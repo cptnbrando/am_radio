@@ -1,4 +1,15 @@
 <div id="stationBar" *ngIf="showStationBar">
-    <p>Station Info:</p>
-    <p>Current Station:</p>
+    <h2>{{currentStation.stationName}}</h2>
+
+    <h4>Info:</h4>
+    <p>{{currentStation.stationInfo}}</p>
+
+    <h4 *ngIf="currentStation.creatorID">Created by: {{currentStation.creatorID}}</h4>
+
+    <div *ngIf="currentStation.stationName === 'No Station'">
+        <h4>Playlist Selected:</h4>
+        <p *ngIf="selectedPlaylist">{{selectedPlaylist.name}}</p>
+        <p *ngIf="!selectedPlaylist">none (use the playlist bar)</p>
+        <button *ngIf="selectedPlaylist" (click)="createRadio()">Create Radio</button>
+    </div>
 </div>
