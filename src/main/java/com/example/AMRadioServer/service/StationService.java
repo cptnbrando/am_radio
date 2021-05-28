@@ -3,6 +3,7 @@ package com.example.AMRadioServer.service;
 import com.example.AMRadioServer.model.ResponseMessage;
 import com.example.AMRadioServer.model.Station;
 import com.example.AMRadioServer.repository.StationRepository;
+import com.wrapper.spotify.model_objects.specification.PlaylistSimplified;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -36,28 +37,25 @@ public class StationService {
      * Saves a new Station to the db
      *
      * @param stationID the ID attempting to be created
-     * @param station a new Station object
+     * @param playlist a PlaylistSimplified object
      * @return ResponseMessage with details
      */
-    public ResponseMessage createStation(int stationID, Station station)
+    public ResponseMessage createStation(int stationID, PlaylistSimplified playlist)
     {
         // If there's already a Playlist in the Station number being created
         if(this.stationRepo.existsById(stationID)) {
-            return new ResponseMessage("Station Exists");
+            return new ResponseMessage("Station Exists: " + stationID);
         }
 
         // If there's already a Station with the given Playlist
-        if(this.stationRepo.existsByPlaylist(station.getPlaylist())) {
-            return new ResponseMessage("Playlist Exists:" + station.getStationID());
-        }
-
-        // If for some reason stationID and ID of the station do not match
-        if(stationID != station.getStationID()) {
-            return new ResponseMessage("ID and StationID do not match!");
+        if(this.stationRepo.existsByPlaylistID(playlist.getId())) {
+            return new ResponseMessage("Playlist Exists: " + playlist.getId());
         }
 
         try {
-            this.stationRepo.save(station);
+            Station newStation = new Station(stationID, playlist);
+
+            this.stationRepo.save(newStation);
             return new ResponseMessage("Created");
         }
         catch (Exception e) {
@@ -76,7 +74,12 @@ public class StationService {
     public Station getStation(int stationID)
     {
         try {
-            return this.stationRepo.getOne(stationID);
+            if(stationRepo.existsById(stationID))
+            {
+                return this.stationRepo.findById(stationID).get();
+            }
+
+            return null;
         }
         catch (Exception e)
         {

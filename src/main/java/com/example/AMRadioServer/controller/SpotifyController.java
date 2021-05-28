@@ -4,10 +4,7 @@ import com.example.AMRadioServer.model.ResponseMessage;
 import com.wrapper.spotify.SpotifyApi;
 import com.wrapper.spotify.exceptions.SpotifyWebApiException;
 import com.wrapper.spotify.model_objects.credentials.AuthorizationCodeCredentials;
-import com.wrapper.spotify.model_objects.specification.Paging;
-import com.wrapper.spotify.model_objects.specification.PlaylistSimplified;
-import com.wrapper.spotify.model_objects.specification.TrackSimplified;
-import com.wrapper.spotify.model_objects.specification.User;
+import com.wrapper.spotify.model_objects.specification.*;
 import com.wrapper.spotify.requests.authorization.authorization_code.AuthorizationCodeRequest;
 import com.wrapper.spotify.requests.authorization.authorization_code.AuthorizationCodeUriRequest;
 import com.wrapper.spotify.requests.data.playlists.GetListOfCurrentUsersPlaylistsRequest;
@@ -114,6 +111,21 @@ public class SpotifyController {
         catch (IOException | SpotifyWebApiException | ParseException e)
         {
             System.out.println("Exception caught in getUserPlaylists");
+            System.out.println(e.getMessage());
+            return null;
+        }
+    }
+
+    @GetMapping(value = "/getPlaylistTracks")
+    public PlaylistTrack[] getPlaylistTracks(@RequestParam String playlistID)
+    {
+        try {
+            Paging<PlaylistTrack> tracks = spotifyApi.getPlaylistsItems(playlistID).build().execute();
+            return tracks.getItems();
+        }
+        catch (IOException | SpotifyWebApiException | ParseException e)
+        {
+            System.out.println("Exception caught in getPlaylistTracks");
             System.out.println(e.getMessage());
             return null;
         }

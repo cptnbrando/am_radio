@@ -3,8 +3,11 @@ package com.example.AMRadioServer.controller;
 import com.example.AMRadioServer.model.ResponseMessage;
 import com.example.AMRadioServer.model.Station;
 import com.example.AMRadioServer.service.StationService;
+import com.wrapper.spotify.model_objects.specification.PlaylistSimplified;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import javax.persistence.EntityNotFoundException;
 
 @RestController
 @CrossOrigin(originPatterns = "*", allowCredentials = "true")
@@ -22,13 +25,14 @@ public class StationController {
      * Create a new Station, if it's available
      *
      * @param stationID ID of the Station
-     * @param station Station object
+     * @param playlist Station object
      * @return Response Message with details
      */
-    @PutMapping(value = "/{stationID}")
-    public ResponseMessage insertNewStation(@PathVariable("stationID") int stationID, @RequestBody Station station)
-    {
-        return this.stationService.createStation(stationID, station);
+    @PostMapping(value = "/{stationID}")
+    public ResponseMessage insertNewStation(@PathVariable("stationID") int stationID, @RequestBody PlaylistSimplified playlist) {
+        System.out.println("insertNewStation");
+        System.out.println(playlist.getId());
+        return this.stationService.createStation(stationID, playlist);
     }
 
     /**

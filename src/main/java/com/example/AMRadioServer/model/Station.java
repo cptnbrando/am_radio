@@ -1,15 +1,13 @@
 package com.example.AMRadioServer.model;
 
-import com.wrapper.spotify.model_objects.specification.User;
+import com.wrapper.spotify.model_objects.specification.PlaylistSimplified;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.data.annotation.CreatedDate;
 
 import javax.persistence.*;
 import java.util.Date;
-import java.util.List;
 
 @Entity
 @Data
@@ -18,7 +16,6 @@ import java.util.List;
 public class Station
 {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "station_id")
     private int stationID;
 
@@ -54,8 +51,8 @@ public class Station
      * ID of Spotify playlist
      * Only one Station can exist for a Playlist
      */
-    @Column(name = "playlist", nullable = false, unique = true)
-    private String playlist;
+    @Column(name = "playlistID", nullable = false, unique = true)
+    private String playlistID;
 
     /**
      * This is the precise time the song began playback
@@ -85,12 +82,16 @@ public class Station
 //    private List<User> listeners;
 
     /**
-     * This constructor is for new Stations, with most of the fields missing
-     *
-     * Either this or the controller should initialize the fields based on the Spotify api
+     * This constructor is for new Stations from a PlaylistSimplified object
      */
-    public Station(String stationName, String playlist) {
-        this.stationName = stationName;
-        this.playlist = playlist;
+    public Station(int stationID, PlaylistSimplified playlist) {
+        this.stationID = stationID;
+        this.stationName = playlist.getName();
+        this.stationInfo = "";
+        this.creatorID = playlist.getOwner().getId();
+        this.playlistID = playlist.getId();
+        this.playTime = new Date();
+        this.current = "";
+        this.next = "";
     }
 }
