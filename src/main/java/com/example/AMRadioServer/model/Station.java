@@ -1,13 +1,19 @@
 package com.example.AMRadioServer.model;
 
 import com.wrapper.spotify.model_objects.specification.PlaylistSimplified;
+import com.wrapper.spotify.model_objects.specification.PlaylistTrack;
+import com.wrapper.spotify.model_objects.specification.TrackSimplified;
+import com.wrapper.spotify.model_objects.specification.User;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.data.annotation.CreatedDate;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 
 @Entity
 @Data
@@ -79,12 +85,23 @@ public class Station
     @Column(name = "next")
     private String next;
 
-//    private List<User> listeners;
+    /**
+     * Holds all current station listeners
+     * userID to Spotify User objects
+     */
+    @Transient
+    private HashMap<String, User> listeners;
+
+    /**
+     * ArrayList of tracks, updated whenever a station gets a new song to ensure no repeated track plays
+     */
+    @Transient
+    private List<PlaylistTrack> tracks;
 
     /**
      * This constructor is for new Stations from a PlaylistSimplified object
      */
-    public Station(int stationID, PlaylistSimplified playlist) {
+    public Station(int stationID, PlaylistSimplified playlist, List<PlaylistTrack> tracks) {
         this.stationID = stationID;
         this.stationName = playlist.getName();
         this.stationInfo = "";
@@ -93,5 +110,8 @@ public class Station
         this.playTime = new Date();
         this.current = "";
         this.next = "";
+
+        this.listeners = new HashMap<>();
+        this.tracks = tracks;
     }
 }
