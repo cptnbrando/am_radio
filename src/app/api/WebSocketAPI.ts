@@ -1,108 +1,87 @@
 import { Subject } from 'rxjs';
 import * as SockJS from 'sockjs-client';
 import * as Stomp from 'stompjs';
-import { PlayerComponent } from '../components/player/player.component';
+import { RadioPageComponent } from '../components/radio-page/radio-page.component';
 
 export class WebSocketAPI {
-    webSocketEndPoint: string = 'http://localhost:9015/ws';
-    topic: string = "/topic/messages";
+    webSocketEndPoint: string = `http://localhost:9015/ws`;
+    topic: string = "/topic/stations";
+    stationNum: number;
     stompClient: Stomp.Client;
-    chatComponent: ChatComponent;
-    playerComponent: PlayerComponent
+    radioPageComponent: RadioPageComponent;
     tempObs = new Subject<String>();
-    constructor(chatComponent: ChatComponent, playerComponent: PlayerComponent) {
-        this.playerComponent = playerComponent;
-        this.chatComponent = chatComponent;
+
+    constructor(radioPageComponent: RadioPageComponent) {
+        this.radioPageComponent = radioPageComponent;
     }
+
     getObs(){
         return this.tempObs.asObservable();
     }
-    _connect() {
+
+    // Connect to the WebSocket for the given station
+    _connect(stationNum: number) {
         console.log("Start websocket connection");
-        // if(this.loginServ.getCurrent()==null){
-        //     return;
-        // }
         let ws = new SockJS(this.webSocketEndPoint);
         this.stompClient = Stomp.over(ws);
-        const _this = this;
-        let authtoken = this.cookieService.getCookie("token")
-        _this.stompClient.connect({
+        let authtoken = localStorage.getItem("accessToken");
+
+        // Connect to the Stomp Client and subscribe to endpoints
+        this.stompClient.connect({
             headers: {
-              token: authtoken
+              accessToken: authtoken
             }, withCredentials:true
-          }, function (frame) {
-            _this.stompClient.subscribe("/topic/messages", function (sdkEvent) {
-                _this.onMessageReceived(sdkEvent);
+          }, function(frame) {
+
+            // Endpoint for getting Station updates (when to skip to next track)
+            this.stompClient.subscribe(`/topic/stations/${stationNum}`, function(sdkEvent) {
+                this.onNext(sdkEvent);
             });
-            _this.stompClient.subscribe("/topic/status", function (sdkEvent){
-                _this.onStatusReceived(sdkEvent);
+
+            // Endpoint for getting list of active listeners for a Station
+            this.stompClient.subscribe(`/topic/stations/${stationNum}/listeners`, function(sdkEvent) {
+                this.onListenerRecieved(sdkEvent);
             });
-            _this.stompClient.subscribe("/topic/loadMessages", function (sdkEvent){
-                _this.onOldMessagesReceived(sdkEvent);
-            });
-            _this.stompClient.subscribe("/topic/typing", function (sdkEvent){
-                _this.onTypingUsersReceived(sdkEvent);
-            });
-            _this.tempObs.next("Done");
+
+            this.tempObs.next("Done");
         }, this.errorCallBack);
     };
 
+    // Function to handle when the track is skipped
+    onNext(message){
+        console.log("Message Recieved from Server :: " + message.body);
+        this.radioPageComponent.handleNext(JSON.parse(message.body));
+    }
+    
+    // Callback for recieving a new listener
+    onListenerRecieved(message) {
+        console.log("New listener found");
+        this.radioPageComponent.handleListener(JSON.parse(message.body));
+    }
+
+    // Send an update to add the user to the station's listeners list
+    _sendNewListener(stationNum, message) {
+        this.stompClient.send(`/ws/stations/${stationNum}/listeners`, {}, JSON.stringify(message));
+    }
+    
+    // Disconnect from Stomp Client
     _disconnect() {
         if (this.stompClient !== null) {
             this.stompClient.disconnect(()=>{});
         }
         console.log("Disconnected");
     }
-
-    // on error, schedule a reconnection attempt
-    errorCallBack(error) {
-        console.log("errorCallBack -> " + error)
-        setTimeout(() => {
-            this._connect();
-        }, 5000);
-    }
-
-    // _send(message) {
-    //     this.stompClient.send("/app/chat", {}, JSON.stringify(message));
-    // }
-
-    onMessageReceived(message) {
-        console.log("Message Recieved from Server :: " + message);
-        this.chatComponent.handleMessage(JSON.parse(message.body));
-    }
-
-    // _sendStatus(message) {
-    //     this.stompClient.send("/app/onlineUsers", {}, JSON.stringify(message));
-    // }
-
+    
+    // Send to update backend listeners list
     _sendDisconnect(message) {
         this.stompClient.send("/app/disconnect", {}, JSON.stringify(message));
     }
 
-    onStatusReceived(message) {
-        console.log("Message Recieved from Server :: " + JSON.parse(message.body));
-        this.chatComponent.handleStatus(JSON.parse(message.body));
-    }
-
-    _sendForOldMessages(message) {
-        this.stompClient.send("/app/loadMessages", {}, JSON.stringify(message));
-    }
-
-    onOldMessagesReceived(message) {
-        console.log("Message Recieved from Server :: " + message.body);
-        this.chatComponent.handleOldMessages(JSON.parse(message.body));
-    }
-
-    _sendNewUserTyping(message) {
-        this.stompClient.send("/app/typing", {}, JSON.stringify(message));
-    }
-
-    _sendUserStoppedTyping(message) {
-        this.stompClient.send("/app/notTyping", {}, JSON.stringify(message));
-    }
-
-    onTypingUsersReceived(message) {
-        console.log("Message Recieved from Server :: " + message.body);
-        this.chatComponent.handleTypingUsers(JSON.parse(message.body));
+    // on error, schedule a reconnection attempt
+    errorCallBack(error, stationNum) {
+        console.log("errorCallBack -> " + error);
+        // setTimeout(() => {
+            //     this._connect(stationNum);
+        // }, 5000);
     }
 }

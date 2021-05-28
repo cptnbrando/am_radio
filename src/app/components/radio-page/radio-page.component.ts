@@ -1,5 +1,6 @@
 import { Component, Input, OnInit, Output } from '@angular/core';
 import { faSpotify } from '@fortawesome/free-brands-svg-icons';
+import { WebSocketAPI } from 'src/app/api/WebSocketAPI';
 import { AppComponent } from 'src/app/app.component';
 import { RadioService } from 'src/app/services/radio.service';
 import { Station } from 'src/app/shared/models/station.model';
@@ -15,6 +16,8 @@ import { SpotifyService } from '../../services/spotify.service';
 export class RadioPageComponent implements OnInit {
 
   faSpotify = faSpotify;
+
+  wsAPI: WebSocketAPI;
 
   // This will hold a spotify uri for the logged in user
   @Input() user: any = {};
@@ -52,28 +55,30 @@ export class RadioPageComponent implements OnInit {
 
   public static accessToken: string = "";
 
-  constructor(private spotifyService: SpotifyService, private playerService: SpotifyPlayerService, private script: ScriptService, private radioService: RadioService) { }
-
-  ngOnInit() {
+  constructor(private spotifyService: SpotifyService, private playerService: SpotifyPlayerService, private script: ScriptService, private radioService: RadioService) {
     // Immediately check for valid tokens from the server
     // This function will redirect the user back to the homepage if credentials can't be found
     if(!this.checkTokens())
     {
       window.location.replace(AppComponent.webURL);
-      return;
+      throw new Error;
     }
 
+    this.wsAPI = new WebSocketAPI(this);
+  }
+
+  ngOnInit() {
     // When we load up, set the User
     this.setUser();
 
     // Also set the UserPlaylists
     this.setPlaylists();
 
-    // Also set userDevices
-    this.setDevices();
+    // // Also set userDevices
+    // this.setDevices();
 
-    // Also set currentDevice
-    this.getCurrentDevice();
+    // // Also set currentDevice
+    // this.getCurrentDevice();
 
     this.canvas = document.querySelector("canvas");
   }
@@ -117,7 +122,7 @@ export class RadioPageComponent implements OnInit {
       console.log(data);
       this.isPlaying = this.currentDevice.is_playing;
       return data;
-    })
+    });
   }
 
   // This is the event handler for the playerReady sdk js script events
@@ -131,8 +136,13 @@ export class RadioPageComponent implements OnInit {
     if(this.isPlaying)
     {
       // Device toggling done via Station Bar
-      this.toggleBar(1);
       this.setPlayerData();
+
+      // Also set userDevices
+      this.setDevices();
+
+      // Also set currentDevice
+      this.getCurrentDevice();
 
       // We get the currently playing player
       this.playerService.getPlayer().subscribe(data => {
@@ -146,8 +156,7 @@ export class RadioPageComponent implements OnInit {
     }
   }
 
-  beginAMRadio(): void 
-  {
+  beginAMRadio(): void {
     console.log("beginAMRadio()");
 
     // So that the station bar doesn't tweak from missing fields
@@ -183,6 +192,7 @@ export class RadioPageComponent implements OnInit {
     });
   }
 
+  // Event callback for Spotify SDK script
   onPlaybackChange(event: any): void {
     console.log("playback change event handler");
     console.log(event);
@@ -190,14 +200,11 @@ export class RadioPageComponent implements OnInit {
     this.isPlaying = !(this.canvas.getAttribute("paused") === "true");
   }
 
+  // Event callback for Spotify SDK script
   onTrackChange(event: any): void {
     console.log("track change event handler");
     this.setPlayerData();
   }
-
-  // getInfoFromPlayer(): void {
-  //   let canvas = document.querySelector("canvas");
-  // }
 
   // This will get the current player and set the data to the UI
   setPlayerData(): void {
@@ -213,10 +220,14 @@ export class RadioPageComponent implements OnInit {
     });
   }
 
+  // Called when the station number is changed
   setStation(): void {
     this.radioService.getStation(this.stationNum).subscribe(data => {
       if(data) this.currentStation = data;
     });
+
+    // We should connect to the websocket here
+    this.wsAPI._connect(this.stationNum);
   }
 
   createdStation(): void {
@@ -317,6 +328,14 @@ export class RadioPageComponent implements OnInit {
     this.script.load('spotifyPlaybackSDK', 'spotifyPlayer').then(data => {
       console.log('scripts loaded ', data);
     }).catch(error => console.log(error));
+  }
+
+  handleNext(station: any): void {
+
+  }
+
+  handleListener(listeners: any): void {
+
   }
 
 }

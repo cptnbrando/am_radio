@@ -12,6 +12,8 @@ export class PlayerComponent implements OnInit {
   faPlay = faPlay;
   faPause = faPause;
 
+  @Input() stationNum: number = 0;
+
   // Setting bars
   @Input() showPlaylistBar: boolean = false;
   @Input() showStationBar: boolean = false;

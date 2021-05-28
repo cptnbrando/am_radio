@@ -12,7 +12,7 @@
         </div>
     </div>
 
-    <div id="playButton" (click)="togglePlay()">        
+    <div id="playButton" (click)="togglePlay()" *ngIf="stationNum === 0">        
         <fa-icon [icon]="faPlay" *ngIf="!isPlaying"></fa-icon>
         <fa-icon [icon]="faPause" *ngIf="isPlaying"></fa-icon>
     </div>
