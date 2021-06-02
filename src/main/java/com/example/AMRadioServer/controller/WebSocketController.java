@@ -3,40 +3,63 @@ package com.example.AMRadioServer.controller;
 import com.example.AMRadioServer.model.Station;
 import com.example.AMRadioServer.service.StationService;
 import com.wrapper.spotify.model_objects.specification.User;
-import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collection;
 import java.util.List;
 
 @RestController
-@Data
+@CrossOrigin(originPatterns = "*", allowCredentials = "true")
+@RequestMapping
 public class WebSocketController {
 
-    @Autowired
-    private StationService stationService;
+    private final StationService stationService;
 
-    @MessageMapping("/stations")
+    @Autowired
+    public WebSocketController(StationService stationService) {
+        this.stationService = stationService;
+    }
+
+    @MessageMapping("/radio")
     @SendTo("/topic/stations")
     public List<Station> getStations() {
+        System.out.println("in WSController/getAllStations");
         return stationService.getAllStations();
     }
 
     /**
      * Gets a given Station
-     * If User if first connected listener, begin a playback loop to update Station
+     * If User is first connected listener, begin a playback loop to update Station
      *
      * @param stationID ID of station
      * @return a Station object
      */
-    @MessageMapping("/stations/{stationID}")
+    @MessageMapping("/radio/{stationID}")
     @SendTo("/topic/stations/{stationID}")
-    public Station getStation(@PathVariable int stationID) {
-        return stationService.getStation(stationID);
+    public Station getStation(@PathVariable("stationID") int stationID)
+    {
+        System.out.println("in WSController/getStation");
+
+        Station myStation = stationService.getStation(stationID, true);
+
+        // Check if the station has any listeners
+        if(myStation.getListeners().isEmpty())
+        {
+            System.out.println(stationID + " found empty listeners");
+            // If it does, add the current user to the listeners list
+            // If this is successful, start the station
+            if(stationService.updateListener(stationID)) {
+                stationService.start(stationID);
+            }
+        }
+
+        return myStation;
     }
 
     /**
@@ -46,10 +69,11 @@ public class WebSocketController {
      * @return Collection of User objects from station's listeners HashMap
      * @throws Exception Websocket Exception
      */
-    @MessageMapping("/stations/{stationID}/listeners")
+    @MessageMapping("/radio/{stationID}/listeners")
     @SendTo("/topic/stations/{stationID}/listeners")
-    public Collection<User> sendListeners(@PathVariable int stationID) throws Exception
+    public Collection<User> sendListeners(@PathVariable("stationID")int stationID) throws Exception
     {
+        System.out.println("in WSController/sendListeners");
         // Use service to check/update listener's list
         if(!this.stationService.updateListener(stationID)) {
             return null;

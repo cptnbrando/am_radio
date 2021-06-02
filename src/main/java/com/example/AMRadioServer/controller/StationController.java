@@ -7,8 +7,6 @@ import com.wrapper.spotify.model_objects.specification.PlaylistSimplified;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.persistence.EntityNotFoundException;
-
 @RestController
 @CrossOrigin(originPatterns = "*", allowCredentials = "true")
 @RequestMapping("/api/station")
@@ -30,19 +28,20 @@ public class StationController {
      */
     @PostMapping(value = "/{stationID}")
     public ResponseMessage insertNewStation(@PathVariable("stationID") int stationID, @RequestBody PlaylistSimplified playlist) {
-        System.out.println("insertNewStation");
+        System.out.println("stationController/insertNewStation");
         System.out.println(playlist.getId());
         return this.stationService.createStation(stationID, playlist);
     }
 
     /**
      * Get a Station, if it exists
+     * Starts it if user is the first listener
      *
      * @param stationID the ID of the Station
      * @return a Station object
      */
     @GetMapping(value = "/{stationID}")
     public Station getStation(@PathVariable("stationID") int stationID) {
-        return this.stationService.getStation(stationID);
+        return this.stationService.getStation(stationID, true);
     }
 }

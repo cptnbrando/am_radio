@@ -11,11 +11,11 @@ import com.wrapper.spotify.model_objects.specification.User;
 import lombok.Data;
 import org.apache.hc.core5.http.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.*;
 
 /**
  * This service class controls the Station
@@ -44,8 +44,8 @@ public class StationService {
         this.spotifyApi = spotifyApi;
         this.allStations = new HashMap<>();
 
-        // Initialize with all currently created Stations
-        List<Station> all = this.getAllStations();
+        // Initialize with all currently created Stations from db
+        List<Station> all = this.stationRepo.findAll();
         for(Station station: all) {
             allStations.put(station.getStationID(), station);
         }
@@ -71,7 +71,7 @@ public class StationService {
         }
 
         try {
-            // Create a new station, set all the tracks, add it to the db and HashMap
+            // Create a new station, get all the tracks, add it to the db and HashMap
             PlaylistTrack[] tracks = this.spotifyApi.getPlaylistsItems(playlist.getId()).build().execute().getItems();
             Station newStation = new Station(stationID, playlist, Arrays.asList(tracks));
 
@@ -94,42 +94,47 @@ public class StationService {
 
     /**
      * Get a station from an ID
+     * HashMap value
      *
      * @param stationID ID of station
+     * @param checkDB whether to check the DB as well
      * @return a Station if it exists, null if it cannot be found
      */
-    public Station getStation(int stationID)
+    public Station getStation(int stationID, boolean... checkDB)
     {
-        try {
-            // Make sure it exists in the db
-            // If so, return the HashMap value (so listeners and tracks also get returned)
-            if(stationRepo.existsById(stationID))
-            {
-                return this.allStations.get(stationID);
-            }
+        if(checkDB[0]) {
+            try {
+                // Check if it exists in the db
+                // If so, return the HashMap value (so listeners and tracks also get returned)
+                if(stationRepo.existsById(stationID)) {
+                    return this.allStations.get(stationID);
+                }
 
-            return null;
+                return null;
+            }
+            catch (IllegalArgumentException e)
+            {
+                System.out.println("Exception caught in stationService/getStation");
+                System.out.println(e.getMessage());
+                return null;
+            }
         }
-        catch (Exception e)
-        {
-            System.out.println("Exception caught in StationService getStation");
-            System.out.println(e.getMessage());
-            return null;
-        }
+
+        return this.allStations.get(stationID);
     }
 
     /**
-     * Get all the stations from the db
+     * Get all the stations from the HashMap
      *
      * @return List of Station objects
      */
     public List<Station> getAllStations() {
         try {
-            return this.stationRepo.findAll();
+            return new ArrayList<>(this.allStations.values());
         }
         catch(Exception e)
         {
-            System.out.println("Exception caught in getAllStations");
+            System.out.println("Exception caught in stationService/getAllStations");
             System.out.println(e.getMessage());
             return null;
         }
@@ -137,7 +142,7 @@ public class StationService {
 
     /**
      * Checks if the current logged in user is in the listeners list for a given station
-     * If not, adds it to the list
+     * If not, adds it to the HashMap stations list
      *
      * @param stationID ID of station
      * @return true if it exists, false if not
@@ -148,7 +153,7 @@ public class StationService {
             User myUser = this.spotifyApi.getCurrentUsersProfile().build().execute();
 
             // If the list does not contain the userID, add user to the list
-            if(!this.getStation(stationID).getListeners().containsKey(myUser.getId())) {
+            if(!this.allStations.get(stationID).getListeners().containsKey(myUser.getId())) {
                 this.addListener(stationID, myUser);
             }
 
@@ -162,76 +167,64 @@ public class StationService {
     }
 
     /**
-     * Add a Spotify User to a station's listeners list
+     * Add a Spotify User to the HashMap stations listeners list
      *
      * @param stationID id of Station
      * @param user currently logged in Spotify User object
      */
     public void addListener(int stationID, User user) {
-        this.getStation(stationID).getListeners().put(user.getId(), user);
+        this.allStations.get(stationID).getListeners().put(user.getId(), user);
     }
 
     /**
      * Starts a loop that continues while there are active listeners for a given Station
      *
-     * @param station the Station to start
+     * @param stationNum ID of the Station to start
      */
-    public void start(Station station)
-    {
-//        // Create a new thread through an Executor
-//        ExecutorService executor = Executors.newSingleThreadExecutor();
-//        Future future = executor.submit(new Callable() {
-//            public String call() throws Exception {
-//                //do operations you want
-//                return "OK";
-//            }
-//        });
-//
-//        // Here we use a while loop to continue getting new songs as long as there are present listeners
-//        // We want to wait until the current system time is past the playTime + currentTrack time
-//        // TODO: learn how tf to do this lol
-//        try {
-////            while(!station.getListeners().isEmpty())
-////            {
-////
-////            }
-//            System.out.println(future.get(2, TimeUnit.SECONDS)); //timeout is in 2 seconds
-//        } catch (TimeoutException | InterruptedException | ExecutionException e) {
-//            System.err.println("Timeout");
-//        }
-//        executor.shutdownNow();
-    }
+    @Async
+    public void start(int stationNum) {
+        Station station = this.getStation(stationNum, true);
 
-    /**
-     * Change the current to the next and get a new random next track
-     *
-     * @param station the Station to update
-     */
-    public Station update(Station station)
-    {
-        // Refresh the tracks list
-        if(station.getTracks().isEmpty())
+        // The Station is playing now
+        station.setPlaying(true);
+
+        // This saves it to db and HashMap
+        this.updateStation(station);
+
+        // Here we use a while loop to continue getting new songs as long as there are present listeners
+        // We want to wait until the current system time is past the playTime + currentTrack time
+        while(!station.getListeners().isEmpty())
         {
-            try {
-                PlaylistTrack[] all = this.spotifyApi.getPlaylistsItems(station.getPlaylistID()).build().execute().getItems();
-                List<PlaylistTrack> trackList = Arrays.asList(all);
-                Collections.shuffle(trackList);
-                station.setTracks(trackList);
-                this.allStations.put(station.getStationID(), station);
-            }
-            catch (IOException | SpotifyWebApiException | ParseException e) {
-                System.out.println("Spotify exception caught in StationService update");
-                System.out.println(e.getMessage());
+            // We don't have to check the DB every loop, just get it from the HashMap
+            station = this.getStation(stationNum);
+
+            // If the SystemTime is greater than the PlayTime + current track elapsed time, update the station
+            assert station.getCurrent() != null;
+            if(System.currentTimeMillis() >= (station.getPlayTime() + station.getCurrent().getDurationMs()))
+            {
+                this.updateStation(station);
             }
         }
 
-        // Current to next
-        station.setCurrent(station.getNext());
+        // When the while loop exists, it means nobody is listening to the station, so stop the station
+        station.stop();
 
-        // Set a random next track
-        int rnd = new Random().nextInt(station.getTracks().size());
-        station.setNext(station.getTracks().remove(rnd).getTrack().getId());
+        // Save the stopped Station to HashMap and db
+        this.allStations.put(station.getStationID(), station);
+        this.stationRepo.save(station);
+    }
 
-        return station;
+    /**
+     * Uses the Station object's update method to change the Station's properties to a next track
+     * This wrapper method also saves it to db and hashmap
+     *
+     * @param station Station to update
+     */
+    private void updateStation(Station station) {
+        station.update(this.spotifyApi);
+
+        // Save to HashMap and db
+        this.allStations.put(station.getStationID(), station);
+        this.stationRepo.save(station);
     }
 }
