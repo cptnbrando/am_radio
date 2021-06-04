@@ -5,10 +5,15 @@ server:
 spring:
   application:
     name: am_radio
+  h2:
+    console:
+      enabled: true
   datasource:
     url: jdbc:h2:file:./h2Database/h2Stations
-    username: {AWS_AM_RADIO_USERNAME}
-    password: {AWS_AM_RADIO_PASSWORD}
+#    username: { AWS_AM_RADIO_USERNAME }
+#    password: { AWS_AM_RADIO_PASSWORD }
+    username: sa
+    password:
     driverClassName: org.h2.Driver
 #    data: classpath:./am_radio.sql
     initialize: true

@@ -7,6 +7,7 @@ import com.wrapper.spotify.model_objects.specification.PlaylistSimplified;
 import com.wrapper.spotify.model_objects.specification.PlaylistTrack;
 import com.wrapper.spotify.model_objects.specification.User;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.apache.hc.core5.http.ParseException;
 import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.data.annotation.CreatedDate;
@@ -22,6 +23,7 @@ import java.util.*;
  */
 @Entity
 @Data
+@NoArgsConstructor
 @Table(name = "Stations")
 public class Station
 {
@@ -146,7 +148,7 @@ public class Station
     private HashMap<String, User> listeners;
 
     /**
-     * This constructor is for new Stations from a PlaylistSimplified object
+     * Constructor for new Stations with default values
      *
      * @param stationID 000 - 999 radio station ID (Required in case a station is being overwritten)
      * @param playlist Spotify PlaylistSimplified object
