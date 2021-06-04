@@ -4,8 +4,8 @@ import * as Stomp from 'stompjs';
 import { RadioPageComponent } from '../components/radio-page/radio-page.component';
 
 export class WebSocketAPI {
-    webSocketEndPoint: string = `http://localhost:9015/ws`;
-    topic: string = "/topic/stations";
+    webSocketEndPoint: string;
+    topic: string;
     stationNum: number;
     stompClient: Stomp.Client;
     radioPageComponent: RadioPageComponent;
@@ -13,6 +13,8 @@ export class WebSocketAPI {
 
     constructor(radioPageComponent: RadioPageComponent) {
         this.radioPageComponent = radioPageComponent;
+        this.webSocketEndPoint = "http://localhost:9015/ws";
+        this.topic = "/topic/stations";
     }
 
     getObs(){
@@ -22,29 +24,25 @@ export class WebSocketAPI {
     // Connect to the WebSocket for the given station
     _connect(stationNum: number) {
         console.log("Start websocket connection");
+        
         let ws = new SockJS(this.webSocketEndPoint);
-        this.stompClient = Stomp.over(ws);
-        let authtoken = localStorage.getItem("accessToken");
+
+        // This is stupid, but necessary because this.stompClient doesn't wanna work right :/
+        const _this = this;
+        console.log(ws);
+
+        _this.stompClient = Stomp.over(ws);
 
         // Connect to the Stomp Client and subscribe to endpoints
-        this.stompClient.connect({
-            headers: {
-              accessToken: authtoken
-            }, withCredentials:true
-          }, function(frame) {
-
+        _this.stompClient.connect({
+            withCredentials:true
+        }, (frame) => {
             // Endpoint for getting Station updates (when to skip to next track)
-            this.stompClient.subscribe(`/topic/stations/${stationNum}`, function(sdkEvent) {
-                this.onNext(sdkEvent);
+            _this.stompClient.subscribe(`${_this.topic}`, function(sdkEvent) {
+                console.log(sdkEvent);
+                _this.onNext(sdkEvent);
             });
-
-            // Endpoint for getting list of active listeners for a Station
-            this.stompClient.subscribe(`/topic/stations/${stationNum}/listeners`, function(sdkEvent) {
-                this.onListenerRecieved(sdkEvent);
-            });
-
-            this.tempObs.next("Done");
-        }, this.errorCallBack);
+        }, (error) => _this.errorCallBack)
     };
 
     // Function to handle when the track is skipped
@@ -60,9 +58,9 @@ export class WebSocketAPI {
     }
 
     // Send an update to add the user to the station's listeners list
-    _sendNewListener(stationNum, message) {
-        this.stompClient.send(`/ws/stations/${stationNum}/listeners`, {}, JSON.stringify(message));
-    }
+    // _sendNewListener(stationNum, message) {
+    //     this.stompClient.send(`/ws/stations/${stationNum}/listeners`, {}, JSON.stringify(message));
+    // }
     
     // Disconnect from Stomp Client
     _disconnect() {

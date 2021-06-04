@@ -9,8 +9,8 @@ import { Component, HostListener } from '@angular/core';
 export class AppComponent {
   title = 'am_radio';
 
-  public static get serverRoot(){return `http://localhost:9015/api`; }
-  public static get webURL() { return `http://localhost:4200`; }
+  public static serverRoot = `http://localhost:9015/api`;
+  public static webURL = `http://localhost:4200`;
 
   constructor() {}
 

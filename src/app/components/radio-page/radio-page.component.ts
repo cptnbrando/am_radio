@@ -221,17 +221,32 @@ export class RadioPageComponent implements OnInit {
   }
 
   // Called when the station number is changed
-  setStation(): void {
-    this.radioService.getStation(this.stationNum).subscribe(data => {
-      if(data) this.currentStation = data;
-    });
+  setStation(stationNum: number): void {
 
-    // We should connect to the websocket here
-    this.wsAPI._connect(this.stationNum);
+    if(stationNum === 0)
+    {
+      return;
+    }
+
+    // Get station at given number
+    this.radioService.getStation(stationNum).subscribe(data => {
+      // This route checks if it exists first, if not it returns back null
+      if(data){
+        this.currentStation = data;
+        // We should connect to the websocket here
+        this.wsAPI._connect(stationNum);
+      }
+      else
+      {
+        this.currentStation = new Station(stationNum);
+        if(!this.showPlaylistBar) this.toggleBar(0);
+        if(!this.showStationBar) this.toggleBar(1);
+      }
+    });
   }
 
   createdStation(): void {
-    this.setStation();
+    this.setStation(this.stationNum);
   }
 
   toggleBar(bar: number): void
@@ -271,27 +286,12 @@ export class RadioPageComponent implements OnInit {
     }
 
     // BeginAMRadio on station 000
-    if(stationNum === 0)
-    {
+    if(stationNum === 0){
       this.beginAMRadio();
       return;
     }
 
-    // Get station at given number
-    this.radioService.getStation(stationNum).subscribe(data => {
-      // This route checks if it exists first, if not it returns back null
-      if(data)
-      {
-        this.currentStation = data;
-      }
-      else
-      {
-        this.currentStation = new Station(stationNum);
-        if(!this.showPlaylistBar) this.toggleBar(0);
-        if(!this.showStationBar) this.toggleBar(1);
-      }
-    });
-
+    this.setStation(stationNum);
   }
 
   async checkTokens(): Promise<boolean>
