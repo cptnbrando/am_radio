@@ -1,0 +1,20 @@
+#header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: solid;
+    background-color: white;
+}
+
+h2 {
+    margin-left: 10px;
+}
+
+#stationNum {
+    font-size: xx-large;
+    margin-right: 10px;
+}
+
+.numControl {
+    margin-left: 10px;
+}

@@ -1,0 +1,30 @@
+.overlay {
+  min-height: 100%;
+  min-width: 100%;
+  max-height: 100%;
+  max-width: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  overflow-x: hidden;
+  transition: 0.5s;
+
+  #settingsBars 
+  {
+    .setting {
+      max-height: 70vh;
+      float: left;
+    }
+
+    .side {
+      width: 20%;
+    }
+
+    .mid {
+      width: 60%;
+    }
+  }
+}

@@ -1,0 +1,25 @@
+<div id="seeker">
+    <span>Imma seek soon</span>
+</div>
+<div id="player">
+    <div id="currentDiv" (click)="toggleBar(0)" class="buttonBox row">
+        <div id="currentImage" class="album column">
+            <img [src]="currentlyPlaying.album.images[0].url">
+        </div>
+        <div id="currentInfo" class="info column">
+            <div id="currentName">{{this.currentlyPlaying.name}}</div>
+            <div id="currentArtist">{{this.currentlyPlaying.artists[0].name}}</div>
+        </div>
+    </div>
+
+    <div id="playButton" (click)="togglePlay()">        
+        <fa-icon [icon]="faPlay" *ngIf="!isPlaying"></fa-icon>
+        <fa-icon [icon]="faPause" *ngIf="isPlaying"></fa-icon>
+    </div>
+
+    <div id="stationInfo" (click)="toggleBar(1)" class="buttonBox">
+        <div>Driving 6</div>
+        <div>bdog66</div>
+        <div>{{this.currentDevice.name}}</div>
+    </div>
+</div>

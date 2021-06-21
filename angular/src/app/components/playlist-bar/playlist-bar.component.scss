@@ -1,0 +1,27 @@
+#playlistBar {
+    border: solid;
+    border-color: green;
+
+    color: white;
+
+    .bigList {
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+
+    li {
+      border: 1px solid white;
+      padding: 5px;
+
+      &:hover {
+        border: 3px solid yellow;
+        padding: 10px;
+      }
+    }
+
+    #tracksBack {
+      &:hover {
+        color: yellow;
+      }
+    }
+}

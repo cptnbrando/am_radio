@@ -1,0 +1,24 @@
+#appDiv {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+#header {
+  border-bottom: solid;
+
+  h2 {
+    margin-left: 10px;
+  }
+}
+
+#appWindow {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+
+  button {
+    padding: 3em;
+  }
+}
