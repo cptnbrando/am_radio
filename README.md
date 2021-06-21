@@ -41,7 +41,7 @@ npm i
 
 ## **Usage**
 
-> Run main in AmRadioServerApplication in IDE
+> Run main in AmRadioServerApplication in IDE 
 
 > Run angular project
 ```
