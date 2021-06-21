@@ -20,8 +20,8 @@ Backend Spring Boot project and docs can be found in the parent directory [here]
 - [SockJS 0.3.21](https://www.npmjs.com/package/sockjs)
 - [STOMP.js 2.3.3](https://www.npmjs.com/package/stompjs)
 - [Spotify Web API Node 5.0.2](https://www.npmjs.com/package/spotify-web-api-node)
-<br>
-This project would not have been possible without the projects [kaleidosync](https://github.com/zachwinter/kaleidosync) and [spotify-viz](https://github.com/zachwinter/spotify-viz) by @ZachWinter. If you're trying to make a Spotify visualizer app, I suggest you check those out first!
+
+This project would not have been possible without the projects [Kaleidosync](https://github.com/zachwinter/kaleidosync) and [spotify-viz](https://github.com/zachwinter/spotify-viz) by @ZachWinter. If you're trying to make a Spotify visualizer app, I suggest you check those out first!
 
 # Getting Started
 
