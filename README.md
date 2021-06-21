@@ -61,4 +61,4 @@ http://localhost:4200
 
 ## **License**
 
-This project uses the following license: [<The MIT License>](https://www.mit.edu/~amini/LICENSE.md).
+This project uses the following license: [The MIT License](https://www.mit.edu/~amini/LICENSE.md).
