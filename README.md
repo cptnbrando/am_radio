@@ -9,10 +9,10 @@ Frontend Angular project and docs can be found in [/angular](https://github.com/
 - [Spring Boot 2.5.1](https://start.spring.io/)
   - Spring Actuator
   - Spring Data JPA
-	- Spring Web MVC
-	- Spring Websocket
+  - Spring Web MVC
+  - Spring Websocket
   - Spring Devtools
-	- Lombok
+  - Lombok
   - h2 Database
   - PostgreSQL Driver
   - Log4J
