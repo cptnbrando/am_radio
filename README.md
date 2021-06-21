@@ -4,7 +4,7 @@ am_radio is a full-stack Spring/Angular music player application to share Spotif
 <br>
 Frontend Angular project and docs can be found in [/angular](https://github.com/cptnbrando/am_radio/tree/main/angular).
 
-## Technologies Used
+## Technologies Used 
 
 - [Spring Boot 2.5.1](https://start.spring.io/)
   - Spring Actuator
