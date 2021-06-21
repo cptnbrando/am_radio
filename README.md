@@ -30,7 +30,7 @@ Make sure you have [node.js v16.3.0+](https://nodejs.org/en/download/) , [npm v7
 
 > Clone this repository
 ```
-git clone https://github.com/cptnbrando/Brandon-Dcruz-Revature-Project-1-ERS.git
+git clone https://github.com/cptnbrando/am_radio
 ```
 
 > npm install in angular project folder
@@ -42,12 +42,6 @@ npm i
 ## **Usage**
 
 > Run main in AmRadioServerApplication in IDE
-
-> npm install in angular project
-```
-cd angular
-npm i
-```
 
 > Run angular project
 ```
