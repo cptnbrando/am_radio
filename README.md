@@ -1,6 +1,4 @@
-# am_radio - A Spotify live radio application created by Captain Brando!
-
-## Project Description
+# am_radio - A Spotify live radio application
 
 am_radio is a full-stack Spring/Angular music player application to share Spotify playlists and listen to them in realtime, with chatrooms and a swanky visualizer to boot.<br>
 Frontend Angular project and docs can be found in [/angular](https://github.com/cptnbrando/am_radio/tree/main/angular).
