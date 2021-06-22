@@ -12,7 +12,7 @@ pipeline {
         stage('build-gradle') {
             steps {
                 script {
-                    sh 'sudo ./gradlew clean build'
+                    sh './gradlew clean build chmod +x gradlew -s -i'
                 }
             }
         }
