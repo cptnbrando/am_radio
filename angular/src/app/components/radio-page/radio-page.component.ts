@@ -35,6 +35,7 @@ export class RadioPageComponent implements OnInit {
   // Current track information
   @Output() currentlyPlaying: any = {};
   @Output() isPlaying: boolean = false;
+  @Output() position: number = 0;
 
   // The device currently playing
   @Output() currentDevice: any = {};
@@ -172,20 +173,25 @@ export class RadioPageComponent implements OnInit {
         this.currentDevice = data;
 
         // Attempt to play most recently played track on am_radio
-        this.spotifyService.getRecentlyPlayedTrack().subscribe(data => {
+        this.playRecentTrack();
+      }
+    });
+  }
+
+  playRecentTrack(): void {
+    // Attempt to play most recently played track on am_radio
+    this.spotifyService.getRecentlyPlayedTrack().subscribe(data => {
+      if(data)
+      {
+        console.log("Found most recently played track");
+        console.log(data);
+        this.playerService.playTrack(data.uri).subscribe(data => {
           if(data)
           {
-            console.log("Found most recently played track");
-            console.log(data);
-            this.playerService.playTrack(data.uri).subscribe(data => {
-              if(data)
-              {
-                // We have successfully played the track in the browser, now we just have to update the UI
-                console.log("playing...");
-                this.isPlaying = true;
-                this.setPlayerData();
-              }
-            });
+            // We have successfully played the track in the browser, now we just have to update the UI
+            console.log("playing...");
+            this.isPlaying = true;
+            // this.setPlayerData();
           }
         });
       }
@@ -206,6 +212,13 @@ export class RadioPageComponent implements OnInit {
     this.setPlayerData();
   }
 
+  // Event callback for Spotify SDK script
+  onPositionChange(event: any): void {
+    console.log("position change event handler");
+    console.log(event);
+    // this.setPlayerData();
+  }
+
   // This will get the current player and set the data to the UI
   setPlayerData(): void {
     this.playerService.getPlayer().subscribe(data => {
@@ -220,11 +233,34 @@ export class RadioPageComponent implements OnInit {
     });
   }
 
-  // Called when the station number is changed
-  setStation(stationNum: number): void {
+  // This is called by the EventEmitter in the header component
+  changeStation(stationNum: number) {
+    console.log("in changeStation");
+    if(this.stationNum > 0 && this.isPlaying) {
+      // Leave the old station if not playing on 000
+      this.radioService.leaveStation(this.stationNum).subscribe();
+    }
+    this.stationNum = stationNum;
 
-    if(stationNum === 0)
-    {
+    // Pause the player to begin
+    if(this.isPlaying){
+      this.playerService.pause().subscribe(data => {
+        console.log(data);
+      });
+    }
+
+    // BeginAMRadio on station 000
+    if(stationNum === 0){
+      this.playRecentTrack();
+      return;
+    }
+
+    this.setStation(stationNum);
+  }
+
+  // Called by changeStation when the station number is changed
+  setStation(stationNum: number): void {
+    if(stationNum === 0) {
       return;
     }
 
@@ -234,7 +270,8 @@ export class RadioPageComponent implements OnInit {
       if(data){
         this.currentStation = data;
         // We should connect to the websocket here
-        this.wsAPI._connect(stationNum);
+        // this.wsAPI._connect(stationNum);
+        this.radioService.joinStation(stationNum).subscribe();
       }
       else
       {
@@ -271,27 +308,6 @@ export class RadioPageComponent implements OnInit {
     console.log("changePlaylist");
     console.log(playlist);
     this.selectedPlaylist = playlist;
-  }
-
-  // This is called by the EventEmitter in the header component
-  changeStation(stationNum: number)
-  {
-    this.stationNum = stationNum;
-
-    // Pause the player to begin
-    if(this.isPlaying){ 
-      this.playerService.pause().subscribe(data => {
-        console.log(data);
-      });
-    }
-
-    // BeginAMRadio on station 000
-    if(stationNum === 0){
-      this.beginAMRadio();
-      return;
-    }
-
-    this.setStation(stationNum);
   }
 
   async checkTokens(): Promise<boolean>

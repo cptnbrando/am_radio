@@ -30,7 +30,7 @@ public class WebSocketController {
     @SendTo("/topic/stations")
     public List<Station> getStations() {
         System.out.println("in WSController/getAllStations");
-        return stationService.getAllStations();
+        return stationService.getAllStationsList();
     }
 
     /**

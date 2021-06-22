@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { faPause, faPlay } from '@fortawesome/free-solid-svg-icons';
 import { SpotifyPlayerService } from '../../services/spotify-player.service';
 import { SpotifyService } from '../../services/spotify.service';
@@ -8,7 +8,7 @@ import { SpotifyService } from '../../services/spotify.service';
   templateUrl: './player.component.html',
   styleUrls: ['./player.component.scss']
 })
-export class PlayerComponent implements OnInit {
+export class PlayerComponent implements OnInit, OnChanges {
   faPlay = faPlay;
   faPause = faPause;
 
@@ -22,6 +22,7 @@ export class PlayerComponent implements OnInit {
   @Input() isPlaying: boolean = false;
   @Input() currentDevice: any = {};
   @Input() currentlyPlaying: any = {};
+  @Input() position: number = 0;
 
   @Output() toggleBarEvent = new EventEmitter<number>();
   @Output() isPlayingEvent = new EventEmitter<boolean>();
@@ -29,14 +30,15 @@ export class PlayerComponent implements OnInit {
   constructor(private spotifyService: SpotifyService, private playerService: SpotifyPlayerService) {
 
   }
+  
+  ngOnChanges(changes: SimpleChanges): void {
+    console.log(changes);
+  }
 
   ngOnInit(): void 
   {
     // First, set default values
     this.setDefaults();
-
-    // Next see if anything is playing and a device is active
-    // this.setPlayerData();
   }
 
   // Player values set when nothing is playing

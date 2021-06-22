@@ -35,36 +35,20 @@ window.onSpotifyWebPlaybackSDKReady = () => {
   // Soooo we edit DOM elements and watch for DOM changes with a dom-watcher directive
   // It's a hacky fix, but it works lol
   player.addListener('player_state_changed', ({
-    // position,
-    // duration,
-    track_window: { previous_tracks, current_track, next_tracks }
+    position,
+    duration,
+    track_window: { current_track }
   }) => {
     // Detects for playback changes
     player.getCurrentState().then(data => {
-      console.log("Current paused value:", (canvas.getAttribute("paused") === "true"));
-      console.log("Current data paused value:", data.paused);
-      if((canvas.getAttribute("paused") === "true") != data.paused)
-      {
-        console.log("Play/pause detected!");
-        console.log(data);
-        canvas.setAttribute("paused", data.paused);
-      }
+      canvas.setAttribute("current", current_track.uri);
+      canvas.setAttribute("position", position);
+      canvas.setAttribute("paused", data.paused);
+      canvas.setAttribute("duration", duration);
     });
 
-    // Detects for track changes
-    if(canvas.getAttribute("current") != current_track.uri)
-    {
-      console.log('Track change detected!', current_track);
-      canvas.setAttribute("current", current_track.uri);
-    }
-
-    // canvas.setAttribute("trackName", current_track.name);
-    // canvas.setAttribute("trackArtist", current_track.artists[0].name);
-    // canvas.setAttribute("trackAlbum", current_track.album.name);
-    // canvas.setAttribute("trackImage", current_track.album.images[0].url);
-
-    // console.log('Position in Song', position);
-    // console.log('Duration of Song', duration);
+    console.log('Position in Song', position);
+    console.log('Duration of Song', duration);
   });
 
   // Ready

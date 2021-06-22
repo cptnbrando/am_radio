@@ -38,6 +38,7 @@ public class StationService {
     private StationRepository stationRepo;
 
     // HashMap stationNumber:Station
+    // This will hold object fields that can't be stored in the db
     private HashMap<Integer, Station> allStations;
 
     private final SpotifyApi spotifyApi;
@@ -79,6 +80,8 @@ public class StationService {
             PlaylistTrack[] tracks = this.spotifyApi.getPlaylistsItems(playlist.getId()).build().execute().getItems();
             Station newStation = new Station(stationID, playlist, Arrays.asList(tracks));
 
+            System.out.println("Created newStation in stationService/createStation");
+
             this.stationRepo.save(newStation);
             this.allStations.put(stationID, newStation);
             return new ResponseMessage("Created");
@@ -106,7 +109,7 @@ public class StationService {
      */
     public Station getStation(int stationID, boolean... checkDB)
     {
-        if(checkDB[0]) {
+        if(checkDB.length == 1 && checkDB[0]) {
             try {
                 // Check if it exists in the db
                 // If so, return the HashMap value (so listeners and tracks also get returned)
@@ -132,7 +135,7 @@ public class StationService {
      *
      * @return List of Station objects
      */
-    public List<Station> getAllStations() {
+    public List<Station> getAllStationsList() {
         try {
             return new ArrayList<>(this.allStations.values());
         }
@@ -181,41 +184,32 @@ public class StationService {
     }
 
     /**
+     * Remove a Spotify User from the HashMap stations listeners list
+     *
+     * @param stationID id of Station
+     * @param user currently logged in Spotify User object
+     */
+    public void removeListener(int stationID, User user) {
+        try {
+            this.allStations.get(stationID).getListeners().remove(user.getId());
+        }
+        catch (NullPointerException e) {
+            System.out.println("NullPointer caught in StationService/removeListener");
+        }
+    }
+
+    /**
      * Starts a loop that continues while there are active listeners for a given Station
+     * Uses a RadioThread, which uses the Runnable class
      *
      * @param stationNum ID of the Station to start
      */
-    @Async
     public void start(int stationNum) {
-        Station station = this.getStation(stationNum, true);
-
-        // The Station is playing now
-        station.setPlaying(true);
-
-        // This saves it to db and HashMap
-        this.updateStation(station);
-
-        // Here we use a while loop to continue getting new songs as long as there are present listeners
-        // We want to wait until the current system time is past the playTime + currentTrack time
-        while(!station.getListeners().isEmpty())
-        {
-            // We don't have to check the DB every loop, just get it from the HashMap
-            station = this.getStation(stationNum);
-
-            // If the SystemTime is greater than the PlayTime + current track elapsed time, update the station
-            assert station.getCurrent() != null;
-            if(System.currentTimeMillis() >= (station.getPlayTime() + station.getCurrent().getDurationMs()))
-            {
-                this.updateStation(station);
-            }
-        }
-
-        // When the while loop exists, it means nobody is listening to the station, so stop the station
-        station.stop();
-
-        // Save the stopped Station to HashMap and db
-        this.allStations.put(station.getStationID(), station);
-        this.stationRepo.save(station);
+        RadioThread radio = new RadioThread(this);
+        radio.setStationNum(stationNum);
+        Thread worker = new Thread(radio);
+        worker.start();
+        System.out.println("Started radio #" + stationNum);
     }
 
     /**
@@ -224,7 +218,7 @@ public class StationService {
      *
      * @param station Station to update
      */
-    private void updateStation(Station station) {
+    public void updateStation(Station station) {
         station.update(this.spotifyApi);
 
         // Save to HashMap and db

@@ -20,5 +20,12 @@ export class RadioService {
     return this.httpCli.post<any>(`${this.serverURL}/${num}`, playlist);
   }
 
+  joinStation(num: number): Observable<any>{
+    return this.httpCli.get<any>(`${this.serverURL}/${num}/join`);
+  }
+
+  leaveStation(num: number): Observable<any>{
+    return this.httpCli.get<any>(`${this.serverURL}/${num}/leave`);
+  }
   
 }

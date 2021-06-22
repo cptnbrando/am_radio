@@ -7,19 +7,19 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.util.concurrent.Executor;
 
-@Configuration
-@EnableAsync
+//@Configuration
+//@EnableAsync
 public class AsyncConfiguration {
 
     // Max number of asynchronous operations, right now there can only be 999 radios simultaneously (001 - 999)
-    private final int POOL_SIZE = 999;
-    private final int QUEUE_CAPACITY = 300;
+    private final int POOL_SIZE = 5;
+    private final int QUEUE_CAPACITY = 5;
 
     /**
      * Thread Executor for all radio threads, so they can loop and change tracks asynchronously
      * @return Executor object
      */
-    @Bean(name = "radioExecutor")
+//    @Bean(name = "radioExecutor")
     public Executor radioExecutor() {
         final ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(this.POOL_SIZE);

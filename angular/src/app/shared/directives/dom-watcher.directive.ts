@@ -15,34 +15,42 @@ export class DomWatcherDirective implements OnInit {
     this.canvas = document.querySelector("canvas");
   }
   
+  // This gets called whenever the canvas element has it's attributes changed
+  // list is the array of all attributes
   registerDomChangedEvent(el) {
     const observer = new MutationObserver( list => {
-      // We only want it to trigger on playback changes, which won't happen at the same time
-      if(list.length === 1)
-      {
-        // console.log(`list`);
-        // console.log(list);
-        if(list[0].attributeName === "state")
+
+      list.forEach((mutation) => {
+        // This means the js file set the state of the visualizer and the spotify player is ready!
+        if(mutation.attributeName === "state")
         {
-          // This means the js file set the state of the visualizer and the radio player is ready!
-          el.dispatchEvent(new CustomEvent('ready', {detail: list, bubbles: true}));
+          el.dispatchEvent(new CustomEvent('ready', {detail: mutation, bubbles: true}));
         }
-        if(list[0].attributeName === "badState")
+        
+        // This means the js file set the badState, so the spotify player is not ready
+        else if(mutation.attributeName === "badState")
         {
-          // This means the js file set the badState, so the visualizer is not ready
-          el.dispatchEvent(new CustomEvent('notReady', {detail: list, bubbles: true}));
+          el.dispatchEvent(new CustomEvent('notReady', {detail: mutation, bubbles: true}));
         }
-        if(list[0].attributeName === "current")
+
+        // This means the track has changed
+        else if(mutation.attributeName === "current")
         {
-          // This means the player has detected a change in song
-          el.dispatchEvent(new CustomEvent('trackChange', {detail: list, bubbles: true}));
+          el.dispatchEvent(new CustomEvent('trackChange', {detail: mutation, bubbles: true}));
         }
-        if(list[0].attributeName === "paused")
+
+        // This means the track's position has changed, which will be called a fuck ton
+        else if(mutation.attributeName === "position")
         {
-          // This means the player has detected a playback change
-          el.dispatchEvent(new CustomEvent('playbackChange', {detail: list[0].target, bubbles: true}));
+          el.dispatchEvent(new CustomEvent('positionChange', {detail: mutation, bubbles: true}));
         }
-      }
+
+        // This means the player has detected a playback change
+        else if(mutation.attributeName === "paused")
+        {
+          el.dispatchEvent(new CustomEvent('playbackChange', {detail: mutation.target, bubbles: true}));
+        }
+      })
     });
     const attributes = true;
     const childList = true;

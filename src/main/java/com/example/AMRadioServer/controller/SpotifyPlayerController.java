@@ -8,6 +8,7 @@ import com.wrapper.spotify.model_objects.miscellaneous.CurrentlyPlaying;
 import com.wrapper.spotify.model_objects.miscellaneous.CurrentlyPlayingContext;
 import com.wrapper.spotify.model_objects.miscellaneous.Device;
 import com.wrapper.spotify.model_objects.specification.AudioFeatures;
+import com.wrapper.spotify.model_objects.specification.User;
 import org.apache.hc.core5.http.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -82,6 +83,23 @@ public class SpotifyPlayerController
     }
 
     /**
+     * Removes all items from the queue and queues up the given track
+     * TODO there's currently no way in the web api to clear a user's queue... arghhhh
+     *
+     * @param trackURI URI of track to queue
+     */
+    protected void playNext(String trackURI) {
+        try {
+            this.spotifyApi.addItemToUsersPlaybackQueue(trackURI).build().execute();
+        }
+        catch (IOException | SpotifyWebApiException | ParseException e)
+        {
+            System.out.println("Exception in player/playNext");
+            System.out.println(e.getMessage());
+        }
+    }
+
+    /**
      * Play the Player
      *
      * @return true if successful, false if not
@@ -144,6 +162,58 @@ public class SpotifyPlayerController
     }
 
     /**
+     * Transfers playback to the given device, if the given id is valid
+     * Returns the currently playing device, which should be am_radio
+     *
+     * @param deviceID id of valid available device
+     * @return the current device playing
+     */
+    @PutMapping(value = "/playOn")
+    public Device playOn(@RequestParam String deviceID)
+    {
+        //Create a JSONArray and add the ID
+        JsonArray deviceArray = new JsonArray();
+        deviceArray.add(deviceID);
+
+        try {
+            this.spotifyApi.transferUsersPlayback(deviceArray).build().execute();
+            return this.getCurrentDevice();
+        }
+        catch (IOException | SpotifyWebApiException | ParseException e)
+        {
+            System.out.println("Exception in player/playOn");
+            System.out.println(e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Goes through the list of devices and returns am_radio if it can be found
+     * Sets it to the active player, plays the track, and returns the device
+     *
+     * @return a spotify player device named am_radio
+     * TODO: if there's another am_radio instance connected, set it to that one and return a bad response
+     */
+    @GetMapping(value = "/getAMRadio")
+    public Device getAMRadio() {
+        System.out.println("/getAMRadio");
+        Device[] myDevices = this.getDevices();
+        System.out.println(myDevices);
+        if(myDevices != null)
+        {
+            for(Device device: myDevices)
+            {
+                if(device.getName().equals("am_radio"))
+                {
+                    return this.playOn(device.getId());
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Give this a time in milliseconds and it will seek the current device to that time!
      *
      * @param time ms time
@@ -177,6 +247,26 @@ public class SpotifyPlayerController
         catch (IOException | SpotifyWebApiException | ParseException e)
         {
             System.out.println("Exception caught in player/shuffle");
+            System.out.println(e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Toggle repeat mode for the player
+     *
+     * @param repeat track (track repeat), context (album, playlist repeat), or off
+     * @return true if successful, false if not
+     */
+    @PutMapping(value = "/repeat")
+    public boolean repeat(@RequestParam String repeat) {
+        try {
+            this.spotifyApi.setRepeatModeOnUsersPlayback(repeat).build().execute();
+            return true;
+        }
+        catch (IOException | SpotifyWebApiException | ParseException e)
+        {
+            System.out.println("Exception caught in player/repeat");
             System.out.println(e.getMessage());
             return false;
         }
@@ -250,54 +340,21 @@ public class SpotifyPlayerController
     }
 
     /**
-     * Goes through the list of devices and returns am_radio if it can be found
-     * Sets it to the active player, plays the track, and returns the device
+     * Get the logged in user
      *
-     * @return a spotify player device named am_radio
-     * TODO: if there's another am_radio instance connected, set it to that one and return a bad response
+     * @return the logged in User
      */
-    @GetMapping(value = "/getAMRadio")
-    public Device getAMRadio() {
-        Device[] myDevices = this.getDevices();
-        if(myDevices != null)
-        {
-            for(Device device: myDevices)
-            {
-                if(device.getName().equals("am_radio"))
-                {
-                    return this.playOn(device.getId());
-                }
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Transfers playback to the given device, if the given id is valid
-     * Returns the currently playing device, which should be am_radio
-     *
-     * @param deviceID id of valid available device
-     * @return the current device playing
-     */
-    @PutMapping(value = "/playOn")
-    public Device playOn(@RequestParam String deviceID)
-    {
-        //Create a JSONArray and add the ID
-        JsonArray deviceArray = new JsonArray();
-        deviceArray.add(deviceID);
-
+    protected User getUser() {
         try {
-            this.spotifyApi.transferUsersPlayback(deviceArray).build().execute();
-            return this.getCurrentDevice();
+            return this.spotifyApi.getCurrentUsersProfile().build().execute();
         }
-        catch (IOException | SpotifyWebApiException | ParseException e)
-        {
-            System.out.println("Exception in player/playOn");
+        catch (IOException | SpotifyWebApiException | ParseException e) {
+            System.out.println("Exception caught in player/getUser");
             System.out.println(e.getMessage());
             return null;
         }
     }
+
 
     /**
      * Change the volume of the spotify player

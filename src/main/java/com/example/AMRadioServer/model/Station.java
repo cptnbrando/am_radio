@@ -217,12 +217,15 @@ public class Station
             }
         }
 
-        // If both fields are null, set next to a random track
+        // If next is null, set it to a random unplayed track
         if(this.getNext() == null)
         {
             // Set a random next track and remove it from the list to avoid repeated tracks
             int rnd = new Random().nextInt(this.getTracks().size());
-            this.setNext(this.getTracks().remove(rnd).getTrack());
+            ArrayList<PlaylistTrack> allTracks = new ArrayList<>(this.getTracks());
+            PlaylistTrack nextTrack = allTracks.remove(rnd);
+            this.setNext(nextTrack.getTrack());
+            this.setTracks(allTracks);
         }
 
         // Current to next
