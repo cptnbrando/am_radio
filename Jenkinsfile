@@ -9,10 +9,10 @@ pipeline {
             }
         }
 
-        stage('build') {
+        stage('build-gradle') {
             steps {
                 script {
-                    sh './gradlew clean build'
+                    sh 'sudo ./gradlew clean build'
                 }
             }
         }

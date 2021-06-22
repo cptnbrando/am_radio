@@ -38,3 +38,6 @@ out/
 
 ### H2Database ###
 h2Database/
+
+### Added Stuff ###
+gradle.properties
