@@ -13,11 +13,6 @@ export class SpotifyService {
 
   constructor(private httpCli:HttpClient) { }
 
-  // // USE THIS SO DEPLOYING WON't BE SO AWFUL
-  // get webURL() {
-  //   return "http://localhost:4200";
-  // }
-
   getSession(): Observable<any>{
     return this.httpCli.get<any>(this.serverURL + `/getSession`);
   }

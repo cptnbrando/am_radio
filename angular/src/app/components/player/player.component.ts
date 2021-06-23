@@ -19,6 +19,7 @@ export class PlayerComponent implements OnInit, OnChanges {
   @Input() showStationBar: boolean = false;
 
   // Spotify data
+  @Input() user: any = {};
   @Input() isPlaying: boolean = false;
   @Input() currentDevice: any = {};
   @Input() currentlyPlaying: any = {};

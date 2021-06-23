@@ -20,7 +20,7 @@ export class RadioPageComponent implements OnInit {
   wsAPI: WebSocketAPI;
 
   // This will hold a spotify uri for the logged in user
-  @Input() user: any = {};
+  @Output() user: any = {};
 
   // This will hold the selected playlist
   @Output() selectedPlaylist: any = null;
@@ -75,54 +75,49 @@ export class RadioPageComponent implements OnInit {
     // Also set the UserPlaylists
     this.setPlaylists();
 
-    // // Also set userDevices
-    // this.setDevices();
-
-    // // Also set currentDevice
-    // this.getCurrentDevice();
-
     this.canvas = document.querySelector("canvas");
   }
 
   // Get the user's playlists and set them to the userPlaylists variable
-  setPlaylists(): any {
+  setPlaylists(): void {
     this.spotifyService.getUserPlaylists().subscribe(data => {
       if(data) this.userPlaylists = data;
-      return data;
     });
   }
 
   // Get the user and set them to the user variable
-  setUser(): any {
+  setUser(): void {
     this.spotifyService.getUser().subscribe(data => {
-      if(data) this.user = data;
-      return data;
+      if(data) {
+        this.user = data;
+        console.log("setUser:");
+        console.log(data);
+      } 
+        
     });
   }
 
-  // Get the user's devices and set them to the userDevices variable
-  setDevices(): any {
+  // Get the user's devices and set them to the devices variable
+  setDevices(): void {
     this.spotifyService.getDevices().subscribe(data => {
       if(data) this.devices = data;
-      return data;
     });
   }
 
   // Set the user's current device to a different one
-  setCurrentDevice(deviceID: string): any {
+  playOnDevice(deviceID: string): void {
     this.playerService.playOn(deviceID).subscribe(data => {
       if(data) this.currentDevice = data;
-      return data;
     });
   }
 
   // Get the user's current device and set it to the currentDevice variable
-  getCurrentDevice(): any {
+  getCurrentDevice(): void {
     this.playerService.getCurrentDevice().subscribe(data => {
-      if(data) this.currentDevice = data;
-      console.log(data);
-      this.isPlaying = this.currentDevice.is_playing;
-      return data;
+      if(data) {
+        this.currentDevice = data;
+        this.isPlaying = this.currentDevice.is_playing;
+      }
     });
   }
 
@@ -158,17 +153,12 @@ export class RadioPageComponent implements OnInit {
   }
 
   beginAMRadio(): void {
-    console.log("beginAMRadio()");
-
     // So that the station bar doesn't tweak from missing fields
     this.currentStation = new Station();
 
     // Get am_radio (This server endpoint find am_radio and sets it as the active device in the Spotify API)
     this.playerService.getAMRadio().subscribe(data => {
-      if(data)
-      {
-        console.log("Found am_radio");
-        console.log(data);
+      if(data) {
         // If found, set it as the active player in the front end aka this component
         this.currentDevice = data;
 
