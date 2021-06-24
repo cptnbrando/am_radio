@@ -1,4 +1,9 @@
 FROM openjdk:11
-ADD build/app/AMRadioServer.jar	AMRadioServer.jar
+LABEL maintainer="bdcruz128@gmail.com"
+
+RUN mkdir /home/app
+VOLUME ["/home/app"]
+WORKDIR /home/app
+
 EXPOSE 9015
-ENTRYPOINT ["java", "-jar", "AMRadioServer.jar"]
+ENTRYPOINT java -jar *.jar

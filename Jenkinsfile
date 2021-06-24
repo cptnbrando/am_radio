@@ -6,6 +6,8 @@ pipeline {
         stage('build-gradle') {
             steps {
                 script {
+                    // Because we are on an extremely laggy filesystem
+                    System.setProperty("org.jenkinsci.plugins.durabletask.BourneShellScript.HEARTBEAT_CHECK_INTERVAL", "3800");
 //                     sh './gradlew clean build'
                     echo 'Build gradle...'
                 }
@@ -14,22 +16,28 @@ pipeline {
 
         stage("build-image") {
             steps {
+                script {
 //                 sh 'docker build . -t am_radio:latest'
-                echo 'Build docker image...'
+                    echo 'Build docker image...'
+                }
             }
         }
 
         stage("push-image") {
             steps {
-//                 sh 'docker push am_radio'
-                echo 'Push docker image...'
+                script {
+//                     sh 'docker push am_radio'
+                    echo 'Push docker image...'
+                }
             }
         }
 
         stage("deploy-image") {
             steps {
-//                 sh 'kubectl rollout restart am_radio --namespace=am_radio'
-                echo 'Deploy docker image...'
+                script {
+//                     sh 'kubectl rollout restart am_radio --namespace=am_radio'
+                    echo 'Deploy docker image...'
+                }
             }
          }
     }
