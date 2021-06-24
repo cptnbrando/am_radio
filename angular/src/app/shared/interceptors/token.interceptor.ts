@@ -17,8 +17,6 @@ export class TokenInterceptor implements HttpInterceptor
       },
       withCredentials: true
     });
-
-    console.log(`Intercepted at ${request.url}`);
     
     return next.handle(request);
   }

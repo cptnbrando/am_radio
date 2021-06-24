@@ -70,6 +70,19 @@ public class StationController extends SpotifyPlayerController {
 
             // wait a few seconds for the current and next fields to get populated
             Thread.sleep(5000);
+
+            // There's no clear queue, or any queue endpoints from Spotify,
+            // sooooo we are skipping through until the next track is the station one
+            // god I hope they make an endpoint soon...
+            //
+            // nvm we gotta do it on the frontend because
+            // THERE ISN'T ANYWAY TO GET THE NEXT UPCOMING TRACK AT ALL????
+            // like we can only ADD TO THE QUEUE???
+            // but if there's other items in the queue it will just
+            // add it after all of them????
+            //
+            // i literally can't rn smh
+
             // then play the current track and queue up the next one
             super.playTrack(station.getCurrentURI());
             super.playNext(station.getNextURI());

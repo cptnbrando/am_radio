@@ -8,7 +8,7 @@ import { AppComponent } from '../app.component';
 })
 export class SpotifyService {
 
-  private serverURL = `${AppComponent.serverRoot}/spotify`;
+  private serverURL = `${AppComponent.serverRoot}/api/spotify`;
   private webURL = `${AppComponent.webURL}`;
 
   constructor(private httpCli:HttpClient) { }

@@ -7,8 +7,12 @@
     <app-station-bar class="side setting" [stationNum]="stationNum" [showStationBar]="showStationBar" [currentStation]="currentStation" [selectedPlaylist]="selectedPlaylist" (createdStation)="createdStation()"></app-station-bar>
   </div>
 
-  <app-player id="appPlayer" [stationNum]="stationNum" [currentDevice]="currentDevice" [showPlaylistBar]="showPlaylistBar" [showStationBar]="showStationBar" (toggleBarEvent)="toggleBar($event)" [currentlyPlaying]="currentlyPlaying" [isPlaying]="isPlaying" [position]="position" [user]="user"></app-player>
+  <app-player id="appPlayer" [stationNum]="stationNum" [currentDevice]="currentDevice"
+    [showPlaylistBar]="showPlaylistBar" [showStationBar]="showStationBar" (toggleBarEvent)="toggleBar($event)"
+    [currentlyPlaying]="currentlyPlaying" [isPlaying]="isPlaying" [position]="position" [user]="user"
+    [currentStation]="currentStation"></app-player>
   
 </div>
 
-<app-visualizer id="visualizer" appDomWatcher (ready)="onPlayerReady($event)" (trackChange)="onTrackChange($event)" (playbackChange)="onPlaybackChange($event)"></app-visualizer>
+<app-visualizer id="visualizer" appDomWatcher (ready)="onPlayerReady($event)" (currentChange)="onCurrentChange($event)"
+  (playbackChange)="onPlaybackChange($event)" (positionChange)="onPositionChange($event)" (nextChange)="onNextChange($event)"></app-visualizer>

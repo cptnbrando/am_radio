@@ -6,6 +6,8 @@ import com.wrapper.spotify.model_objects.specification.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,16 +16,16 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Collection;
 import java.util.List;
 
-@RestController
-@CrossOrigin(originPatterns = "*", allowCredentials = "true")
-@RequestMapping
+@Controller
 public class WebSocketController {
 
     private final StationService stationService;
+    private final SimpMessagingTemplate template;
 
     @Autowired
-    public WebSocketController(StationService stationService) {
+    public WebSocketController(StationService stationService, SimpMessagingTemplate template) {
         this.stationService = stationService;
+        this.template = template;
     }
 
     @MessageMapping("/radio")
@@ -31,6 +33,12 @@ public class WebSocketController {
     public List<Station> getStations() {
         System.out.println("in WSController/getAllStations");
         return stationService.getAllStationsList();
+    }
+
+    @MessageMapping("/send/message")
+    public void sendMessage(String message) {
+        System.out.println(message);
+        this.template.convertAndSend("/message", message);
     }
 
     /**

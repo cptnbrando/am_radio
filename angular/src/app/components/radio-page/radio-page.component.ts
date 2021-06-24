@@ -1,9 +1,10 @@
-import { Component, Input, OnInit, Output } from '@angular/core';
+import { Component, HostListener, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { faSpotify } from '@fortawesome/free-brands-svg-icons';
 import { WebSocketAPI } from 'src/app/api/WebSocketAPI';
 import { AppComponent } from 'src/app/app.component';
 import { RadioService } from 'src/app/services/radio.service';
 import { Station } from 'src/app/shared/models/station.model';
+import { SocketService } from 'src/app/socket.service';
 import { ScriptService } from '../../services/script.service';
 import { SpotifyPlayerService } from '../../services/spotify-player.service'
 import { SpotifyService } from '../../services/spotify.service';
@@ -13,7 +14,7 @@ import { SpotifyService } from '../../services/spotify.service';
   templateUrl: './radio-page.component.html',
   styleUrls: ['./radio-page.component.scss']
 })
-export class RadioPageComponent implements OnInit {
+export class RadioPageComponent implements OnInit, OnChanges {
 
   faSpotify = faSpotify;
 
@@ -30,12 +31,13 @@ export class RadioPageComponent implements OnInit {
 
   // What station the user is on, begins on 0
   @Output() stationNum: number = 0;
-  @Output() currentStation: Station = null;
+  @Output() currentStation: any = {};
 
-  // Current track information
+  // Spotify track information
   @Output() currentlyPlaying: any = {};
   @Output() isPlaying: boolean = false;
   @Output() position: number = 0;
+  next: any = "";
 
   // The device currently playing
   @Output() currentDevice: any = {};
@@ -66,6 +68,9 @@ export class RadioPageComponent implements OnInit {
     }
 
     this.wsAPI = new WebSocketAPI(this);
+  }
+  ngOnChanges(changes: SimpleChanges): void {
+    throw new Error('Method not implemented.');
   }
 
   ngOnInit() {
@@ -171,17 +176,12 @@ export class RadioPageComponent implements OnInit {
   playRecentTrack(): void {
     // Attempt to play most recently played track on am_radio
     this.spotifyService.getRecentlyPlayedTrack().subscribe(data => {
-      if(data)
-      {
-        console.log("Found most recently played track");
-        console.log(data);
+      if(data) {
         this.playerService.playTrack(data.uri).subscribe(data => {
-          if(data)
-          {
+          if(data) {
             // We have successfully played the track in the browser, now we just have to update the UI
-            console.log("playing...");
+            console.log("playing recent track...");
             this.isPlaying = true;
-            // this.setPlayerData();
           }
         });
       }
@@ -191,13 +191,11 @@ export class RadioPageComponent implements OnInit {
   // Event callback for Spotify SDK script
   onPlaybackChange(event: any): void {
     console.log("playback change event handler");
-    console.log(event);
-
     this.isPlaying = !(this.canvas.getAttribute("paused") === "true");
   }
 
   // Event callback for Spotify SDK script
-  onTrackChange(event: any): void {
+  onCurrentChange(event: any): void {
     console.log("track change event handler");
     this.setPlayerData();
   }
@@ -207,6 +205,13 @@ export class RadioPageComponent implements OnInit {
     console.log("position change event handler");
     console.log(event);
     // this.setPlayerData();
+  }
+
+  // Event callback for next_track Spotify SDK script
+  onNextChange(event: any): void {
+    console.log("next change event handler");
+    console.log(event.detail.attributes.next);
+    this.next = event.detail.attributes.next;
   }
 
   // This will get the current player and set the data to the UI
@@ -226,7 +231,7 @@ export class RadioPageComponent implements OnInit {
   // This is called by the EventEmitter in the header component
   changeStation(stationNum: number) {
     console.log("in changeStation");
-    if(this.stationNum > 0 && this.isPlaying) {
+    if(this.stationNum > 0) {
       // Leave the old station if not playing on 000
       this.radioService.leaveStation(this.stationNum).subscribe();
     }
@@ -234,18 +239,17 @@ export class RadioPageComponent implements OnInit {
 
     // Pause the player to begin
     if(this.isPlaying){
-      this.playerService.pause().subscribe(data => {
-        console.log(data);
-      });
+      this.playerService.pause().subscribe();
     }
 
-    // BeginAMRadio on station 000
+    // BeginAMRadio on station 000, otherwise join/start the station
     if(stationNum === 0){
       this.playRecentTrack();
       return;
     }
-
-    this.setStation(stationNum);
+    else {
+      this.setStation(stationNum);
+    }
   }
 
   // Called by changeStation when the station number is changed
@@ -257,14 +261,17 @@ export class RadioPageComponent implements OnInit {
     // Get station at given number
     this.radioService.getStation(stationNum).subscribe(data => {
       // This route checks if it exists first, if not it returns back null
-      if(data){
+      if(data) {
         this.currentStation = data;
         // We should connect to the websocket here
         // this.wsAPI._connect(stationNum);
-        this.radioService.joinStation(stationNum).subscribe();
+        this.radioService.joinStation(stationNum).subscribe(() => {
+          // now we check if the queue is right
+          // if not, we keep skipping until the station is lined up
+          
+        });
       }
-      else
-      {
+      else {
         this.currentStation = new Station(stationNum);
         if(!this.showPlaylistBar) this.toggleBar(0);
         if(!this.showStationBar) this.toggleBar(1);
@@ -276,11 +283,9 @@ export class RadioPageComponent implements OnInit {
     this.setStation(this.stationNum);
   }
 
-  toggleBar(bar: number): void
-  {
+  toggleBar(bar: number): void {
     // Playlist bar = 0, Station bar = 1, Controls panel = 2
-    switch(bar)
-    {
+    switch(bar) {
       case 0:
         this.showPlaylistBar = !this.showPlaylistBar;
         break;
@@ -293,25 +298,20 @@ export class RadioPageComponent implements OnInit {
     }
   }
 
-  changePlaylist(playlist: any)
-  {
+  changePlaylist(playlist: any) {
     console.log("changePlaylist");
     console.log(playlist);
     this.selectedPlaylist = playlist;
   }
 
-  async checkTokens(): Promise<boolean>
-  {
-    await this.spotifyService.checkTokens().subscribe(data => 
-    {
-      if(data == null)
-      {
+  async checkTokens(): Promise<boolean> {
+    await this.spotifyService.checkTokens().subscribe(data => {
+      if(data == null) {
         // No access token, so we go away!
         window.location.replace(AppComponent.webURL);
         return false;
       }
-      else
-      {
+      else {
         // We have to set it to local storage so the playback sdk js script can get it
         localStorage.setItem("accessToken", data.message);
 
@@ -342,6 +342,19 @@ export class RadioPageComponent implements OnInit {
 
   handleListener(listeners: any): void {
 
+  }
+
+  @HostListener('window:unload', [ '$event' ])
+  unloadHandler(event) {
+    console.log("window unload buh bye");
+  }
+
+  @HostListener('window:beforeunload', [ '$event' ])
+  beforeUnloadHandler(event) {
+    console.log("window before unload");
+    if(this.stationNum > 0) {
+      this.radioService.leaveStation(this.stationNum).subscribe();
+    }
   }
 
 }

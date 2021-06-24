@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { faPause, faPlay } from '@fortawesome/free-solid-svg-icons';
+import { Station } from 'src/app/shared/models/station.model';
 import { SpotifyPlayerService } from '../../services/spotify-player.service';
 import { SpotifyService } from '../../services/spotify.service';
 
@@ -13,6 +14,7 @@ export class PlayerComponent implements OnInit, OnChanges {
   faPause = faPause;
 
   @Input() stationNum: number = 0;
+  @Input() currentStation: any = {};
 
   // Setting bars
   @Input() showPlaylistBar: boolean = false;
@@ -33,7 +35,7 @@ export class PlayerComponent implements OnInit, OnChanges {
   }
   
   ngOnChanges(changes: SimpleChanges): void {
-    console.log(changes);
+    
   }
 
   ngOnInit(): void 
@@ -45,6 +47,7 @@ export class PlayerComponent implements OnInit, OnChanges {
   // Player values set when nothing is playing
   setDefaults(): void {
     this.currentDevice.name = "No Current Device!";
+    this.currentStation.stationName = "No Station!";
     
     this.currentlyPlaying.album = {};
     this.currentlyPlaying.album.images = [5];

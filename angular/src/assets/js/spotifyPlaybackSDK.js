@@ -35,20 +35,16 @@ window.onSpotifyWebPlaybackSDKReady = () => {
   // Soooo we edit DOM elements and watch for DOM changes with a dom-watcher directive
   // It's a hacky fix, but it works lol
   player.addListener('player_state_changed', ({
-    position,
     duration,
-    track_window: { current_track }
+    track_window: { current_track, next_tracks }
   }) => {
     // Detects for playback changes
     player.getCurrentState().then(data => {
       canvas.setAttribute("current", current_track.uri);
-      canvas.setAttribute("position", position);
       canvas.setAttribute("paused", data.paused);
       canvas.setAttribute("duration", duration);
+      canvas.setAttribute("next", next_tracks[0].uri);
     });
-
-    console.log('Position in Song', position);
-    console.log('Duration of Song', duration);
   });
 
   // Ready

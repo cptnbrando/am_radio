@@ -18,6 +18,7 @@ import { LandingPageComponent } from './components/landing-page/landing-page.com
 import { RadioPageComponent } from './components/radio-page/radio-page.component';
 import { AppRoutingModule } from './app-routing.module';
 import { DomWatcherDirective } from './shared/directives/dom-watcher.directive';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -37,7 +38,8 @@ import { DomWatcherDirective } from './shared/directives/dom-watcher.directive';
     FontAwesomeModule,
     HttpClientModule,
     RouterModule,
-    AppRoutingModule
+    AppRoutingModule,
+    FormsModule
   ],
   providers: [
     {

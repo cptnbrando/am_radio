@@ -8,7 +8,7 @@ import { AppComponent } from '../app.component';
 })
 export class RadioService {
 
-  private serverURL = `${AppComponent.serverRoot}/station`;
+  private serverURL = `${AppComponent.serverRoot}/api/station`;
 
   constructor(private httpCli:HttpClient) { }
 
