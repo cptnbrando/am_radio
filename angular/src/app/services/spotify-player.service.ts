@@ -36,16 +36,36 @@ export class SpotifyPlayerService {
     return this.httpCli.get<any>(this.serverURL + `/getAudioAnalysis?trackID=${trackID}`);
   }
 
+  startAMRadio(): Observable<any>{
+    return this.httpCli.get<any>(this.serverURL + `/startAMRadio`);
+  }
+
   playTrack(uri: string): Observable<any>{
     let params = new HttpParams();
     params = params.append("trackURI", uri);
-    console.log(this.serverURL + `/playTrack?trackURI=${uri}`);
     return this.httpCli.put<any>(this.serverURL + `/playTrack`, uri, {params: params});
+  }
+
+  playPlaylist(contextURI: string): Observable<any> {
+    let params = new HttpParams();
+    params = params.append("contextURI", contextURI);
+    return this.httpCli.put<any>(this.serverURL + `/playPlaylist`, contextURI, {params: params});
+  }
+
+  addToQueue(uri: string): Observable<any> {
+    let params = new HttpParams();
+    params = params.append("trackURI", uri);
+    return this.httpCli.put<any>(this.serverURL + `/addToQueue`, uri, {params: params});
   }
 
   next(): Observable<any>{
     // The api doesn't need any body data... I don't think...?
     return this.httpCli.post<any>(`${this.serverURL}/next`, "yeet");
+  }
+
+  previous(): Observable<any> {
+    // The api doesn't need any body data... I don't think...?
+    return this.httpCli.post<any>(`${this.serverURL}/previous`, "yeet");
   }
 
   play(): Observable<any>{
@@ -62,6 +82,10 @@ export class SpotifyPlayerService {
 
   shuffle(activate: boolean): Observable<any>{
     return this.httpCli.put<any>(`${this.serverURL}/shuffle?activate=${activate}`, activate);
+  }
+
+  repeat(type: string): Observable<any> {
+    return this.httpCli.put<any>(`${this.serverURL}/repeat?type=${type}`, type);
   }
 
   playOn(deviceID: string): Observable<any>{

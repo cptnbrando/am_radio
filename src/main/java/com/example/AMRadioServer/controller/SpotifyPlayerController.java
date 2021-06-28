@@ -8,12 +8,15 @@ import com.wrapper.spotify.model_objects.miscellaneous.CurrentlyPlaying;
 import com.wrapper.spotify.model_objects.miscellaneous.CurrentlyPlayingContext;
 import com.wrapper.spotify.model_objects.miscellaneous.Device;
 import com.wrapper.spotify.model_objects.specification.AudioFeatures;
+import com.wrapper.spotify.model_objects.specification.PlaylistSimplified;
+import com.wrapper.spotify.model_objects.specification.PlaylistTrack;
 import com.wrapper.spotify.model_objects.specification.User;
 import org.apache.hc.core5.http.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.Random;
 
 @RestController
 @CrossOrigin(originPatterns = "*", allowCredentials = "true")
@@ -83,18 +86,57 @@ public class SpotifyPlayerController
     }
 
     /**
+     * Set playback to last played track
+     *
+     * @return true if successful, false if not
+     */
+    @PostMapping(value = "/previous")
+    public boolean previous() {
+        try {
+            this.spotifyApi.skipUsersPlaybackToPreviousTrack().build().execute();
+            return true;
+        }
+        catch (IOException | SpotifyWebApiException | ParseException e)
+        {
+            System.out.println("Exception in player/previous");
+            System.out.println(e.getMessage());
+            return false;
+        }
+    }
+
+
+    /**
      * Removes all items from the queue and queues up the given track
-     * TODO there's currently no way in the web api to clear a user's queue... arghhhh
      *
      * @param trackURI URI of track to queue
      */
-    protected void playNext(String trackURI) {
+    @PutMapping(value = "/addToQueue")
+    public void addToQueue(@RequestParam(name = "trackURI") String trackURI) {
+        System.out.println("in addToQueue");
+        System.out.println(trackURI);
         try {
             this.spotifyApi.addItemToUsersPlaybackQueue(trackURI).build().execute();
         }
         catch (IOException | SpotifyWebApiException | ParseException e)
         {
-            System.out.println("Exception in player/playNext");
+            System.out.println("Exception in player/addToQueue");
+            System.out.println(e.getMessage());
+        }
+    }
+
+    /**
+     * Takes a Playlist URI and plays it on Spotify
+     *
+     * @param contextURI URI of playlist
+     */
+    @PutMapping(value = "/playPlaylist")
+    public void playPlaylist(@RequestParam(name = "contextURI") String contextURI) {
+        try {
+            this.spotifyApi.startResumeUsersPlayback().context_uri(contextURI).build().execute();
+        }
+        catch (IOException | SpotifyWebApiException | ParseException e)
+        {
+            System.out.println("Exception in player/playPlaylist");
             System.out.println(e.getMessage());
         }
     }
@@ -213,6 +255,29 @@ public class SpotifyPlayerController
         return null;
     }
 
+    @GetMapping(value = "/startAMRadio")
+    public void startAMRadio() {
+        try {
+            // Playback's already on am_radio, so we want to shuffle and repeat on a random recent playlist
+            // and skip to the next track
+            PlaylistSimplified[] lists = this.spotifyApi.getListOfCurrentUsersPlaylists().limit(10).build().execute().getItems();
+
+            // toggle shuffle
+            this.spotifyApi.toggleShuffleForUsersPlayback(true).build().execute();
+            // toggle context repeat
+            this.spotifyApi.setRepeatModeOnUsersPlayback("context").build().execute();
+
+            // Get a random playlist and play it
+            Random rand = new Random();
+            this.playPlaylist(lists[rand.nextInt((lists.length))].getUri());
+        }
+        catch (IOException | SpotifyWebApiException | ParseException e)
+        {
+            System.out.println("Exception caught in player/seek");
+            System.out.println(e.getMessage());
+        }
+    }
+
     /**
      * Give this a time in milliseconds and it will seek the current device to that time!
      *
@@ -255,13 +320,13 @@ public class SpotifyPlayerController
     /**
      * Toggle repeat mode for the player
      *
-     * @param repeat track (track repeat), context (album, playlist repeat), or off
+     * @param type 0 off, 1 context (album, playlist repeat), or 2 track (track repeat)
      * @return true if successful, false if not
      */
     @PutMapping(value = "/repeat")
-    public boolean repeat(@RequestParam String repeat) {
+    public boolean repeat(@RequestParam String type) {
         try {
-            this.spotifyApi.setRepeatModeOnUsersPlayback(repeat).build().execute();
+            this.spotifyApi.setRepeatModeOnUsersPlayback(type).build().execute();
             return true;
         }
         catch (IOException | SpotifyWebApiException | ParseException e)

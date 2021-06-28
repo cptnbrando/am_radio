@@ -10,9 +10,9 @@
   <app-player id="appPlayer" [stationNum]="stationNum" [currentDevice]="currentDevice"
     [showPlaylistBar]="showPlaylistBar" [showStationBar]="showStationBar" (toggleBarEvent)="toggleBar($event)"
     [currentlyPlaying]="currentlyPlaying" [isPlaying]="isPlaying" [position]="position" [user]="user"
-    [currentStation]="currentStation"></app-player>
+    [currentStation]="currentStation" [repeat]="repeat" [shuffle]="shuffle"></app-player>
   
 </div>
 
 <app-visualizer id="visualizer" appDomWatcher (ready)="onPlayerReady($event)" (currentChange)="onCurrentChange($event)"
-  (playbackChange)="onPlaybackChange($event)" (positionChange)="onPositionChange($event)" (nextChange)="onNextChange($event)"></app-visualizer>
+  (playbackChange)="onPlaybackChange($event)" (positionChange)="onPositionChange($event)" (nextChange)="onNextChange($event)" (shuffleChange)="onShuffleChange($event)" (repeatChange)="onRepeatChange($event)"></app-visualizer>

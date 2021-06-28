@@ -85,14 +85,14 @@ public class StationController extends SpotifyPlayerController {
 
             // then play the current track and queue up the next one
             super.playTrack(station.getCurrentURI());
-            super.playNext(station.getNextURI());
+            super.addToQueue(station.getNextURI());
         }
 
         // if the station IS playing, we play the current track and seek it to the right time
         // System.currentTime - station.getPlayTime
         super.playTrack(station.getCurrentURI());
         super.seek((int) (System.currentTimeMillis() - station.getPlayTime()));
-        super.playNext(station.getNextURI());
+        super.addToQueue(station.getNextURI());
     }
 
     /**

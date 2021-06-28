@@ -168,6 +168,24 @@ public class SpotifyController {
     }
 
     /**
+     * Get the last 50 recently played tracks
+     *
+     * @return TrackSimplified object of the most recently played track
+     * (Spotify doesn't like returning actual Track objects, but a TrackSimplified has pretty much everything)
+     */
+    @GetMapping(value = "/getRecentlyPlayedTracks")
+    public PlayHistory[] getRecentlyPlayedTracks() {
+        try {
+            return spotifyApi.getCurrentUsersRecentlyPlayedTracks().build().execute().getItems();
+        }
+        catch (IOException | SpotifyWebApiException | ParseException e) {
+            System.out.println("Exception caught in getRecentlyPlayed()");
+            System.out.println(e.getMessage());
+            return null;
+        }
+    }
+
+    /**
      * Attempts to access user data and if rejected, refreshes the tokens and returns new ones
      *
      * @return a valid access token

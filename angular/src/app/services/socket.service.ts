@@ -1,8 +1,7 @@
+import * as SockJS from 'sockjs-client';
+import * as Stomp from 'stompjs';
 import { Injectable } from '@angular/core';
-import { AppComponent } from './app.component';
-
-declare var SockJS;
-declare var Stomp;
+import { AppComponent } from '../app.component';
 
 @Injectable({
   providedIn: 'root'
@@ -25,14 +24,12 @@ export class SocketService {
       that.stompClient.subscribe('/message', (message) => {
         if(message.body) {
           that.msg.push(message.body);
-          console.log("Message recieved: " + message.body);
         }
       });
     });
   }
 
   sendMessage(message) {
-    console.log("socket service sendMessage() with: " + message);
     this.stompClient.send('/app/send/message', {}, message);
   }
 

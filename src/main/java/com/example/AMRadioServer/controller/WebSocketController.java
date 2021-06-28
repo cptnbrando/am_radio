@@ -28,16 +28,22 @@ public class WebSocketController {
         this.template = template;
     }
 
-    @MessageMapping("/radio")
-    @SendTo("/topic/stations")
-    public List<Station> getStations() {
-        System.out.println("in WSController/getAllStations");
-        return stationService.getAllStationsList();
-    }
+//    @MessageMapping("/radio")
+//    @SendTo("/topic/stations")
+//    public List<Station> getStations() {
+//        System.out.println("in WSController/getAllStations");
+//        return stationService.getAllStationsList();
+//    }
 
+    /**
+     * Sends a message
+     * Updates the SimpMessagingTemplate object, which gets updated for those
+     * subscribed to server/socket/message
+     *
+     * @param message text message to send
+     */
     @MessageMapping("/send/message")
     public void sendMessage(String message) {
-        System.out.println(message);
         this.template.convertAndSend("/message", message);
     }
 

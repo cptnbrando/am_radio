@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
-import { faPause, faPlay } from '@fortawesome/free-solid-svg-icons';
+import { faAngleLeft, faAngleRight, faPause, faPlay, faRandom, faRecycle, faSync } from '@fortawesome/free-solid-svg-icons';
 import { Station } from 'src/app/shared/models/station.model';
 import { SpotifyPlayerService } from '../../services/spotify-player.service';
 import { SpotifyService } from '../../services/spotify.service';
@@ -10,8 +10,14 @@ import { SpotifyService } from '../../services/spotify.service';
   styleUrls: ['./player.component.scss']
 })
 export class PlayerComponent implements OnInit, OnChanges {
+  // FontAwesome icons
   faPlay = faPlay;
   faPause = faPause;
+  faAngleRight = faAngleRight;
+  faAngleLeft = faAngleLeft;
+  faRandom = faRandom;
+  faSync = faSync;
+  faRecycle = faRecycle;
 
   @Input() stationNum: number = 0;
   @Input() currentStation: any = {};
@@ -27,6 +33,9 @@ export class PlayerComponent implements OnInit, OnChanges {
   @Input() currentlyPlaying: any = {};
   @Input() position: number = 0;
 
+  @Input() shuffle: boolean = false;
+  @Input() repeat: number = 0;
+
   @Output() toggleBarEvent = new EventEmitter<number>();
   @Output() isPlayingEvent = new EventEmitter<boolean>();
 
@@ -35,7 +44,7 @@ export class PlayerComponent implements OnInit, OnChanges {
   }
   
   ngOnChanges(changes: SimpleChanges): void {
-    
+    console.log(this.repeat);
   }
 
   ngOnInit(): void 
@@ -52,18 +61,20 @@ export class PlayerComponent implements OnInit, OnChanges {
     this.currentlyPlaying.album = {};
     this.currentlyPlaying.album.images = [5];
     this.currentlyPlaying.album.images[0] = {};
-    this.currentlyPlaying.album.images[0].url = "";
+    this.currentlyPlaying.album.images[0].url = "/assets/img/default.png";
+    this.currentlyPlaying.album.name = "No Album"
+
     this.currentlyPlaying.artists = [5];
     this.currentlyPlaying.artists[0] = {};
     this.currentlyPlaying.artists[0].name = "No Artist";
+    
     this.currentlyPlaying.name = "Nothing Playing";
   }
 
   // This will get the current player and set the data to the UI
   setPlayerData(): void {
     this.playerService.getPlayer().subscribe(data => {
-      if(data)
-      {
+      if(data) {
         // Set the data
         this.currentlyPlaying = data.item;
         this.currentDevice = data.device;
@@ -72,8 +83,6 @@ export class PlayerComponent implements OnInit, OnChanges {
         {
           this.isPlayingEvent.emit(true);
         }
-
-        console.log(data);
       }
     });
   }
@@ -83,19 +92,39 @@ export class PlayerComponent implements OnInit, OnChanges {
   }
 
   togglePlay() {
-    if(this.isPlaying)
-    {
+    if(this.isPlaying) {
       // The player is playing, so we want to pause it!
-      this.playerService.pause().subscribe(data => {
-        // this.isPlayingEvent.emit(data);
-      });
+      this.playerService.pause().subscribe();
     }
-    else
-    {
+    else {
       // The player is not playing, so we want to play it!
-      this.playerService.play().subscribe(data => {
-        // this.isPlayingEvent.emit(data);
-      });
+      this.playerService.play().subscribe();
+    }
+  }
+
+  skip() {
+    this.playerService.next().subscribe();
+  }
+
+  back() {
+    this.playerService.previous().subscribe();
+  }
+
+  shuffleChange(): void {
+    this.playerService.shuffle(!this.shuffle).subscribe();
+  }
+
+  repeatChange(): void {
+    switch(this.repeat) {
+      case 0:
+        this.playerService.repeat("context").subscribe();
+        break;
+      case 1:
+        this.playerService.repeat("track").subscribe();
+        break;
+      case 2:
+        this.playerService.repeat("off").subscribe();
+        break;
     }
   }
 }

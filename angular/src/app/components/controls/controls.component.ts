@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { SocketService } from 'src/app/socket.service';
+import { SocketService } from 'src/app/services/socket.service';
 
 @Component({
   selector: 'app-controls',
@@ -17,7 +17,6 @@ export class ControlsComponent implements OnInit {
   }
 
   sendMessage() {
-    console.log("sendMessage yeet " + this.input);
     if(this.input) {
       this.socketService.sendMessage(this.input);
       this.input = '';

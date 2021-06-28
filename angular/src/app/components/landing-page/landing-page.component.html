@@ -1,12 +1,14 @@
 <div id="appDiv">
   <div id="header">
-    <h2>am_radio</h2>
+    <h2 class="clickable">am_radio</h2>
     <div id="scrollbar">
         <!-- This is where a scrollbar can goooo -->
     </div>
   </div> 
 
   <div id="appWindow">
-    <button (click)="login()"><fa-icon [icon]="faSpotify"></fa-icon> Login with Spotify</button>
+    <button (click)="login()" class="clickable">
+      <fa-icon [icon]="faSpotify"></fa-icon> Login with Spotify
+    </button>
   </div>
 </div>

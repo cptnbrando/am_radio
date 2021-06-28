@@ -4,7 +4,6 @@ import { WebSocketAPI } from 'src/app/api/WebSocketAPI';
 import { AppComponent } from 'src/app/app.component';
 import { RadioService } from 'src/app/services/radio.service';
 import { Station } from 'src/app/shared/models/station.model';
-import { SocketService } from 'src/app/socket.service';
 import { ScriptService } from '../../services/script.service';
 import { SpotifyPlayerService } from '../../services/spotify-player.service'
 import { SpotifyService } from '../../services/spotify.service';
@@ -38,6 +37,8 @@ export class RadioPageComponent implements OnInit, OnChanges {
   @Output() isPlaying: boolean = false;
   @Output() position: number = 0;
   next: any = "";
+  @Output() shuffle: boolean = false;
+  @Output() repeat: number = 0;
 
   // The device currently playing
   @Output() currentDevice: any = {};
@@ -61,8 +62,7 @@ export class RadioPageComponent implements OnInit, OnChanges {
   constructor(private spotifyService: SpotifyService, private playerService: SpotifyPlayerService, private script: ScriptService, private radioService: RadioService) {
     // Immediately check for valid tokens from the server
     // This function will redirect the user back to the homepage if credentials can't be found
-    if(!this.checkTokens())
-    {
+    if(!this.checkTokens()) {
       window.location.replace(AppComponent.webURL);
       throw new Error;
     }
@@ -93,12 +93,7 @@ export class RadioPageComponent implements OnInit, OnChanges {
   // Get the user and set them to the user variable
   setUser(): void {
     this.spotifyService.getUser().subscribe(data => {
-      if(data) {
-        this.user = data;
-        console.log("setUser:");
-        console.log(data);
-      } 
-        
+      if(data) this.user = data;
     });
   }
 
@@ -129,18 +124,16 @@ export class RadioPageComponent implements OnInit, OnChanges {
   // This is the event handler for the playerReady sdk js script events
   // It uses dom-watcher to watch the canvas element for attribute changes, updated by the spotifyPlayerSDK.js in /assets
   onPlayerReady(event: any) {
-    console.log("onPlayerReady");
     this.playerReady = event.returnValue;
     
     // Once the radio player is ready, we should prompt the user to swap to the new player
     // ...or we could change it automatically if there's nothing playing rn
-    if(this.isPlaying)
-    {
+    if(this.isPlaying) {
       // Device toggling done via Station Bar
       this.setPlayerData();
 
       // Also set userDevices
-      this.setDevices();
+      // this.setDevices();
 
       // Also set currentDevice
       this.getCurrentDevice();
@@ -164,18 +157,18 @@ export class RadioPageComponent implements OnInit, OnChanges {
     // Get am_radio (This server endpoint find am_radio and sets it as the active device in the Spotify API)
     this.playerService.getAMRadio().subscribe(data => {
       if(data) {
-        // If found, set it as the active player in the front end aka this component
+        // If found, set it as the active player
         this.currentDevice = data;
 
-        // Attempt to play most recently played track on am_radio
-        this.playRecentTrack();
+        // Attempt to play the last played Playlist
+        this.playerService.startAMRadio().subscribe();
       }
     });
   }
 
   playRecentTrack(): void {
     // Attempt to play most recently played track on am_radio
-    this.spotifyService.getRecentlyPlayedTrack().subscribe(data => {
+    this.spotifyService.getRecentlyPlayed().subscribe(data => {
       if(data) {
         this.playerService.playTrack(data.uri).subscribe(data => {
           if(data) {
@@ -188,30 +181,80 @@ export class RadioPageComponent implements OnInit, OnChanges {
     });
   }
 
+  /**
+   * Gets 20 of the most recently played tracks and adds them to the queue one by one
+   */
+  playRecentlyPlayedTracks(): void {
+    this.spotifyService.getRecentlyPlayedTracks().subscribe(data => {
+      console.log("playRecentlyPlayedTracks");
+      // add each item to the queue
+      data.forEach(item => {
+        if(item.track.type === "TRACK") {
+          console.log(item.track);
+          this.playerService.addToQueue(item.track.uri).subscribe();
+        }
+      });
+      
+      // skip to the next track and begin the queue
+      this.playerService.next().subscribe();
+    });
+  }
+
+  /**
+   * Plays the last played playlist
+   * Sets shuffle to on and skips to next track
+   */
+  playLastPlayedPlaylist(): void {
+    this.spotifyService.getUserPlaylists().subscribe(data => {
+      let playlist = data[0];
+      console.log(playlist);
+      
+      this.playerService.playPlaylist(playlist.uri).subscribe();
+
+      // toggle shuffle and repeat and skip to the next track
+
+      
+      // skip to the next track and begin the queue
+      // this.playerService.next().subscribe();
+    });
+  }
+
   // Event callback for Spotify SDK script
   onPlaybackChange(event: any): void {
-    console.log("playback change event handler");
+    // console.log("playback change event handler");
     this.isPlaying = !(this.canvas.getAttribute("paused") === "true");
   }
 
   // Event callback for Spotify SDK script
   onCurrentChange(event: any): void {
-    console.log("track change event handler");
+    // console.log("track change event handler");
     this.setPlayerData();
   }
 
   // Event callback for Spotify SDK script
   onPositionChange(event: any): void {
-    console.log("position change event handler");
-    console.log(event);
+    // console.log("position change event handler");
+    // console.log(event);
     // this.setPlayerData();
   }
 
   // Event callback for next_track Spotify SDK script
   onNextChange(event: any): void {
-    console.log("next change event handler");
-    console.log(event.detail.attributes.next);
+    // console.log("next change event handler");
+    // console.log(event.detail.attributes.next);
     this.next = event.detail.attributes.next;
+  }
+
+  onRepeatChange(event: any): void {
+    // console.log("repeat change event handler");
+    // console.log(event.detail.attributes.repeat);
+    this.repeat = parseInt(event.detail.attributes.repeat.nodeValue);
+  }
+
+  onShuffleChange(event: any): void {
+    // console.log("shuffle change event handler");
+    // console.log(event);
+    this.shuffle = (event.detail.attributes.shuffle.nodeValue === "true");
   }
 
   // This will get the current player and set the data to the UI

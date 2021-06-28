@@ -1,9 +1,9 @@
 <div id="header">
-    <h2 (click)="toggleBar(2)">am_radio</h2>
+    <h2 (click)="toggleBar(2)" class="clickable">am_radio</h2>
     <div id="scrollbar">
         <!-- This is where a scrollbar can goooo -->
     </div>
     <div id="numBox">
-        <span id="stationNum" class="numControl" (click)="changeStation(stationNum + 1)" (contextmenu)="changeStation(stationNum - 1)">{{stationNumDisplay()}}</span>
+        <span id="stationNum" class="numControl clickable" (click)="changeStation(stationNum + 1)" (contextmenu)="changeStation(stationNum - 1)">{{stationNumDisplay()}}</span>
     </div>
 </div>

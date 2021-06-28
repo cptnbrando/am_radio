@@ -2,24 +2,39 @@
     <span>Imma seek soon</span>
 </div>
 <div id="player">
-    <div id="currentDiv" (click)="toggleBar(0)" class="buttonBox row">
+    <div id="currentDiv" (click)="toggleBar(0)" class="playerItem row clickable">
         <div id="currentImage" class="album column">
-            <img [src]="currentlyPlaying.album.images[0].url">
+            <img [src]="currentlyPlaying.album.images[0].url" alt="image">
         </div>
         <div id="currentInfo" class="info column">
             <div id="currentName">{{this.currentlyPlaying.name}}</div>
             <div id="currentArtist">{{this.currentlyPlaying.artists[0].name}}</div>
+            <div id="currentAlbum">{{this.currentlyPlaying.album.name}}</div>
         </div>
     </div>
 
-    <div id="playButton" (click)="togglePlay()">        
-        <fa-icon [icon]="faPlay" *ngIf="!isPlaying"></fa-icon>
-        <fa-icon [icon]="faPause" *ngIf="isPlaying"></fa-icon>
+    <div id="playerIcons" class="playerItem">
+        <div (click)="shuffleChange()" *ngIf="stationNum === 0" class="clickable">
+            <fa-icon [icon]="faRandom" size="2x" *ngIf="!shuffle"></fa-icon>
+            <fa-icon [icon]="faRandom" size="2x" *ngIf="shuffle" class="selected"></fa-icon>
+        </div>
+        <fa-icon [icon]="faAngleLeft" (click)="back()" *ngIf="stationNum === 0" class="clickable" size="3x">
+        </fa-icon>
+        <fa-icon [icon]="faPlay" (click)="togglePlay()" *ngIf="!isPlaying" class="clickable" size="3x"></fa-icon>
+        <fa-icon [icon]="faPause" (click)="togglePlay()" *ngIf="isPlaying" class="clickable" size="3x"></fa-icon>
+        <fa-icon [icon]="faAngleRight" (click)="skip()" *ngIf="stationNum === 0" class="clickable" size="3x"></fa-icon>
+        <div (click)="repeatChange()" *ngIf="stationNum === 0" class="clickable">
+            <fa-icon [icon]="faSync" size="2x" *ngIf="repeat === 0" style="color:black"></fa-icon>
+            <fa-icon [icon]="faSync" size="2x" *ngIf="repeat === 1" class="selected"></fa-icon>
+            <fa-icon [icon]="faRecycle" size="2x" *ngIf="repeat === 2" class="selected"></fa-icon>
+        </div>
     </div>
 
-    <div id="stationInfo" (click)="toggleBar(1)" class="buttonBox">
-        <div>{{this.currentStation.stationName}}</div>
-        <div>{{this.user.displayName}}</div>
-        <div>{{this.currentDevice.name}}</div>
+    <div id="stationInfo" (click)="toggleBar(1)" class="playerItem">
+        <div class="vertical" class="clickable">
+            <div>{{this.currentStation.stationName}}</div>
+            <div>{{this.user.displayName}}</div>
+            <div>{{this.currentDevice.name}}</div>
+        </div>
     </div>
 </div>

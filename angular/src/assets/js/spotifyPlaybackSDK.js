@@ -36,14 +36,18 @@ window.onSpotifyWebPlaybackSDKReady = () => {
   // It's a hacky fix, but it works lol
   player.addListener('player_state_changed', ({
     duration,
-    track_window: { current_track, next_tracks }
+    track_window: { current_track }
   }) => {
     // Detects for playback changes
     player.getCurrentState().then(data => {
       canvas.setAttribute("current", current_track.uri);
       canvas.setAttribute("paused", data.paused);
       canvas.setAttribute("duration", duration);
-      canvas.setAttribute("next", next_tracks[0].uri);
+      canvas.setAttribute("repeat", data.repeat_mode);
+      canvas.setAttribute("shuffle", data.shuffle);
+      // canvas.setAttribute("deviceName", data.devices);
+      // console.log('getCurrentState');
+      // console.log(data);
     });
   });
 
