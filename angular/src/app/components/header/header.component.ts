@@ -6,8 +6,8 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
   styleUrls: ['./header.component.scss']
 })
 export class HeaderComponent implements OnInit {
-  @Input() showControls: boolean;
-  @Input() stationNum: number;
+  @Input() showControls: boolean = false;
+  @Input() stationNum: number = 0;
 
   @Output() toggleBarEvent = new EventEmitter<number>();
   @Output() changeStationEvent = new EventEmitter<number>();

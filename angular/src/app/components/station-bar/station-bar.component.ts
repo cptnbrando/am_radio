@@ -9,17 +9,19 @@ import { Station } from 'src/app/shared/models/station.model';
 })
 export class StationBarComponent implements OnInit {
 
-  @Input() showStationBar: boolean;
+  @Input() showStationBar: boolean = false;
   @Input() currentStation: Station;
-  @Input() stationNum: number;
+  @Input() stationNum: number = 0;
   @Input() selectedPlaylist: any;
 
   @Output() createdStation = new EventEmitter<any>();
 
-  constructor(private radioService: RadioService) { }
+  constructor(private radioService: RadioService) {
+    this.currentStation = new Station;
+  }
 
   ngOnInit(): void {
-
+    
   }
 
   createRadio() {

@@ -1,6 +1,5 @@
 import { Component, HostListener, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { faSpotify } from '@fortawesome/free-brands-svg-icons';
-import { WebSocketAPI } from 'src/app/api/WebSocketAPI';
 import { AppComponent } from 'src/app/app.component';
 import { RadioService } from 'src/app/services/radio.service';
 import { Station } from 'src/app/shared/models/station.model';
@@ -16,8 +15,6 @@ import { SpotifyService } from '../../services/spotify.service';
 export class RadioPageComponent implements OnInit, OnChanges {
 
   faSpotify = faSpotify;
-
-  wsAPI: WebSocketAPI;
 
   // This will hold a spotify uri for the logged in user
   @Output() user: any = {};
@@ -66,8 +63,6 @@ export class RadioPageComponent implements OnInit, OnChanges {
       window.location.replace(AppComponent.webURL);
       throw new Error;
     }
-
-    this.wsAPI = new WebSocketAPI(this);
   }
   ngOnChanges(changes: SimpleChanges): void {
     throw new Error('Method not implemented.');
@@ -188,7 +183,7 @@ export class RadioPageComponent implements OnInit, OnChanges {
     this.spotifyService.getRecentlyPlayedTracks().subscribe(data => {
       console.log("playRecentlyPlayedTracks");
       // add each item to the queue
-      data.forEach(item => {
+      data.forEach((item: { track: { type: string; uri: string; }; }) => {
         if(item.track.type === "TRACK") {
           console.log(item.track);
           this.playerService.addToQueue(item.track.uri).subscribe();
@@ -388,12 +383,12 @@ export class RadioPageComponent implements OnInit, OnChanges {
   }
 
   @HostListener('window:unload', [ '$event' ])
-  unloadHandler(event) {
+  unloadHandler(event: any) {
     console.log("window unload buh bye");
   }
 
   @HostListener('window:beforeunload', [ '$event' ])
-  beforeUnloadHandler(event) {
+  beforeUnloadHandler(event: any) {
     console.log("window before unload");
     if(this.stationNum > 0) {
       this.radioService.leaveStation(this.stationNum).subscribe();

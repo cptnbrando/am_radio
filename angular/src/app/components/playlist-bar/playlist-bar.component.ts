@@ -11,10 +11,10 @@ export class PlaylistBarComponent implements OnInit {
 
   faArrowLeft = faArrowLeft;
 
-  @Input() showPlaylistBar: boolean;
+  @Input() showPlaylistBar: boolean = false;
 
   @Input() user : any;
-  @Input() userPlaylists: string[];
+  @Input() userPlaylists: any[] = [];
 
   @Input() selectedPlaylist: any;
   @Output() changePlaylistEvent = new EventEmitter<any>();

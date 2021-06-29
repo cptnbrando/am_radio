@@ -33,9 +33,9 @@ export class Station
     constructor(stationID?: number)
     {
         this.stationID = 0;
-        this.stationCreated = null;
+        this.stationCreated = new Date();
         this.stationName = "Recently Played";
-        this.stationInfo = "Your most recently played tracks, according to Spotify";
+        this.stationInfo = "A random playlist from the last 25 that you've last played from your Spotify library";
         this.creatorID = "";
         this.playlistID = "";
         this.playTime = 0;

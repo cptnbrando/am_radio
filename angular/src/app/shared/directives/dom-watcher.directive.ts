@@ -6,7 +6,7 @@ import { Directive, ElementRef, OnInit } from '@angular/core';
 export class DomWatcherDirective implements OnInit {
 
   canvas: any;
-  currentlyPlaying: string;
+  currentlyPlaying: string = "";
 
   constructor(private elRef: ElementRef) { }
 
@@ -17,7 +17,7 @@ export class DomWatcherDirective implements OnInit {
   
   // This gets called whenever the canvas element has it's attributes changed
   // list is the array of all attributes
-  registerDomChangedEvent(el) {
+  registerDomChangedEvent(el: any) {
     const observer = new MutationObserver( list => {
 
       list.forEach((mutation) => {

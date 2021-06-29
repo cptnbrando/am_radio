@@ -8,20 +8,20 @@ import { AppComponent } from '../app.component';
 })
 export class SocketService {
   public stompClient;
-  public msg = [];
+  public msg: string[] = [];
 
   constructor() {
+    const serverURL = `${AppComponent.serverRoot}/socket`;
+    const ws = new SockJS(serverURL);
+    this.stompClient = Stomp.over(ws);
     this.initWSConnection();
   }
 
   initWSConnection(): void {
-    const serverURL = `${AppComponent.serverRoot}/socket`;
-    const ws = new SockJS(serverURL);
-    this.stompClient = Stomp.over(ws);
     const that = this;
 
-    this.stompClient.connect({}, function(frame) {
-      that.stompClient.subscribe('/message', (message) => {
+    this.stompClient.connect({}, function(frame: any) {
+      that.stompClient.subscribe('/message', (message: any) => {
         if(message.body) {
           that.msg.push(message.body);
         }
@@ -29,7 +29,7 @@ export class SocketService {
     });
   }
 
-  sendMessage(message) {
+  sendMessage(message: string) {
     this.stompClient.send('/app/send/message', {}, message);
   }
 

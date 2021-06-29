@@ -16,7 +16,7 @@ export class AppComponent {
 
   // So that right clicking doesn't yield a lame context menu
   @HostListener('contextmenu', ['$event'])
-  onRightClick(event) {
+  onRightClick(event: any) {
     event.preventDefault();
   }
 }

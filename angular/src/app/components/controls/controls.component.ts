@@ -8,10 +8,10 @@ import { SocketService } from 'src/app/services/socket.service';
 })
 export class ControlsComponent implements OnInit {
 
-  @Input() showControls: boolean;
+  @Input() showControls: boolean = false;
   input: string = '';
 
-  constructor(private socketService: SocketService) { }
+  constructor(public socketService: SocketService) { }
 
   ngOnInit(): void {
   }
