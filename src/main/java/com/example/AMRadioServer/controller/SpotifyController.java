@@ -74,10 +74,10 @@ public class SpotifyController {
             spotifyApi.setAccessToken(authorizationCodeCredentials.getAccessToken());
             spotifyApi.setRefreshToken(authorizationCodeCredentials.getRefreshToken());
 
-            System.out.println("Access: " + spotifyApi.getAccessToken());
-            System.out.println("Refresh: " + spotifyApi.getRefreshToken());
-
-            System.out.println("Expires in: " + authorizationCodeCredentials.getExpiresIn());
+//            System.out.println("Access: " + spotifyApi.getAccessToken());
+//            System.out.println("Refresh: " + spotifyApi.getRefreshToken());
+//
+//            System.out.println("Expires in: " + authorizationCodeCredentials.getExpiresIn());
 
         } catch (IOException | SpotifyWebApiException | org.apache.hc.core5.http.ParseException e) {
             System.out.println("Error: " + e.getMessage());
@@ -179,7 +179,7 @@ public class SpotifyController {
             return spotifyApi.getCurrentUsersRecentlyPlayedTracks().build().execute().getItems();
         }
         catch (IOException | SpotifyWebApiException | ParseException e) {
-            System.out.println("Exception caught in getRecentlyPlayed()");
+            System.out.println("Exception caught in getRecentlyPlayedTracks()");
             System.out.println(e.getMessage());
             return null;
         }

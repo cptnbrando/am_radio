@@ -1,12 +1,17 @@
 #playlistBar {
     border: solid;
     border-color: green;
-
+    height: 100%;
     color: white;
 
+    #playlists, #tracks {
+      max-height: 65vh;
+      overflow-y: hidden;
+    }
+
     .bigList {
-        max-height: 70vh;
-        overflow-y: auto;
+      max-height: inherit;
+      overflow-y: auto;
     }
 
     li {

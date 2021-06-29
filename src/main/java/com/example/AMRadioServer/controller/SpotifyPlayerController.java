@@ -200,9 +200,7 @@ public class SpotifyPlayerController
      */
     @GetMapping(value = "/getAMRadio")
     public Device getAMRadio() {
-        System.out.println("/getAMRadio");
         Device[] myDevices = this.getDevices();
-        System.out.println(myDevices);
         if(myDevices != null)
         {
             for(Device device: myDevices)
