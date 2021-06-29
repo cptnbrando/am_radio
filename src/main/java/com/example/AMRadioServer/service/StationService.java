@@ -194,7 +194,7 @@ public class StationService {
             this.allStations.get(stationID).getListeners().remove(user.getId());
         }
         catch (NullPointerException e) {
-            System.out.println("NullPointer caught in StationService/removeListener");
+//            System.out.println("NullPointer caught in StationService/removeListener");
         }
     }
 

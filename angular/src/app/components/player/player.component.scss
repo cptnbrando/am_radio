@@ -8,6 +8,12 @@
     .playerItem {
         display: flex;
     }
+
+    .clickable {
+        &:hover {
+            color: grey;
+        }
+    }
 }
 
 #currentDiv {

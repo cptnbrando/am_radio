@@ -4,6 +4,12 @@
     align-items: center;
     border-bottom: solid;
     background-color: white;
+
+    .clickable {
+        &:hover {
+            color: grey;
+        }
+    }
 }
 
 h2 {

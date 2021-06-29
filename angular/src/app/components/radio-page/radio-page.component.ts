@@ -22,6 +22,9 @@ export class RadioPageComponent implements OnInit, OnChanges {
   // This will hold the selected playlist
   @Output() selectedPlaylist: any = null;
 
+  // This will hold a user playing playlist
+  @Output() playingPlaylist: any = null;
+
   // This will hold an array of playlist uris for the user
   @Output() userPlaylists: any = {};
 
@@ -145,6 +148,7 @@ export class RadioPageComponent implements OnInit, OnChanges {
     }
   }
 
+  // Man... hour 5:48:50 - 5:48:54 on Fireplace 10 hours full hd is nutty
   beginAMRadio(): void {
     // So that the station bar doesn't tweak from missing fields
     this.currentStation = new Station();
@@ -155,8 +159,12 @@ export class RadioPageComponent implements OnInit, OnChanges {
         // If found, set it as the active player
         this.currentDevice = data;
 
-        // Attempt to play the last played Playlist
-        this.playerService.startAMRadio().subscribe();
+        // Attempt to play a random playlist on am_radio
+        this.playerService.startAMRadio().subscribe(data => {
+          this.playingPlaylist = data;
+          console.log("startAMRadio");
+          console.log(data);
+        });
       }
     });
   }
@@ -201,79 +209,58 @@ export class RadioPageComponent implements OnInit, OnChanges {
    */
   playLastPlayedPlaylist(): void {
     this.spotifyService.getUserPlaylists().subscribe(data => {
-      let playlist = data[0];
-      console.log(playlist);
-      
-      this.playerService.playPlaylist(playlist.uri).subscribe();
-
-      // toggle shuffle and repeat and skip to the next track
-
-      
-      // skip to the next track and begin the queue
-      // this.playerService.next().subscribe();
+      this.playerService.playPlaylist(data[0].uri).subscribe();
     });
   }
 
   // Event callback for Spotify SDK script
   onPlaybackChange(event: any): void {
-    // console.log("playback change event handler");
     this.isPlaying = !(this.canvas.getAttribute("paused") === "true");
   }
 
   // Event callback for Spotify SDK script
   onCurrentChange(event: any): void {
-    // console.log("track change event handler");
     this.setPlayerData();
   }
 
   // Event callback for Spotify SDK script
   onPositionChange(event: any): void {
-    // console.log("position change event handler");
-    // console.log(event);
     // this.setPlayerData();
   }
 
   // Event callback for next_track Spotify SDK script
   onNextChange(event: any): void {
-    // console.log("next change event handler");
-    // console.log(event.detail.attributes.next);
     this.next = event.detail.attributes.next;
   }
 
   onRepeatChange(event: any): void {
-    // console.log("repeat change event handler");
-    // console.log(event.detail.attributes.repeat);
     this.repeat = parseInt(event.detail.attributes.repeat.nodeValue);
   }
 
   onShuffleChange(event: any): void {
-    // console.log("shuffle change event handler");
-    // console.log(event);
     this.shuffle = (event.detail.attributes.shuffle.nodeValue === "true");
   }
 
   // This will get the current player and set the data to the UI
   setPlayerData(): void {
     this.playerService.getPlayer().subscribe(data => {
-      if(data)
-      {
+      if(data) {
         // Set the data
         this.currentlyPlaying = data.item;
         this.currentDevice = data.device;
-
-        console.log(data);
       }
     });
   }
 
   // This is called by the EventEmitter in the header component
   changeStation(stationNum: number) {
-    console.log("in changeStation");
     if(this.stationNum > 0) {
       // Leave the old station if not playing on 000
       this.radioService.leaveStation(this.stationNum).subscribe();
     }
+
     this.stationNum = stationNum;
+    this.playingPlaylist = null;
 
     // Pause the player to begin
     if(this.isPlaying){
@@ -282,7 +269,7 @@ export class RadioPageComponent implements OnInit, OnChanges {
 
     // BeginAMRadio on station 000, otherwise join/start the station
     if(stationNum === 0){
-      this.playRecentTrack();
+      this.beginAMRadio();
       return;
     }
     else {
@@ -337,9 +324,26 @@ export class RadioPageComponent implements OnInit, OnChanges {
   }
 
   changePlaylist(playlist: any) {
-    console.log("changePlaylist");
-    console.log(playlist);
     this.selectedPlaylist = playlist;
+  }
+
+  // Play a track on am_radio 000
+  playTrack(track: any) {
+    if(this.stationNum != 0) {
+      this.changeStation(0);
+    }
+
+    this.playerService.playTrack(track.track.uri).subscribe();
+  }
+
+  // Play a playlist on am_radio 000
+  playPlaylist() {
+    if(this.stationNum != 0) {
+      this.changeStation(0);
+    }
+
+    this.playerService.playPlaylist(this.selectedPlaylist.uri).subscribe();
+    this.playingPlaylist = this.selectedPlaylist;
   }
 
   async checkTokens(): Promise<boolean> {
@@ -372,14 +376,6 @@ export class RadioPageComponent implements OnInit, OnChanges {
     this.script.load('spotifyPlaybackSDK', 'spotifyPlayer').then(data => {
       console.log('scripts loaded ', data);
     }).catch(error => console.log(error));
-  }
-
-  handleNext(station: any): void {
-
-  }
-
-  handleListener(listeners: any): void {
-
   }
 
   @HostListener('window:unload', [ '$event' ])

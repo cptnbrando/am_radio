@@ -215,8 +215,11 @@ public class SpotifyPlayerController
         return null;
     }
 
+    /**
+     * Gets a random recently played playlist, sets shuffle and repeat to true, and plays it
+     */
     @GetMapping(value = "/startAMRadio")
-    public void startAMRadio() {
+    public PlaylistSimplified startAMRadio() {
         try {
             // Playback's already on am_radio, so we want to shuffle and repeat on a random recent playlist
             // and skip to the next track
@@ -229,12 +232,15 @@ public class SpotifyPlayerController
 
             // Get a random playlist and play it
             Random rand = new Random();
-            this.playPlaylist(lists[rand.nextInt((lists.length))].getUri());
+            PlaylistSimplified randomPlaylist = lists[rand.nextInt((lists.length))];
+            this.playPlaylist(randomPlaylist.getUri());
+            return randomPlaylist;
         }
         catch (IOException | SpotifyWebApiException | ParseException e)
         {
             System.out.println("Exception caught in player/seek");
             System.out.println(e.getMessage());
+            return null;
         }
     }
 

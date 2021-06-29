@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { SpotifyService } from 'src/app/services/spotify.service';
-import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { faArrowLeft, faPlay } from '@fortawesome/free-solid-svg-icons';
+import { SpotifyPlayerService } from 'src/app/services/spotify-player.service';
 
 @Component({
   selector: 'app-playlist-bar',
@@ -10,6 +11,7 @@ import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 export class PlaylistBarComponent implements OnInit {
 
   faArrowLeft = faArrowLeft;
+  faPlay = faPlay;
 
   @Input() showPlaylistBar: boolean = false;
 
@@ -18,27 +20,24 @@ export class PlaylistBarComponent implements OnInit {
 
   @Input() selectedPlaylist: any;
   @Output() changePlaylistEvent = new EventEmitter<any>();
+
+  @Output() playPlaylistEvent = new EventEmitter<any>();
+  @Output() playTrackEvent = new EventEmitter<any>();
+
   selectedTracks: any = null;
 
-  constructor(private spotifyService: SpotifyService) { }
+  constructor(private spotifyService: SpotifyService, private playerService: SpotifyPlayerService) { }
 
   ngOnInit(): void {
   }
 
-  loadUserPlaylists(): void{
-    
-  }
-
   clickPlaylist(playlist: any): void{
-    console.log(playlist);
     if(playlist != this.selectedPlaylist) {
       this.changePlaylistEvent.emit(playlist);
 
       this.spotifyService.getPlaylistTracks(playlist.id).subscribe(data => {
-        if(data)
-        {
+        if(data) {
           this.selectedTracks = data;
-          console.log(data);
         }
       });
     }
@@ -47,6 +46,14 @@ export class PlaylistBarComponent implements OnInit {
   back(): void{
     this.changePlaylistEvent.emit(null);
     this.selectedTracks = null;
+  }
+
+  playTrack(track: any): void {
+    this.playTrackEvent.emit(track);
+  }
+
+  playPlaylist(): void {
+    this.playPlaylistEvent.emit();
   }
 
 }

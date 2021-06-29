@@ -24,6 +24,7 @@ export class PlayerComponent implements OnInit {
 
   @Input() stationNum: number = 0;
   @Input() currentStation: any = {};
+  @Input() playingPlaylist: any = {};
 
   // Setting bars
   @Input() showPlaylistBar: boolean = false;

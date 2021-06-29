@@ -45,9 +45,6 @@ window.onSpotifyWebPlaybackSDKReady = () => {
       canvas.setAttribute("duration", duration);
       canvas.setAttribute("repeat", data.repeat_mode);
       canvas.setAttribute("shuffle", data.shuffle);
-      // canvas.setAttribute("deviceName", data.devices);
-      // console.log('getCurrentState');
-      // console.log(data);
     });
   });
 
