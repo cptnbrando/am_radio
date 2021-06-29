@@ -142,44 +142,6 @@ public class SpotifyPlayerController
     }
 
     /**
-     * Play the Player
-     *
-     * @return true if successful, false if not
-     */
-    @PutMapping(value = "/play")
-    public boolean play() {
-        try {
-            this.spotifyApi.startResumeUsersPlayback().build().execute();
-            return true;
-        }
-        catch (IOException | SpotifyWebApiException | ParseException e)
-        {
-            System.out.println("Exception in player/play");
-            System.out.println(e.getMessage());
-            return false;
-        }
-    }
-
-    /**
-     * Pause the Player
-     *
-     * @return true if successful, false if not
-     */
-    @PutMapping(value = "/pause")
-    public boolean pause() {
-        try {
-            this.spotifyApi.pauseUsersPlayback().build().execute();
-            return true;
-        }
-        catch (IOException | SpotifyWebApiException | ParseException e)
-        {
-            System.out.println("Exception in player/pause");
-            System.out.println(e.getMessage());
-            return false;
-        }
-    }
-
-    /**
      * There's no way to play directly from a URI
      * ...sooo we set it to the queue, then skip to the next song
      * this works for now, but might get stupid once the stations and queues are used more...
@@ -260,7 +222,7 @@ public class SpotifyPlayerController
         try {
             // Playback's already on am_radio, so we want to shuffle and repeat on a random recent playlist
             // and skip to the next track
-            PlaylistSimplified[] lists = this.spotifyApi.getListOfCurrentUsersPlaylists().limit(10).build().execute().getItems();
+            PlaylistSimplified[] lists = this.spotifyApi.getListOfCurrentUsersPlaylists().limit(25).build().execute().getItems();
 
             // toggle shuffle
             this.spotifyApi.toggleShuffleForUsersPlayback(true).build().execute();
@@ -275,6 +237,44 @@ public class SpotifyPlayerController
         {
             System.out.println("Exception caught in player/seek");
             System.out.println(e.getMessage());
+        }
+    }
+
+    /**
+     * Play the Player
+     *
+     * @return true if successful, false if not
+     */
+    @PutMapping(value = "/play")
+    public boolean play() {
+        try {
+            this.spotifyApi.startResumeUsersPlayback().build().execute();
+            return true;
+        }
+        catch (IOException | SpotifyWebApiException | ParseException e)
+        {
+            System.out.println("Exception in player/play");
+            System.out.println(e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Pause the Player
+     *
+     * @return true if successful, false if not
+     */
+    @PutMapping(value = "/pause")
+    public boolean pause() {
+        try {
+            this.spotifyApi.pauseUsersPlayback().build().execute();
+            return true;
+        }
+        catch (IOException | SpotifyWebApiException | ParseException e)
+        {
+            System.out.println("Exception in player/pause");
+            System.out.println(e.getMessage());
+            return false;
         }
     }
 
@@ -332,6 +332,27 @@ public class SpotifyPlayerController
         catch (IOException | SpotifyWebApiException | ParseException e)
         {
             System.out.println("Exception caught in player/repeat");
+            System.out.println(e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Change the volume of the spotify player
+     *
+     * @param percent 0 - 100 percent int value
+     * @return true if successful, false if not
+     */
+    @PutMapping(value = "/volume")
+    public boolean volume(@RequestParam int percent)
+    {
+        try {
+            this.spotifyApi.setVolumeForUsersPlayback(percent).build().execute();
+            return true;
+        }
+        catch (IOException | SpotifyWebApiException | ParseException e)
+        {
+            System.out.println("Exception in player/volume");
             System.out.println(e.getMessage());
             return false;
         }
@@ -417,28 +438,6 @@ public class SpotifyPlayerController
             System.out.println("Exception caught in player/getUser");
             System.out.println(e.getMessage());
             return null;
-        }
-    }
-
-
-    /**
-     * Change the volume of the spotify player
-     *
-     * @param percent 0 - 100 percent int value
-     * @return true if successful, false if not
-     */
-    @PutMapping(value = "/volume")
-    public boolean volume(@RequestParam int percent)
-    {
-        try {
-            this.spotifyApi.setVolumeForUsersPlayback(percent).build().execute();
-            return true;
-        }
-        catch (IOException | SpotifyWebApiException | ParseException e)
-        {
-            System.out.println("Exception in player/volume");
-            System.out.println(e.getMessage());
-            return false;
         }
     }
 }

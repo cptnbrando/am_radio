@@ -19,6 +19,8 @@ import { RadioPageComponent } from './components/radio-page/radio-page.component
 import { AppRoutingModule } from './app-routing.module';
 import { DomWatcherDirective } from './shared/directives/dom-watcher.directive';
 import { FormsModule } from '@angular/forms';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { MatSliderModule } from '@angular/material/slider';
 
 @NgModule({
   declarations: [
@@ -39,7 +41,9 @@ import { FormsModule } from '@angular/forms';
     HttpClientModule,
     RouterModule,
     AppRoutingModule,
-    FormsModule
+    FormsModule,
+    BrowserAnimationsModule,
+    MatSliderModule
   ],
   providers: [
     {

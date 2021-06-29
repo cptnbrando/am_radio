@@ -1,15 +1,13 @@
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
-import { faAngleLeft, faAngleRight, faPause, faPlay, faRandom, faRecycle, faSync } from '@fortawesome/free-solid-svg-icons';
-import { Station } from 'src/app/shared/models/station.model';
+import { faAngleLeft, faAngleRight, faPause, faPlay, faRandom, faRecycle, faSync, faVolumeDown, faVolumeMute, faVolumeOff, faVolumeUp } from '@fortawesome/free-solid-svg-icons';
 import { SpotifyPlayerService } from '../../services/spotify-player.service';
-import { SpotifyService } from '../../services/spotify.service';
 
 @Component({
   selector: 'app-player',
   templateUrl: './player.component.html',
   styleUrls: ['./player.component.scss']
 })
-export class PlayerComponent implements OnInit, OnChanges {
+export class PlayerComponent implements OnInit {
   // FontAwesome icons
   faPlay = faPlay;
   faPause = faPause;
@@ -18,6 +16,11 @@ export class PlayerComponent implements OnInit, OnChanges {
   faRandom = faRandom;
   faSync = faSync;
   faRecycle = faRecycle;
+
+  faVolumeUp = faVolumeUp;
+  faVolumeOff = faVolumeOff;
+  faVolumeMute = faVolumeMute;
+  faVolumeDown = faVolumeDown;
 
   @Input() stationNum: number = 0;
   @Input() currentStation: any = {};
@@ -32,6 +35,7 @@ export class PlayerComponent implements OnInit, OnChanges {
   @Input() currentDevice: any = {};
   @Input() currentlyPlaying: any = {};
   @Input() position: number = 0;
+  volume: number = 100;
 
   @Input() shuffle: boolean = false;
   @Input() repeat: number = 0;
@@ -39,12 +43,8 @@ export class PlayerComponent implements OnInit, OnChanges {
   @Output() toggleBarEvent = new EventEmitter<number>();
   @Output() isPlayingEvent = new EventEmitter<boolean>();
 
-  constructor(private spotifyService: SpotifyService, private playerService: SpotifyPlayerService) {
+  constructor(private playerService: SpotifyPlayerService) {
 
-  }
-  
-  ngOnChanges(changes: SimpleChanges): void {
-    console.log(this.repeat);
   }
 
   ngOnInit(): void 
@@ -126,5 +126,19 @@ export class PlayerComponent implements OnInit, OnChanges {
         this.playerService.repeat("off").subscribe();
         break;
     }
+  }
+
+  changeVolume(): void {
+    this.playerService.volume(this.volume).subscribe();
+  }
+
+  toggleMute(): void {
+    if(this.volume > 0) {
+      this.volume = 0;
+    }
+    else {
+      this.volume = 100;
+    }
+    this.playerService.volume(this.volume).subscribe();
   }
 }
