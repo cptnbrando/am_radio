@@ -1,23 +1,26 @@
 <div id="playlistBar" *ngIf="showPlaylistBar">
-    <div id="playlists" *ngIf="!selectedPlaylist">
-        <h2>Playlists:</h2>
+    <div id="playlists" class="playlistBarDiv" *ngIf="!selectedPlaylist && !selectedPlaylistTracks">
+        <div class="playlistBarHead">
+          <h2>My Playlists</h2>
+        </div>
         <div class="bigList">
             <ol>
                 <li *ngFor="let list of userPlaylists" (click)="clickPlaylist(list)" class="clickable">{{list.name}}</li>
             </ol>
         </div>
     </div>
-    <div id="tracks" *ngIf="selectedPlaylist">
-        <h2 (click)="back()" id="tracksBack" class="clickable">
-          <fa-icon [icon]="faArrowLeft"></fa-icon> Tracks:
-        </h2>
-        <h2 (click)="playPlaylist()" class="clickable">
-            {{selectedPlaylist.name}}
-            <fa-icon [icon]="faPlay"></fa-icon>
-        </h2>
+    <div id="tracks" class="playlistBarDiv" *ngIf="selectedPlaylistTracks && selectedPlaylist">
+        <div class="playlistBarHead">
+            <h2 (click)="back()" id="tracksBack" class="clickable">
+                <fa-icon [icon]="faArrowLeft"></fa-icon> Tracks
+            </h2>
+            <h2 (click)="playPlaylist()" class="clickable">
+                {{selectedPlaylist.name}} <fa-icon [icon]="faPlay"></fa-icon>
+            </h2>
+        </div>
         <div class="bigList">
             <ol>
-                <li *ngFor="let track of selectedTracks" class="clickable" (click)="playTrack(track)">
+                <li *ngFor="let track of selectedPlaylistTracks" class="clickable" (click)="playTrack(track)">
                     {{track.track.artists[0].name}} - {{track.track.name}}
                 </li>
             </ol>

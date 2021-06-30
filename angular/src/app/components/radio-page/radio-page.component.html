@@ -2,7 +2,7 @@
   <app-header [showControls]="showControls" (toggleBarEvent)="toggleBar($event)" [stationNum]="stationNum" (changeStationEvent)="changeStation($event)"></app-header>
 
   <div id="settingsBars">
-    <app-playlist-bar class="side setting" [showPlaylistBar]="showPlaylistBar" [selectedPlaylist]="selectedPlaylist" [userPlaylists]="userPlaylists" (changePlaylistEvent)="changePlaylist($event)" (playPlaylistEvent)="playPlaylist()" (playTrackEvent)="playTrack($event)"></app-playlist-bar>
+    <app-playlist-bar class="side setting" [showPlaylistBar]="showPlaylistBar" [selectedPlaylist]="selectedPlaylist" [selectedPlaylistTracks]="selectedPlaylistTracks" [userPlaylists]="userPlaylists" (changePlaylistEvent)="changePlaylist($event)" (playPlaylistEvent)="playPlaylist()" (playTrackEvent)="playTrack($event)"></app-playlist-bar>
     <app-controls class="mid setting" [showControls]="showControls"></app-controls>
     <app-station-bar class="side setting" [stationNum]="stationNum" [showStationBar]="showStationBar" [currentStation]="currentStation" [selectedPlaylist]="selectedPlaylist" (createdStation)="createdStation()"></app-station-bar>
   </div>

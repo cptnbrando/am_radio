@@ -21,6 +21,7 @@ export class RadioPageComponent implements OnInit, OnChanges {
 
   // This will hold the selected playlist
   @Output() selectedPlaylist: any = null;
+  @Output() selectedPlaylistTracks: any = null;
 
   // This will hold a user playing playlist
   @Output() playingPlaylist: any = null;
@@ -149,58 +150,33 @@ export class RadioPageComponent implements OnInit, OnChanges {
   }
 
   // Man... hour 5:48:50 - 5:48:54 on Fireplace 10 hours full hd is nutty
+  // This will set the current station to default 000 and get/startAMRadio
   beginAMRadio(): void {
     // So that the station bar doesn't tweak from missing fields
     this.currentStation = new Station();
 
-    // Get am_radio (This server endpoint find am_radio and sets it as the active device in the Spotify API)
-    this.playerService.getAMRadio().subscribe(data => {
-      if(data) {
-        // If found, set it as the active player
-        this.currentDevice = data;
+    if(this.currentDevice.name != "am_radio") {
+      // Get am_radio (This server endpoint find am_radio and sets it as the active device in the Spotify API)
+      this.playerService.getAMRadio().subscribe(data => {
+        if(data) {
+          // If found, set it as the active player
+          this.currentDevice = data;
 
-        // Attempt to play a random playlist on am_radio
-        this.playerService.startAMRadio().subscribe(data => {
-          this.playingPlaylist = data;
-          console.log("startAMRadio");
-          console.log(data);
-        });
-      }
-    });
-  }
-
-  playRecentTrack(): void {
-    // Attempt to play most recently played track on am_radio
-    this.spotifyService.getRecentlyPlayed().subscribe(data => {
-      if(data) {
-        this.playerService.playTrack(data.uri).subscribe(data => {
-          if(data) {
-            // We have successfully played the track in the browser, now we just have to update the UI
-            console.log("playing recent track...");
-            this.isPlaying = true;
-          }
-        });
-      }
-    });
-  }
-
-  /**
-   * Gets 20 of the most recently played tracks and adds them to the queue one by one
-   */
-  playRecentlyPlayedTracks(): void {
-    this.spotifyService.getRecentlyPlayedTracks().subscribe(data => {
-      console.log("playRecentlyPlayedTracks");
-      // add each item to the queue
-      data.forEach((item: { track: { type: string; uri: string; }; }) => {
-        if(item.track.type === "TRACK") {
-          console.log(item.track);
-          this.playerService.addToQueue(item.track.uri).subscribe();
+          // Attempt to play a random playlist on am_radio
+          this.playerService.startAMRadio().subscribe(data => {
+            this.playingPlaylist = data;
+            this.changePlaylist(data);
+          });
         }
       });
-      
-      // skip to the next track and begin the queue
-      this.playerService.next().subscribe();
-    });
+    } else {
+      // Attempt to play a random playlist on am_radio
+      this.playerService.startAMRadio().subscribe(data => {
+        this.playingPlaylist = data;
+        this.changePlaylist(data);
+      });
+    }
+
   }
 
   /**
@@ -233,10 +209,12 @@ export class RadioPageComponent implements OnInit, OnChanges {
     this.next = event.detail.attributes.next;
   }
 
+  // Event callback for repeat changes detected by Spotify SDK player
   onRepeatChange(event: any): void {
     this.repeat = parseInt(event.detail.attributes.repeat.nodeValue);
   }
 
+  // Event callback for shuffle changes detected by Spotify SDK player
   onShuffleChange(event: any): void {
     this.shuffle = (event.detail.attributes.shuffle.nodeValue === "true");
   }
@@ -323,8 +301,18 @@ export class RadioPageComponent implements OnInit, OnChanges {
     }
   }
 
+  // Event callback for playlistBar when a new playlist is selected
   changePlaylist(playlist: any) {
     this.selectedPlaylist = playlist;
+    if(playlist === null) {
+      this.selectedPlaylistTracks = null;
+    } else {
+      this.spotifyService.getPlaylistTracks(playlist.id).subscribe(data => {
+        if(data) {
+          this.selectedPlaylistTracks = data;
+        }
+      });
+    }
   }
 
   // Play a track on am_radio 000
@@ -371,6 +359,7 @@ export class RadioPageComponent implements OnInit, OnChanges {
     return false;
   }
 
+  // Uses the ScriptService to load the Spotify Web Player SDK js script
   loadPlayerScript(): void {
     // We've got an access token, so let's make a spotify web sdk player
     this.script.load('spotifyPlaybackSDK', 'spotifyPlayer').then(data => {

@@ -149,43 +149,6 @@ public class SpotifyController {
     }
 
     /**
-     * Get the most recently played track
-     *
-     * @return TrackSimplified object of the most recently played track
-     * (Spotify doesn't like returning actual Track objects, but a TrackSimplified has pretty much everything)
-     */
-    @GetMapping(value = "/getRecentlyPlayed")
-    public TrackSimplified getRecentlyPlayed()
-    {
-        try {
-            return spotifyApi.getCurrentUsersRecentlyPlayedTracks().build().execute().getItems()[0].getTrack();
-        }
-        catch (IOException | SpotifyWebApiException | ParseException e) {
-            System.out.println("Exception caught in getRecentlyPlayed()");
-            System.out.println(e.getMessage());
-            return null;
-        }
-    }
-
-    /**
-     * Get the last 50 recently played tracks
-     *
-     * @return TrackSimplified object of the most recently played track
-     * (Spotify doesn't like returning actual Track objects, but a TrackSimplified has pretty much everything)
-     */
-    @GetMapping(value = "/getRecentlyPlayedTracks")
-    public PlayHistory[] getRecentlyPlayedTracks() {
-        try {
-            return spotifyApi.getCurrentUsersRecentlyPlayedTracks().build().execute().getItems();
-        }
-        catch (IOException | SpotifyWebApiException | ParseException e) {
-            System.out.println("Exception caught in getRecentlyPlayedTracks()");
-            System.out.println(e.getMessage());
-            return null;
-        }
-    }
-
-    /**
      * Attempts to access user data and if rejected, refreshes the tokens and returns new ones
      *
      * @return a valid access token
@@ -193,7 +156,7 @@ public class SpotifyController {
     @GetMapping(value = "/checkTokens")
     public ResponseMessage checkTokens()
     {
-        if(this.getAccessToken() == null || this.getUserPlaylists() == null)
+        if(this.spotifyApi.getAccessToken() == null || this.getUserPlaylists() == null)
         {
             // This should get new tokens from the current refresh token, if there's one there
             String[] tokens;
@@ -236,26 +199,6 @@ public class SpotifyController {
     }
 
     /**
-     * This will return an access token
-     *
-     * @return the current access token, valid or not
-     */
-    protected String getAccessToken()
-    {
-        return spotifyApi.getAccessToken();
-    }
-
-    /**
-     * This will return a refresh token
-     *
-     * @return the current refresh token, valid or not
-     */
-    protected String getRefreshToken()
-    {
-        return spotifyApi.getRefreshToken();
-    }
-
-    /**
      * Trade the current refresh token for a new access token
      *
      * @return access token and refresh token
@@ -271,10 +214,6 @@ public class SpotifyController {
         }
 
         AuthorizationCodeCredentials auth = spotifyApi.authorizationCodeRefresh(clientID, clientSecret, refreshToken).build().execute();
-
-        // Set the new tokens to the class one
-        spotifyApi.setAccessToken(auth.getAccessToken());
-        spotifyApi.setRefreshToken(auth.getRefreshToken());
 
         String[] tokens = new String[2];
         tokens[0] = auth.getAccessToken();

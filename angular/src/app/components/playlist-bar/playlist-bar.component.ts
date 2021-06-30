@@ -18,13 +18,12 @@ export class PlaylistBarComponent implements OnInit {
   @Input() user : any;
   @Input() userPlaylists: any[] = [];
 
-  @Input() selectedPlaylist: any;
+  @Input() selectedPlaylist: any = null;
+  @Input() selectedPlaylistTracks: any = null;
   @Output() changePlaylistEvent = new EventEmitter<any>();
 
   @Output() playPlaylistEvent = new EventEmitter<any>();
   @Output() playTrackEvent = new EventEmitter<any>();
-
-  selectedTracks: any = null;
 
   constructor(private spotifyService: SpotifyService, private playerService: SpotifyPlayerService) { }
 
@@ -34,18 +33,12 @@ export class PlaylistBarComponent implements OnInit {
   clickPlaylist(playlist: any): void{
     if(playlist != this.selectedPlaylist) {
       this.changePlaylistEvent.emit(playlist);
-
-      this.spotifyService.getPlaylistTracks(playlist.id).subscribe(data => {
-        if(data) {
-          this.selectedTracks = data;
-        }
-      });
     }
   }
 
   back(): void{
     this.changePlaylistEvent.emit(null);
-    this.selectedTracks = null;
+    this.selectedPlaylistTracks = null;
   }
 
   playTrack(track: any): void {
