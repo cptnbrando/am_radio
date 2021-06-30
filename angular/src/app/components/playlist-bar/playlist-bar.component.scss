@@ -2,42 +2,77 @@
     border: solid;
     border-color: green;
     color: white;
-    height: 100%;
-    width: 100%;
     position: relative;
+    height: 100%;
+    width: 99%;
 
     .playlistBarDiv {
-      height: 100%;
       display: block;
       position: absolute;
+      height: 100%;
       width: 100%;
     }
 
     .playlistBarHead {
       display: flex;
-      justify-content: space-around;
-      margin-top: 10px;
+      align-items: center;
+      margin-top: 20px;
       margin-bottom: 20px;
       height: 40px;
+
+      .clickable {
+        &:hover {
+          color: yellow;
+        }
+      }
+
+      #tracksBack {
+        flex: .53;
+        font-size: 1.2vw;
+        border-right: solid;
+      }
+
+      #playPlaylist {
+        flex: 1;
+        font-size: 1.2vw;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        margin-left: 15px;
+        text-align: right;
+
+        fa-icon {
+          margin-left: 15px
+        }
+      }
+
     }
 
     .bigList {
-      height: calc(100% - 70px);
+      height: calc(100% - 90px);
       overflow-y: auto;
+      padding-right: 15px;
+
+      // Experimental Firefox only Scrollbar
+      scrollbar-color: white black;
+      scrollbar-width: thin;
+
+      ::-webkit-scrollbar-thumb {
+        background: white;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: black;
+      }
     }
 
     li {
       border: 1px solid white;
       padding: 10px;
+      font-size: calc(.8vw);
 
       &:hover {
         border: 2px solid yellow;
-      }
-    }
-
-    #tracksBack {
-      &:hover {
-        color: yellow;
       }
     }
 }

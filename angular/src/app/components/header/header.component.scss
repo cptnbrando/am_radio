@@ -5,6 +5,12 @@
     border-bottom: solid;
     background-color: white;
 
+    #loadingNumbers {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
     .clickable {
         &:hover {
             color: grey;

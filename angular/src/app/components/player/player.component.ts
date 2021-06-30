@@ -43,6 +43,7 @@ export class PlayerComponent implements OnInit {
 
   @Output() toggleBarEvent = new EventEmitter<number>();
   @Output() isPlayingEvent = new EventEmitter<boolean>();
+  @Output() toggleLoadingEvent = new EventEmitter<boolean>();
 
   constructor(private playerService: SpotifyPlayerService) {
 
@@ -93,6 +94,8 @@ export class PlayerComponent implements OnInit {
   }
 
   togglePlay() {
+    this.toggleLoadingEvent.emit(true);
+
     if(this.isPlaying) {
       // The player is playing, so we want to pause it!
       this.playerService.pause().subscribe();
@@ -104,18 +107,22 @@ export class PlayerComponent implements OnInit {
   }
 
   skip() {
+    this.toggleLoadingEvent.emit(true);
     this.playerService.next().subscribe();
   }
 
   back() {
+    this.toggleLoadingEvent.emit(true);
     this.playerService.previous().subscribe();
   }
 
   shuffleChange(): void {
+    this.toggleLoadingEvent.emit(true);
     this.playerService.shuffle(!this.shuffle).subscribe();
   }
 
   repeatChange(): void {
+    this.toggleLoadingEvent.emit(true);
     switch(this.repeat) {
       case 0:
         this.playerService.repeat("context").subscribe();

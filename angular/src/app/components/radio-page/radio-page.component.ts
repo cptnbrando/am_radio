@@ -54,6 +54,9 @@ export class RadioPageComponent implements OnInit, OnChanges {
   @Output() showStationBar: boolean = false;
   @Output() showControls: boolean = false;
 
+  // isLoading
+  @Output() isLoading: boolean = true;
+
   // This is the canvas element
   // We update attributes of it to display changes to the player
   canvas: any;
@@ -73,6 +76,10 @@ export class RadioPageComponent implements OnInit, OnChanges {
   }
 
   ngOnInit() {
+
+    // Start isLoading
+    this.toggleLoading(true);
+
     // When we load up, set the User
     this.setUser();
 
@@ -154,6 +161,7 @@ export class RadioPageComponent implements OnInit, OnChanges {
   beginAMRadio(): void {
     // So that the station bar doesn't tweak from missing fields
     this.currentStation = new Station();
+    this.toggleLoading(true);
 
     if(this.currentDevice.name != "am_radio") {
       // Get am_radio (This server endpoint find am_radio and sets it as the active device in the Spotify API)
@@ -164,16 +172,26 @@ export class RadioPageComponent implements OnInit, OnChanges {
 
           // Attempt to play a random playlist on am_radio
           this.playerService.startAMRadio().subscribe(data => {
-            this.playingPlaylist = data;
-            this.changePlaylist(data);
+            if(data != null) {
+              this.playingPlaylist = data;
+              this.changePlaylist(data);
+              this.currentStation.stationName = "Recently Played";  
+            }
+
+            // stop isLoading
+            this.toggleLoading(false);
           });
         }
       });
     } else {
-      // Attempt to play a random playlist on am_radio
+      // If the device is already set, just play a random playlist
       this.playerService.startAMRadio().subscribe(data => {
         this.playingPlaylist = data;
         this.changePlaylist(data);
+        this.currentStation.stationName = "Recently Played";
+
+        // stop isLoading
+        this.toggleLoading(false);
       });
     }
 
@@ -212,11 +230,13 @@ export class RadioPageComponent implements OnInit, OnChanges {
   // Event callback for repeat changes detected by Spotify SDK player
   onRepeatChange(event: any): void {
     this.repeat = parseInt(event.detail.attributes.repeat.nodeValue);
+    this.toggleLoading(false);
   }
 
   // Event callback for shuffle changes detected by Spotify SDK player
   onShuffleChange(event: any): void {
     this.shuffle = (event.detail.attributes.shuffle.nodeValue === "true");
+    this.toggleLoading(false);
   }
 
   // This will get the current player and set the data to the UI
@@ -226,12 +246,16 @@ export class RadioPageComponent implements OnInit, OnChanges {
         // Set the data
         this.currentlyPlaying = data.item;
         this.currentDevice = data.device;
+
+        this.toggleLoading(false);
       }
     });
   }
 
   // This is called by the EventEmitter in the header component
   changeStation(stationNum: number) {
+    this.toggleLoading(true);
+
     if(this.stationNum > 0) {
       // Leave the old station if not playing on 000
       this.radioService.leaveStation(this.stationNum).subscribe();
@@ -279,6 +303,8 @@ export class RadioPageComponent implements OnInit, OnChanges {
         if(!this.showPlaylistBar) this.toggleBar(0);
         if(!this.showStationBar) this.toggleBar(1);
       }
+
+      this.toggleLoading(false);
     });
   }
 
@@ -313,10 +339,19 @@ export class RadioPageComponent implements OnInit, OnChanges {
         }
       });
     }
+
+    // console.log(this.currentStation);
+
+    if(this.currentStation && this.stationNum === 0) {
+      this.currentStation.stationName = playlist.name;
+    }
+
+    this.toggleLoading(false);
   }
 
   // Play a track on am_radio 000
   playTrack(track: any) {
+    this.toggleLoading(true);
     if(this.stationNum != 0) {
       this.changeStation(0);
     }
@@ -326,6 +361,7 @@ export class RadioPageComponent implements OnInit, OnChanges {
 
   // Play a playlist on am_radio 000
   playPlaylist() {
+    this.toggleLoading(true);
     if(this.stationNum != 0) {
       this.changeStation(0);
     }
@@ -365,6 +401,11 @@ export class RadioPageComponent implements OnInit, OnChanges {
     this.script.load('spotifyPlaybackSDK', 'spotifyPlayer').then(data => {
       console.log('scripts loaded ', data);
     }).catch(error => console.log(error));
+  }
+
+  // Set the isLoading icon to spin or not
+  toggleLoading(start: boolean): void {
+    this.isLoading = start;
   }
 
   @HostListener('window:unload', [ '$event' ])

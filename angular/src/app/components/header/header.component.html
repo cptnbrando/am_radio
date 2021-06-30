@@ -3,7 +3,12 @@
     <div id="scrollbar">
         <!-- This is where a scrollbar can goooo -->
     </div>
-    <div id="numBox">
-        <span id="stationNum" class="numControl clickable" (click)="changeStation(stationNum + 1)" (contextmenu)="changeStation(stationNum - 1)">{{stationNumDisplay()}}</span>
+    <div id="loadingNumbers">
+        <div id="loading" *ngIf="this.isLoading">
+            <mat-spinner id="loading" [diameter]="30"></mat-spinner>
+        </div>
+        <div id="numBox">
+            <span id="stationNum" class="numControl clickable" (click)="changeStation(stationNum + 1)" (contextmenu)="changeStation(stationNum - 1)">{{stationNumDisplay()}}</span>
+        </div>
     </div>
 </div>

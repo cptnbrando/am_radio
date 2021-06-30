@@ -1,8 +1,10 @@
 package com.example.AMRadioServer.controller;
 
+import com.example.AMRadioServer.model.ResponseMessage;
 import com.google.gson.JsonArray;
 import com.wrapper.spotify.SpotifyApi;
 import com.wrapper.spotify.exceptions.SpotifyWebApiException;
+import com.wrapper.spotify.model_objects.credentials.AuthorizationCodeCredentials;
 import com.wrapper.spotify.model_objects.miscellaneous.AudioAnalysis;
 import com.wrapper.spotify.model_objects.miscellaneous.CurrentlyPlaying;
 import com.wrapper.spotify.model_objects.miscellaneous.CurrentlyPlayingContext;
@@ -14,8 +16,11 @@ import com.wrapper.spotify.model_objects.specification.User;
 import org.apache.hc.core5.http.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.URI;
 import java.util.Random;
 
 @RestController
@@ -25,6 +30,7 @@ import java.util.Random;
 public class SpotifyPlayerController
 {
     private final SpotifyApi spotifyApi;
+    private static final String errorURL = "http://localhost:4200";
 
     @Autowired
     public SpotifyPlayerController(SpotifyApi spotifyApi) {
@@ -37,15 +43,35 @@ public class SpotifyPlayerController
      * @return CurrentlyPlayingContext for the Player
      */
     @GetMapping(value = "/getPlayer")
-    public CurrentlyPlayingContext getPlayer() {
+    public CurrentlyPlayingContext getPlayer() throws SpotifyWebApiException {
         try {
             return this.spotifyApi.getInformationAboutUsersCurrentPlayback().build().execute();
         }
-        catch (IOException | SpotifyWebApiException | ParseException e)
+        catch (IOException | ParseException e)
         {
             System.out.println("Exception in player/getPlayer");
-            System.out.println(e.getMessage());
+            System.out.println(e);
             return null;
+        } catch (SpotifyWebApiException e) {
+            if(e.getMessage().equals("Invalid access token") || e.getMessage().equals("Expired access token")) {
+                try {
+                    this.newTokens();
+                } catch (SpotifyWebApiException g) {
+                    if(e.getMessage().equals("No refresh token found")) {
+                        throw e;
+                    }
+                }
+                return this.getPlayer();
+            }
+            else if(e.getMessage().equals("No refresh token found")) {
+                throw e;
+            }
+            else {
+                System.out.println("SpotifyWebApiException in getPlayer");
+                System.out.println(e.getMessage());
+                System.out.println(e);
+                return null;
+            }
         }
     }
 
@@ -443,5 +469,46 @@ public class SpotifyPlayerController
             System.out.println(e.getMessage());
             return null;
         }
+    }
+
+    /**
+     * Gets new valid access/refresh tokens and sets them to the api
+     *
+     * @return a valid access token
+     */
+    private ResponseMessage newTokens() throws SpotifyWebApiException {
+        try {
+            String[] tokens = this.getNewTokens();
+            this.spotifyApi.setAccessToken(tokens[0]);
+            this.spotifyApi.setRefreshToken(tokens[1]);
+            return new ResponseMessage(this.spotifyApi.getAccessToken());
+        } catch (IOException | ParseException e) {
+            System.out.println("Exception caught in newTokens(): " + e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Trade the current refresh token for a new access token
+     *
+     * @return access token and refresh token
+     */
+    protected String[] getNewTokens() throws IOException, ParseException, SpotifyWebApiException {
+        String clientID = spotifyApi.getClientId();
+        String clientSecret = spotifyApi.getClientSecret();
+        String refreshToken = spotifyApi.getRefreshToken();
+
+        if(refreshToken == null || clientID == null || clientSecret == null)
+        {
+            throw new SpotifyWebApiException("No refresh token found");
+        }
+
+        AuthorizationCodeCredentials auth = spotifyApi.authorizationCodeRefresh(clientID, clientSecret, refreshToken).build().execute();
+
+        String[] tokens = new String[2];
+        tokens[0] = auth.getAccessToken();
+        tokens[1] = auth.getRefreshToken();
+
+        return tokens;
     }
 }

@@ -100,7 +100,6 @@ public class SpotifyController {
     {
         final GetListOfCurrentUsersPlaylistsRequest getListOfCurrentUsersPlaylistsRequest = spotifyApi.getListOfCurrentUsersPlaylists()
                 .limit(25)
-                .offset(5)
                 .build();
 
         try {

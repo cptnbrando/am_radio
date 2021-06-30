@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import {ProgressSpinnerMode} from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'app-header',
@@ -11,6 +12,9 @@ export class HeaderComponent implements OnInit {
 
   @Output() toggleBarEvent = new EventEmitter<number>();
   @Output() changeStationEvent = new EventEmitter<number>();
+
+  // Loading icon
+  @Input() isLoading: boolean = true;
 
   constructor() { }
 

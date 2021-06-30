@@ -14,8 +14,8 @@
             <h2 (click)="back()" id="tracksBack" class="clickable">
                 <fa-icon [icon]="faArrowLeft"></fa-icon> Tracks
             </h2>
-            <h2 (click)="playPlaylist()" class="clickable">
-                {{selectedPlaylist.name}} <fa-icon [icon]="faPlay"></fa-icon>
+            <h2 (click)="playPlaylist()" id="playPlaylist" class="clickable">
+                {{selectedPlaylist.name}} <fa-icon [icon]="faPlay" style="margin-left: 15px"></fa-icon>
             </h2>
         </div>
         <div class="bigList">
