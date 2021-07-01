@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import {ProgressSpinnerMode} from '@angular/material/progress-spinner';
+import { AppComponent } from 'src/app/app.component';
 
 @Component({
   selector: 'app-header',
@@ -49,6 +49,12 @@ export class HeaderComponent implements OnInit {
     {
       return `${this.stationNum}`;
     }
+  }
+
+  // Logout from am_radio
+  logout(): any {
+    localStorage.clear();
+    window.location.replace(AppComponent.webURL);
   }
 
 }

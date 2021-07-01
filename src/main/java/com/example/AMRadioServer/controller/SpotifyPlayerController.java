@@ -52,26 +52,6 @@ public class SpotifyPlayerController
             System.out.println("Exception in player/getPlayer");
             System.out.println(e);
             return null;
-        } catch (SpotifyWebApiException e) {
-            if(e.getMessage().equals("Invalid access token") || e.getMessage().equals("Expired access token")) {
-                try {
-                    this.newTokens();
-                } catch (SpotifyWebApiException g) {
-                    if(e.getMessage().equals("No refresh token found")) {
-                        throw e;
-                    }
-                }
-                return this.getPlayer();
-            }
-            else if(e.getMessage().equals("No refresh token found")) {
-                throw e;
-            }
-            else {
-                System.out.println("SpotifyWebApiException in getPlayer");
-                System.out.println(e.getMessage());
-                System.out.println(e);
-                return null;
-            }
         }
     }
 

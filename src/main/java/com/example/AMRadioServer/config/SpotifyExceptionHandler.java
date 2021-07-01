@@ -5,14 +5,17 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-//@ControllerAdvice
+@ControllerAdvice
 public class SpotifyExceptionHandler {
 
-//    private static final String appURL = "http://localhost:4200";
-//
-//    @ExceptionHandler(SpotifyWebApiException.class)
-//    public String redirect(SpotifyWebApiException e, RedirectAttributes redirectAttributes) {
-//        redirectAttributes.addFlashAttribute("message", e.getCause().getMessage());
-//        return "redirect:" + appURL;
-//    }
+    private static final String appURL = "http://localhost:4200";
+
+    @ExceptionHandler(SpotifyWebApiException.class)
+    public String redirect(SpotifyWebApiException e, RedirectAttributes redirectAttributes) {
+        System.out.println("SpotifyExceptionHandler!");
+        System.out.println(e.getMessage());
+
+        redirectAttributes.addFlashAttribute("message", e.getCause().getMessage());
+        return "redirect:" + appURL;
+    }
 }

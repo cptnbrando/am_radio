@@ -1,7 +1,5 @@
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
-import { SpotifyService } from 'src/app/services/spotify.service';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { faArrowLeft, faPlay } from '@fortawesome/free-solid-svg-icons';
-import { SpotifyPlayerService } from 'src/app/services/spotify-player.service';
 
 @Component({
   selector: 'app-playlist-bar',
@@ -25,12 +23,15 @@ export class PlaylistBarComponent implements OnInit {
   @Output() playPlaylistEvent = new EventEmitter<any>();
   @Output() playTrackEvent = new EventEmitter<any>();
 
-  constructor(private spotifyService: SpotifyService, private playerService: SpotifyPlayerService) { }
+  @Output() toggleLoadingEvent = new EventEmitter<boolean>();
+
+  constructor() { }
 
   ngOnInit(): void {
   }
 
   clickPlaylist(playlist: any): void{
+    this.toggleLoadingEvent.emit(true);
     if(playlist != this.selectedPlaylist) {
       this.changePlaylistEvent.emit(playlist);
     }
@@ -42,10 +43,12 @@ export class PlaylistBarComponent implements OnInit {
   }
 
   playTrack(track: any): void {
+    this.toggleLoadingEvent.emit(true);
     this.playTrackEvent.emit(track);
   }
 
   playPlaylist(): void {
+    this.toggleLoadingEvent.emit(true);
     this.playPlaylistEvent.emit();
   }
 

@@ -333,20 +333,18 @@ export class RadioPageComponent implements OnInit, OnChanges {
     if(playlist === null) {
       this.selectedPlaylistTracks = null;
     } else {
+      // Set the station 000 name
+      if(this.currentStation && this.stationNum === 0) {
+        this.currentStation.stationName = playlist.name;
+      }
+      // get the tracks from the chosen playlist
       this.spotifyService.getPlaylistTracks(playlist.id).subscribe(data => {
         if(data) {
           this.selectedPlaylistTracks = data;
+          this.toggleLoading(false);
         }
       });
     }
-
-    // console.log(this.currentStation);
-
-    if(this.currentStation && this.stationNum === 0) {
-      this.currentStation.stationName = playlist.name;
-    }
-
-    this.toggleLoading(false);
   }
 
   // Play a track on am_radio 000

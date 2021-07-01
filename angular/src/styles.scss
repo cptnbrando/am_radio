@@ -32,6 +32,22 @@ $AMRadio-theme: mat-light-theme((color: (primary: $AMRadio-primary,
 html, body {
   margin: 0;
   padding: 0;
+
+  // Experimental Firefox only Scrollbar
+  scrollbar-color: white black;
+  scrollbar-width: thin;
+
+  ::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: white;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: black;
+  }
 }
 
 app-root {

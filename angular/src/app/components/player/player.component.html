@@ -19,11 +19,15 @@
             <fa-icon [icon]="faRandom" size="2x" *ngIf="!shuffle"></fa-icon>
             <fa-icon [icon]="faRandom" size="2x" *ngIf="shuffle" class="selected"></fa-icon>
         </div>
-        <fa-icon [icon]="faAngleLeft" (click)="back()" *ngIf="stationNum === 0" class="clickable" size="3x">
+        <fa-icon [icon]="faAngleLeft" (click)="back()" *ngIf="stationNum === 0"
+          class="clickable" size="3x">
         </fa-icon>
-        <fa-icon [icon]="faPlay" (click)="togglePlay()" *ngIf="!isPlaying" class="clickable" size="3x"></fa-icon>
-        <fa-icon [icon]="faPause" (click)="togglePlay()" *ngIf="isPlaying" class="clickable" size="3x"></fa-icon>
-        <fa-icon [icon]="faAngleRight" (click)="skip()" *ngIf="stationNum === 0" class="clickable" size="3x"></fa-icon>
+        <div (click)="togglePlay()" class="clickable">
+            <fa-icon [icon]="faPlay" *ngIf="!isPlaying" size="3x"></fa-icon>
+            <fa-icon [icon]="faPause" *ngIf="isPlaying" size="3x"></fa-icon>
+        </div>
+        <fa-icon [icon]="faAngleRight" (click)="skip()" *ngIf="stationNum === 0"
+          class="clickable" size="3x"></fa-icon>
         <div (click)="repeatChange()" *ngIf="stationNum === 0" class="clickable">
             <fa-icon [icon]="faSync" size="2x" *ngIf="repeat === 0"></fa-icon>
             <fa-icon [icon]="faSync" size="2x" *ngIf="repeat === 1" class="selected"></fa-icon>

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, HostListener, Input, OnInit, Output } from '@angular/core';
 import { faAngleLeft, faAngleRight, faPause, faPlay, faRandom, faRecycle, faSync, faVolumeDown, faVolumeMute, faVolumeOff, faVolumeUp } from '@fortawesome/free-solid-svg-icons';
 import { SpotifyPlayerService } from '../../services/spotify-player.service';
 
@@ -43,6 +43,8 @@ export class PlayerComponent implements OnInit {
 
   @Output() toggleBarEvent = new EventEmitter<number>();
   @Output() isPlayingEvent = new EventEmitter<boolean>();
+
+  @Input() isLoading: boolean = true;
   @Output() toggleLoadingEvent = new EventEmitter<boolean>();
 
   constructor(private playerService: SpotifyPlayerService) {
@@ -89,57 +91,76 @@ export class PlayerComponent implements OnInit {
     });
   }
 
+  // Trigger an event to open the playlist / station bars
   toggleBar(bar: number) {
     this.toggleBarEvent.emit(bar);
   }
 
+  // Event for clicking play button, toggles play
   togglePlay() {
-    this.toggleLoadingEvent.emit(true);
-
-    if(this.isPlaying) {
-      // The player is playing, so we want to pause it!
-      this.playerService.pause().subscribe();
-    }
-    else {
-      // The player is not playing, so we want to play it!
-      this.playerService.play().subscribe();
+    if(!this.isLoading) {
+      this.toggleLoadingEvent.emit(true);
+  
+      if(this.isPlaying) {
+        // The player is playing, so we want to pause it!
+        this.playerService.pause().subscribe();
+      }
+      else {
+        // The player is not playing, so we want to play it!
+        this.playerService.play().subscribe();
+      }
     }
   }
 
+  // Event for right arrow, skip to the next track
   skip() {
-    this.toggleLoadingEvent.emit(true);
-    this.playerService.next().subscribe();
-  }
-
-  back() {
-    this.toggleLoadingEvent.emit(true);
-    this.playerService.previous().subscribe();
-  }
-
-  shuffleChange(): void {
-    this.toggleLoadingEvent.emit(true);
-    this.playerService.shuffle(!this.shuffle).subscribe();
-  }
-
-  repeatChange(): void {
-    this.toggleLoadingEvent.emit(true);
-    switch(this.repeat) {
-      case 0:
-        this.playerService.repeat("context").subscribe();
-        break;
-      case 1:
-        this.playerService.repeat("track").subscribe();
-        break;
-      case 2:
-        this.playerService.repeat("off").subscribe();
-        break;
+    if(!this.isLoading) {
+      this.toggleLoadingEvent.emit(true);
+      this.playerService.next().subscribe();
     }
   }
 
+  // Event for left arrow, go to previous track
+  back() {
+    if(!this.isLoading) {
+      this.toggleLoadingEvent.emit(true);
+      this.playerService.previous().subscribe();
+    }
+  }
+
+  // Event for shuffle button, toggle shuffle
+  shuffleChange(): void {
+    if(!this.isLoading) {
+      this.toggleLoadingEvent.emit(true);
+      this.playerService.shuffle(!this.shuffle).subscribe();
+    }
+  }
+
+  // Event for repeat button, toggle repeat
+  repeatChange(): void {
+    if(!this.isLoading)
+    {
+      this.toggleLoadingEvent.emit(true);
+      switch(this.repeat) {
+        case 0:
+          this.playerService.repeat("context").subscribe();
+          break;
+        case 1:
+          this.playerService.repeat("track").subscribe();
+          break;
+        case 2:
+          this.playerService.repeat("off").subscribe();
+          break;
+      }
+    }
+  }
+
+  // Event for volume slider, change the volume
   changeVolume(): void {
     this.playerService.volume(this.volume).subscribe();
   }
 
+  // Event for clicking volume icon, toggle mute
   toggleMute(): void {
     if(this.volume > 0) {
       this.volume = 0;
@@ -148,5 +169,33 @@ export class PlayerComponent implements OnInit {
       this.volume = 100;
     }
     this.playerService.volume(this.volume).subscribe();
+  }
+
+  // Listens for keyboard events to control the player
+  @HostListener('window:keyup', ['$event'])
+  keyEvent(event: KeyboardEvent) {
+    // console.log(event);
+    switch(event.code) {
+      // Spacebar togglePlay
+      case "Space":
+        this.togglePlay();
+        break;
+      // Left arrow back()
+      case "ArrowLeft":
+        this.back();
+        break;
+      // Right arrow skip()
+      case "ArrowRight":
+        this.skip();
+        break;
+      // S key toggleBar(1)
+      case "KeyS":
+        this.toggleBar(1);
+        break;
+      // P key toggleBar(0)
+      case "KeyP":
+        this.toggleBar(0);
+        break;
+    }
   }
 }

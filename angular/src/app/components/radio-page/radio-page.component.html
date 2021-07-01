@@ -3,7 +3,10 @@
     (changeStationEvent)="changeStation($event)" [isLoading]="isLoading"></app-header>
 
   <div id="settingsBars">
-    <app-playlist-bar class="side setting" [showPlaylistBar]="showPlaylistBar" [selectedPlaylist]="selectedPlaylist" [selectedPlaylistTracks]="selectedPlaylistTracks" [userPlaylists]="userPlaylists" (changePlaylistEvent)="changePlaylist($event)" (playPlaylistEvent)="playPlaylist()" (playTrackEvent)="playTrack($event)"></app-playlist-bar>
+    <app-playlist-bar class="side setting" [showPlaylistBar]="showPlaylistBar" [selectedPlaylist]="selectedPlaylist"
+      [selectedPlaylistTracks]="selectedPlaylistTracks" [userPlaylists]="userPlaylists"
+      (changePlaylistEvent)="changePlaylist($event)" (playPlaylistEvent)="playPlaylist()"
+      (playTrackEvent)="playTrack($event)" (toggleLoadingEvent)="toggleLoading($event)"></app-playlist-bar>
     <app-controls class="mid setting" [showControls]="showControls"></app-controls>
     <app-station-bar class="side setting" [stationNum]="stationNum" [showStationBar]="showStationBar" [currentStation]="currentStation" [selectedPlaylist]="selectedPlaylist" (createdStation)="createdStation()"></app-station-bar>
   </div>
@@ -11,7 +14,7 @@
   <app-player id="appPlayer" [stationNum]="stationNum" [currentDevice]="currentDevice"
     [showPlaylistBar]="showPlaylistBar" [showStationBar]="showStationBar" (toggleBarEvent)="toggleBar($event)"
     [currentlyPlaying]="currentlyPlaying" [isPlaying]="isPlaying" [position]="position" [user]="user"
-    [currentStation]="currentStation" [repeat]="repeat" [shuffle]="shuffle" [playingPlaylist]="playingPlaylist" (toggleLoadingEvent)="toggleLoading($event)"></app-player>
+    [currentStation]="currentStation" [repeat]="repeat" [shuffle]="shuffle" [playingPlaylist]="playingPlaylist" (toggleLoadingEvent)="toggleLoading($event)" [isLoading]="isLoading"></app-player>
   
 </div>
 
