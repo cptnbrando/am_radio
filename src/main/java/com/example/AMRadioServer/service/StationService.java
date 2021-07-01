@@ -20,6 +20,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * This service class controls the Station
@@ -45,6 +47,8 @@ public class StationService {
     // Holds all threads for each station
     private HashMap<Integer, Thread> allRadioThreads;
 
+    private HashMap<Integer, ExecutorService> allRadioExecutors;
+
     private final SpotifyApi spotifyApi;
 
     @Autowired
@@ -53,6 +57,7 @@ public class StationService {
         this.spotifyApi = spotifyApi;
         this.allStations = new HashMap<>();
         this.allRadioThreads = new HashMap<>();
+
 
         // Initialize with all currently created Stations from db
         List<Station> all = this.stationRepo.findAll();
@@ -135,23 +140,6 @@ public class StationService {
     }
 
     /**
-     * Get all the stations from the HashMap
-     *
-     * @return List of Station objects
-     */
-    public List<Station> getAllStationsList() {
-        try {
-            return new ArrayList<>(this.allStations.values());
-        }
-        catch(Exception e)
-        {
-            System.out.println("Exception caught in stationService/getAllStations");
-            System.out.println(e.getMessage());
-            return null;
-        }
-    }
-
-    /**
      * Checks if the current logged in user is in the listeners list for a given station
      * If not, adds it to the HashMap stations list
      *
@@ -226,29 +214,16 @@ public class StationService {
      * @param stationNum ID of the Station to start
      */
     public void start(int stationNum) {
-        // If this is true, we shouldn't be here...
-        if(this.allRadioThreads.containsKey(stationNum)) {
-            return;
-        }
         RadioThread radio = new RadioThread(this, stationNum);
         Thread worker = new Thread(radio);
-
         worker.start();
 
         this.allRadioThreads.put(stationNum, worker);
         System.out.println("Started radio #" + stationNum);
     }
 
-    /**
-     * Uses the Station object's update method to change the Station's properties to a next track
-     * This wrapper method also saves it to db and hashmap
-     *
-     * @param station Station to update
-     */
     public void updateStation(Station station) {
-        station.update(this.spotifyApi);
-
-        // Save to HashMap and db
+        station.update();
         this.saveStation(station);
     }
 

@@ -36,7 +36,9 @@ export class PlayerComponent implements OnInit {
   @Input() currentDevice: any = {};
   @Input() currentlyPlaying: any = {};
   @Input() position: number = 0;
-  volume: number = 100;
+
+  @Input() volume: number = 100;
+  @Output() volumeEvent = new EventEmitter<number>();
 
   @Input() shuffle: boolean = false;
   @Input() repeat: number = 0;
@@ -159,7 +161,8 @@ export class PlayerComponent implements OnInit {
 
   // Event for volume slider, change the volume
   changeVolume(): void {
-    this.playerService.volume(this.volume).subscribe();
+    this.volumeEvent.emit(this.volume);
+    // this.playerService.volume(this.volume).subscribe();
   }
 
   // Event for clicking volume icon, toggle mute
@@ -170,7 +173,7 @@ export class PlayerComponent implements OnInit {
     else {
       this.volume = 100;
     }
-    this.playerService.volume(this.volume).subscribe();
+    this.volumeEvent.emit(this.volume);
   }
 
   // Listens for keyboard events to control the player

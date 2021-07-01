@@ -1,8 +1,13 @@
 package com.example.AMRadioServer.service;
 
 import com.example.AMRadioServer.model.Station;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Scope;
+import com.wrapper.spotify.SpotifyApi;
+import com.wrapper.spotify.exceptions.SpotifyWebApiException;
+import com.wrapper.spotify.model_objects.specification.PlaylistTrack;
+import org.apache.hc.core5.http.ParseException;
+
+import java.io.IOException;
+import java.util.*;
 
 /**
  * Runnable thread class for a radio to loop and update fields
@@ -32,8 +37,6 @@ public class RadioThread implements Runnable {
      *
      * @see Thread#run()
      */
-    @Bean
-    @Scope(value="request")
     @Override
     public void run() {
         Station station = stationService.getStation(stationNum, true);

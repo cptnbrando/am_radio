@@ -15,7 +15,7 @@
   <app-player id="appPlayer" [stationNum]="stationNum" [currentDevice]="currentDevice"
     [showPlaylistBar]="showPlaylistBar" [showStationBar]="showStationBar" (toggleBarEvent)="toggleBar($event)"
     [currentlyPlaying]="currentlyPlaying" [isPlaying]="isPlaying" [position]="position" [user]="user"
-    [currentStation]="currentStation" [repeat]="repeat" [shuffle]="shuffle" [playingPlaylist]="playingPlaylist" (toggleLoadingEvent)="toggleLoading($event)" [isLoading]="isLoading" [isTyping]="isTyping"></app-player>
+    [currentStation]="currentStation" [repeat]="repeat" [shuffle]="shuffle" [playingPlaylist]="playingPlaylist" (toggleLoadingEvent)="toggleLoading($event)" [isLoading]="isLoading" [isTyping]="isTyping" (volumeEvent)="changeVolume($event)" [volume]="volume"></app-player>
   
 </div>
 

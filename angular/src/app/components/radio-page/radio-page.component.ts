@@ -40,6 +40,7 @@ export class RadioPageComponent implements OnInit, OnChanges {
   next: any = "";
   @Output() shuffle: boolean = false;
   @Output() repeat: number = 0;
+  @Output() volume: number = 100;
 
   // The device currently playing
   @Output() currentDevice: any = {};
@@ -79,7 +80,6 @@ export class RadioPageComponent implements OnInit, OnChanges {
   }
 
   ngOnInit() {
-
     // Start isLoading
     this.toggleLoading(true);
 
@@ -250,7 +250,7 @@ export class RadioPageComponent implements OnInit, OnChanges {
         this.currentlyPlaying = data.item;
         this.currentDevice = data.device;
 
-        this.toggleLoading(false);
+        // this.toggleLoading(false);
       }
     });
   }
@@ -282,7 +282,7 @@ export class RadioPageComponent implements OnInit, OnChanges {
     }
   }
 
-  // Called by changeStation when the station number is changed
+  // Called by changeStation when the station number is changed if the station exists
   setStation(stationNum: number): void {
     this.toggleLoading(true);
 
@@ -290,17 +290,28 @@ export class RadioPageComponent implements OnInit, OnChanges {
       return;
     }
 
+    // this.playerService.shuffle(false).subscribe();
+    // this.playerService.repeat("off").subscribe();
+
+    this.toggleLoading(true);
+
     // Get station at given number
     this.radioService.getStation(stationNum).subscribe(data => {
       // This route checks if it exists first, if not it returns back null
       if(data) {
+        // Set the volume to 0 to not have that annoying skip
+        // Store the previous value to set it afterwards
+        let myVol = this.volume;
+        this.changeVolume(0);
         this.currentStation = data;
-        // We should connect to the websocket here
-        // this.wsAPI._connect(stationNum);
+
         this.radioService.joinStation(stationNum).subscribe((data) => {
           // now we check if the queue is right
           // if not, we keep skipping until the station is lined up
-          if(data) this.toggleLoading(false);
+          if(data) {
+            this.toggleLoading(false);
+            this.changeVolume(myVol);
+          }
         });
       }
       else {
@@ -398,6 +409,12 @@ export class RadioPageComponent implements OnInit, OnChanges {
     return false;
   }
 
+  // Change volume event handler
+  changeVolume(value: any): void {
+    this.volume = value;
+    this.playerService.volume(value).subscribe();
+  }
+
   // Uses the ScriptService to load the Spotify Web Player SDK js script
   loadPlayerScript(): void {
     // We've got an access token, so let's make a spotify web sdk player
@@ -431,7 +448,7 @@ export class RadioPageComponent implements OnInit, OnChanges {
   }
 
   // If the user is clicking anywhere, they are not typing
-  @HostListener('window:click', ['$event'])
+  @HostListener('window:click', [ '$event' ])
   clearTyping(event: any) {
     this.toggleTyping(false);
   }

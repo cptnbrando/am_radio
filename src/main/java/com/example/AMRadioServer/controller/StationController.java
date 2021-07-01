@@ -54,7 +54,7 @@ public class StationController extends SpotifyPlayerController {
      * @param stationID ID of station to join
      */
     @GetMapping(value = "/{stationID}/join")
-    public boolean joinStation(@PathVariable("stationID") int stationID) throws InterruptedException, SpotifyWebApiException {
+    public boolean joinStation(@PathVariable("stationID") int stationID) throws SpotifyWebApiException, InterruptedException {
         Station station = this.stationService.getStation(stationID, false);
         if(station == null) {
             return false;
@@ -72,37 +72,20 @@ public class StationController extends SpotifyPlayerController {
         if(!station.isPlaying()) {
             this.stationService.start(stationID);
 
-            // wait a few seconds for the current and next fields to get populated
-//            Thread.sleep(2500);
-
-            // There's no clear queue, or any queue endpoints from Spotify,
-            // sooooo we are skipping through until the next track is the station one
-            // god I hope they make an endpoint soon...
-            //
-            // nvm we gotta do it on the frontend because
-            // THERE ISN'T ANYWAY TO GET THE NEXT UPCOMING TRACK AT ALL????
-            // like we can only ADD TO THE QUEUE???
-            // but if there's other items in the queue it will just
-            // add it after all of them????
-            //
-            // i literally can't rn smh
-
-            // then play the current track and queue up the next one
-//            super.playTrack(station.getCurrentURI());
-//            super.addToQueue(station.getNextURI());
+            // Wait a second for the fields to get right
+            Thread.sleep(3000);
         }
 
         // Play the current track and seek it to the right time if the station is playing
         // System.currentTime - station.getPlayTime
-        int currentVol = super.getPlayer().getDevice().getVolume_percent();
-        super.volume(0);
         if(station.isPlaying() && super.playTrack(station.getCurrentURI())) {
             long seekValue = System.currentTimeMillis() - station.getPlayTime();
             System.out.println("Station is playing, seeking to: " + seekValue);
             super.seek((int) seekValue);
         }
+
+        // Add the next one to the queue
         super.addToQueue(station.getNextURI());
-        super.volume(currentVol);
 
         return true;
     }

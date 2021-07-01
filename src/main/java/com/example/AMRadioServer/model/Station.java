@@ -10,7 +10,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.hc.core5.http.ParseException;
 import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Scope;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.scheduling.annotation.Async;
 
 import javax.persistence.*;
 import java.io.IOException;
@@ -120,7 +123,13 @@ public class Station
      * Stored in HashMap value
      */
     @Transient
-    private List<PlaylistTrack> tracks;
+    private List<PlaylistTrack> allTracks;
+
+    /**
+     * I can't use the SpotifyAPI here, so we have another list and remove tracks as they get played
+     */
+    @Transient
+    private List<PlaylistTrack> notPlayedTracks;
 
     /**
      * This should point to the currently playing song
@@ -169,7 +178,8 @@ public class Station
         // Transients
         this.creator = playlist.getOwner();
         this.playlist = playlist;
-        this.tracks = tracks;
+        this.allTracks = tracks;
+        this.notPlayedTracks = new ArrayList<>(tracks);
         this.current = null;
         this.next = null;
         this.listeners = new HashMap<>();
@@ -198,42 +208,32 @@ public class Station
     /**
      * Change the current to the next and get a new random next track
      * Updates the track fields and set the playTime to the current time
-     *
-     * @param spotifyApi to update info from Spotify
      */
-    public void update(SpotifyApi spotifyApi) {
+    public void update() {
         // Refresh the tracks list if it is empty
-        if(this.getTracks().isEmpty())
+        if(this.getNotPlayedTracks().isEmpty())
         {
-            try {
-                PlaylistTrack[] all = spotifyApi.getPlaylistsItems(this.getPlaylistID()).build().execute().getItems();
-                List<PlaylistTrack> trackList = Arrays.asList(all);
-                Collections.shuffle(trackList);
-                this.setTracks(trackList);
-            }
-            catch (IOException | SpotifyWebApiException | ParseException e) {
-                System.out.println("Spotify exception caught in StationService update");
-                System.out.println(e.getMessage());
-            }
+            List<PlaylistTrack> trackList = this.allTracks;
+            Collections.shuffle(trackList);
+            this.setNotPlayedTracks(trackList);
         }
 
-        // If next is null, set it to a random unplayed track
-        if(this.getNext() == null)
-        {
+        System.out.println("In update()");
+        System.out.println(this.getNotPlayedTracks().size());
+
+        // If next is null, then we get a new random track
+        if(this.next == null) {
             // Set a random next track and remove it from the list to avoid repeated tracks
-            int rnd = new Random().nextInt(this.getTracks().size());
-            ArrayList<PlaylistTrack> allTracks = new ArrayList<>(this.getTracks());
-            PlaylistTrack nextTrack = allTracks.remove(rnd);
-            this.setNext(nextTrack.getTrack());
-            this.setTracks(allTracks);
+            int rnd = new Random().nextInt(this.getNotPlayedTracks().size());
+            this.setNext(this.getNotPlayedTracks().remove(rnd).getTrack());
         }
 
         // Current to next
         this.setCurrent(this.getNext());
 
         // Set a random next track and remove it from the list to avoid repeated tracks
-        int rnd = new Random().nextInt(this.getTracks().size());
-        this.setNext(this.getTracks().remove(rnd).getTrack());
+        int rnd = new Random().nextInt(this.getNotPlayedTracks().size());
+        this.setNext(this.getNotPlayedTracks().remove(rnd).getTrack());
 
         // Set new playTime
         this.setPlayTime(System.currentTimeMillis());
@@ -245,7 +245,7 @@ public class Station
     public void stop() {
         this.setPlaying(false);
         this.setListeners(new HashMap<>());
-        this.setTracks(new ArrayList<>());
+        this.setNotPlayedTracks(new ArrayList<>(this.allTracks));
         this.setCurrent(null);
         this.setNext(null);
         this.setPlayTime(0);

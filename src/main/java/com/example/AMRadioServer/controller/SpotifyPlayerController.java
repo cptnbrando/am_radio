@@ -58,14 +58,11 @@ public class SpotifyPlayerController
                 try {
                     this.newTokens();
                 } catch (SpotifyWebApiException g) {
-                    if(e.getMessage().equals("No refresh token found")) {
-                        throw e;
+                    if(g.getMessage().equals("No refresh token found")) {
+                        throw g;
                     }
                 }
                 return this.getPlayer();
-            }
-            else if(e.getMessage().equals("No refresh token found")) {
-                throw e;
             }
             else {
                 System.out.println("SpotifyWebApiException in getPlayer");
@@ -183,7 +180,7 @@ public class SpotifyPlayerController
             this.spotifyApi.addItemToUsersPlaybackQueue(trackURI).build().execute();
             this.spotifyApi.skipUsersPlaybackToNextTrack().build().execute();
 
-            Thread.sleep(5000);
+            Thread.sleep(2500);
             IPlaylistItem current = this.spotifyApi.getUsersCurrentlyPlayingTrack().build().execute().getItem();
 
             // Loop until the queue and current playing track is right
@@ -196,10 +193,10 @@ public class SpotifyPlayerController
                 Thread.sleep(2000);
                 current = this.spotifyApi.getUsersCurrentlyPlayingTrack().build().execute().getItem();
                 count++;
-                if(count > 3) {
+                if(count > 5) {
                     this.spotifyApi.addItemToUsersPlaybackQueue(trackURI).build().execute();
+                    count = 0;
                 }
-                Thread.sleep(2000);
             }
 
             return true;
