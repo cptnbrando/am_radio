@@ -22,6 +22,7 @@ import { FormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatSliderModule } from '@angular/material/slider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { SeekerComponent } from './components/player/seeker/seeker.component';
 
 @NgModule({
   declarations: [
@@ -34,7 +35,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     StationBarComponent,
     LandingPageComponent,
     RadioPageComponent,
-    DomWatcherDirective
+    DomWatcherDirective,
+    SeekerComponent
   ],
   imports: [
     BrowserModule,

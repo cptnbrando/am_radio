@@ -57,6 +57,9 @@ export class RadioPageComponent implements OnInit, OnChanges {
   // isLoading
   @Output() isLoading: boolean = true;
 
+  // isTyping
+  @Output() isTyping: boolean = false;
+
   // This is the canvas element
   // We update attributes of it to display changes to the player
   canvas: any;
@@ -281,6 +284,8 @@ export class RadioPageComponent implements OnInit, OnChanges {
 
   // Called by changeStation when the station number is changed
   setStation(stationNum: number): void {
+    this.toggleLoading(true);
+
     if(stationNum === 0) {
       return;
     }
@@ -292,10 +297,10 @@ export class RadioPageComponent implements OnInit, OnChanges {
         this.currentStation = data;
         // We should connect to the websocket here
         // this.wsAPI._connect(stationNum);
-        this.radioService.joinStation(stationNum).subscribe(() => {
+        this.radioService.joinStation(stationNum).subscribe((data) => {
           // now we check if the queue is right
           // if not, we keep skipping until the station is lined up
-          
+          if(data) this.toggleLoading(false);
         });
       }
       else {
@@ -406,6 +411,12 @@ export class RadioPageComponent implements OnInit, OnChanges {
     this.isLoading = start;
   }
 
+  // Check for keyboard input typing in chatroom
+  toggleTyping(typing: boolean): void {
+    console.log(typing);
+    this.isTyping = typing;
+  }
+
   @HostListener('window:unload', [ '$event' ])
   unloadHandler(event: any) {
     console.log("window unload buh bye");
@@ -417,6 +428,12 @@ export class RadioPageComponent implements OnInit, OnChanges {
     if(this.stationNum > 0) {
       this.radioService.leaveStation(this.stationNum).subscribe();
     }
+  }
+
+  // If the user is clicking anywhere, they are not typing
+  @HostListener('window:click', ['$event'])
+  clearTyping(event: any) {
+    this.toggleTyping(false);
   }
 
 }

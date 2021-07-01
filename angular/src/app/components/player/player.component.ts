@@ -47,6 +47,8 @@ export class PlayerComponent implements OnInit {
   @Input() isLoading: boolean = true;
   @Output() toggleLoadingEvent = new EventEmitter<boolean>();
 
+  @Input() isTyping: boolean = false;
+
   constructor(private playerService: SpotifyPlayerService) {
 
   }
@@ -175,27 +177,29 @@ export class PlayerComponent implements OnInit {
   @HostListener('window:keyup', ['$event'])
   keyEvent(event: KeyboardEvent) {
     // console.log(event);
-    switch(event.code) {
-      // Spacebar togglePlay
-      case "Space":
-        this.togglePlay();
-        break;
-      // Left arrow back()
-      case "ArrowLeft":
-        this.back();
-        break;
-      // Right arrow skip()
-      case "ArrowRight":
-        this.skip();
-        break;
-      // S key toggleBar(1)
-      case "KeyS":
-        this.toggleBar(1);
-        break;
-      // P key toggleBar(0)
-      case "KeyP":
-        this.toggleBar(0);
-        break;
+    if(!this.isTyping) {
+      switch(event.code) {
+        // Spacebar togglePlay
+        case "Space":
+          this.togglePlay();
+          break;
+        // Left arrow back()
+        case "ArrowLeft":
+          this.back();
+          break;
+        // Right arrow skip()
+        case "ArrowRight":
+          this.skip();
+          break;
+        // S key toggleBar(1)
+        case "KeyS":
+          this.toggleBar(1);
+          break;
+        // P key toggleBar(0)
+        case "KeyP":
+          this.toggleBar(0);
+          break;
+      }
     }
   }
 }

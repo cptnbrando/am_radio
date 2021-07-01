@@ -41,6 +41,10 @@ public class StationService {
     // This will hold object fields that can't be stored in the db
     private HashMap<Integer, Station> allStations;
 
+    // HashMap stationNumber: RadioThread
+    // Holds all threads for each station
+    private HashMap<Integer, Thread> allRadioThreads;
+
     private final SpotifyApi spotifyApi;
 
     @Autowired
@@ -48,6 +52,7 @@ public class StationService {
         this.stationRepo = stationRepo;
         this.spotifyApi = spotifyApi;
         this.allStations = new HashMap<>();
+        this.allRadioThreads = new HashMap<>();
 
         // Initialize with all currently created Stations from db
         List<Station> all = this.stationRepo.findAll();
@@ -82,8 +87,7 @@ public class StationService {
 
             System.out.println("Created newStation in stationService/createStation");
 
-            this.stationRepo.save(newStation);
-            this.allStations.put(stationID, newStation);
+            this.saveStation(newStation);
             return new ResponseMessage("Created");
         }
         catch (IOException | SpotifyWebApiException | ParseException e)
@@ -180,35 +184,58 @@ public class StationService {
      * @param user currently logged in Spotify User object
      */
     public void addListener(int stationID, User user) {
-        this.allStations.get(stationID).getListeners().put(user.getId(), user);
+        Station station = this.getStation(stationID, false);
+        station.getListeners().put(user.getId(), user);
+        this.saveStation(station);
     }
 
     /**
      * Remove a Spotify User from the HashMap stations listeners list
+     * Interrupt the thread if the user is the last listener
      *
      * @param stationID id of Station
      * @param user currently logged in Spotify User object
      */
     public void removeListener(int stationID, User user) {
         try {
-            this.allStations.get(stationID).getListeners().remove(user.getId());
+            Station station = this.getStation(stationID, false);
+            station.getListeners().remove(user.getId());
+
+            // If it's the last listener, stop the thread
+            if(station.getListeners().isEmpty()) {
+                Thread radio = this.allRadioThreads.get(stationID);
+                radio.interrupt();
+                this.allRadioThreads.remove(stationID);
+            }
+
+            // Save station
+            this.saveStation(station);
         }
         catch (NullPointerException e) {
-//            System.out.println("NullPointer caught in StationService/removeListener");
+            System.out.println("NullPointer caught in StationService/removeListener");
+        } catch (SecurityException e) {
+            System.out.println("SecurityException caught in StationService/removeListener");
         }
     }
 
     /**
      * Starts a loop that continues while there are active listeners for a given Station
      * Uses a RadioThread, which uses the Runnable class
+     * Adds the RadioThread to the global HashMap
      *
      * @param stationNum ID of the Station to start
      */
     public void start(int stationNum) {
-        RadioThread radio = new RadioThread(this);
-        radio.setStationNum(stationNum);
+        // If this is true, we shouldn't be here...
+        if(this.allRadioThreads.containsKey(stationNum)) {
+            return;
+        }
+        RadioThread radio = new RadioThread(this, stationNum);
         Thread worker = new Thread(radio);
+
         worker.start();
+
+        this.allRadioThreads.put(stationNum, worker);
         System.out.println("Started radio #" + stationNum);
     }
 
@@ -222,6 +249,14 @@ public class StationService {
         station.update(this.spotifyApi);
 
         // Save to HashMap and db
+        this.saveStation(station);
+    }
+
+    /**
+     * Method to just save Station data to db / wherever else
+     * @param station Station to save
+     */
+    protected void saveStation(Station station) {
         this.allStations.put(station.getStationID(), station);
         this.stationRepo.save(station);
     }

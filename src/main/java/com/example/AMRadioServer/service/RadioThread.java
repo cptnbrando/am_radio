@@ -1,21 +1,20 @@
 package com.example.AMRadioServer.service;
 
 import com.example.AMRadioServer.model.Station;
-import lombok.Data;
-import org.springframework.stereotype.Service;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Scope;
 
 /**
  * Runnable thread class for a radio to loop and update fields
  */
-@Service
-@Data
 public class RadioThread implements Runnable {
 
-    private StationService stationService;
-    private int stationNum;
+    private final StationService stationService;
+    private final int stationNum;
 
-    public RadioThread(StationService stationService) {
+    public RadioThread(StationService stationService, int stationNum) {
         this.stationService = stationService;
+        this.stationNum = stationNum;
     }
 
     /**
@@ -33,6 +32,8 @@ public class RadioThread implements Runnable {
      *
      * @see Thread#run()
      */
+    @Bean
+    @Scope(value="request")
     @Override
     public void run() {
         Station station = stationService.getStation(stationNum, true);

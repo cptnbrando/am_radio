@@ -15,6 +15,7 @@ export class HeaderComponent implements OnInit {
 
   // Loading icon
   @Input() isLoading: boolean = true;
+  @Output() toggleLoadingEvent = new EventEmitter<boolean>();
 
   constructor() { }
 
@@ -28,11 +29,15 @@ export class HeaderComponent implements OnInit {
 
   // Sends an event to the app with a new station number
   changeStation(num: number) {
-    if(num < 0 || num > 100)
-    {
-      return;
+    if(!this.isLoading) {
+      this.toggleLoadingEvent.emit(true);
+
+      if(num < 0 || num > 100)
+      {
+        return;
+      }
+      this.changeStationEvent.emit(num);
     }
-    this.changeStationEvent.emit(num);
   }
 
   // Used to format the displayed number into a 000 leading zero varient

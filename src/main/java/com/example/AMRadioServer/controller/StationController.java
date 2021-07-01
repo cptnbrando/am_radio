@@ -3,6 +3,7 @@ package com.example.AMRadioServer.controller;
 import com.example.AMRadioServer.model.ResponseMessage;
 import com.example.AMRadioServer.model.Station;
 import com.example.AMRadioServer.service.StationService;
+import com.wrapper.spotify.exceptions.SpotifyWebApiException;
 import com.wrapper.spotify.model_objects.specification.PlaylistSimplified;
 import com.wrapper.spotify.model_objects.specification.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,23 +54,26 @@ public class StationController extends SpotifyPlayerController {
      * @param stationID ID of station to join
      */
     @GetMapping(value = "/{stationID}/join")
-    public void joinStation(@PathVariable("stationID") int stationID) throws InterruptedException {
+    public boolean joinStation(@PathVariable("stationID") int stationID) throws InterruptedException, SpotifyWebApiException {
         Station station = this.stationService.getStation(stationID, false);
+        if(station == null) {
+            return false;
+        }
 
         // Set repeat and shuffle to off
         super.shuffle(false);
         super.repeat("off");
 
         // Add the listener
-        User user = super.getUser();
-        this.stationService.addListener(stationID, user);
+//        User user = super.getUser();
+        this.stationService.updateListener(stationID);
 
         // If the station's not playing, start it
-        if(!this.stationService.getStation(stationID, false).isPlaying()) {
+        if(!station.isPlaying()) {
             this.stationService.start(stationID);
 
             // wait a few seconds for the current and next fields to get populated
-            Thread.sleep(5000);
+//            Thread.sleep(2500);
 
             // There's no clear queue, or any queue endpoints from Spotify,
             // sooooo we are skipping through until the next track is the station one
@@ -84,15 +88,23 @@ public class StationController extends SpotifyPlayerController {
             // i literally can't rn smh
 
             // then play the current track and queue up the next one
-            super.playTrack(station.getCurrentURI());
-            super.addToQueue(station.getNextURI());
+//            super.playTrack(station.getCurrentURI());
+//            super.addToQueue(station.getNextURI());
         }
 
-        // if the station IS playing, we play the current track and seek it to the right time
+        // Play the current track and seek it to the right time if the station is playing
         // System.currentTime - station.getPlayTime
-        super.playTrack(station.getCurrentURI());
-        super.seek((int) (System.currentTimeMillis() - station.getPlayTime()));
+        int currentVol = super.getPlayer().getDevice().getVolume_percent();
+        super.volume(0);
+        if(station.isPlaying() && super.playTrack(station.getCurrentURI())) {
+            long seekValue = System.currentTimeMillis() - station.getPlayTime();
+            System.out.println("Station is playing, seeking to: " + seekValue);
+            super.seek((int) seekValue);
+        }
         super.addToQueue(station.getNextURI());
+        super.volume(currentVol);
+
+        return true;
     }
 
     /**

@@ -4,6 +4,7 @@ import com.example.AMRadioServer.model.ResponseMessage;
 import com.google.gson.JsonArray;
 import com.wrapper.spotify.SpotifyApi;
 import com.wrapper.spotify.exceptions.SpotifyWebApiException;
+import com.wrapper.spotify.model_objects.IPlaylistItem;
 import com.wrapper.spotify.model_objects.credentials.AuthorizationCodeCredentials;
 import com.wrapper.spotify.model_objects.miscellaneous.AudioAnalysis;
 import com.wrapper.spotify.model_objects.miscellaneous.CurrentlyPlaying;
@@ -52,6 +53,26 @@ public class SpotifyPlayerController
             System.out.println("Exception in player/getPlayer");
             System.out.println(e);
             return null;
+        } catch (SpotifyWebApiException e) {
+            if(e.getMessage().equals("Invalid access token") || e.getMessage().equals("The access token expired")) {
+                try {
+                    this.newTokens();
+                } catch (SpotifyWebApiException g) {
+                    if(e.getMessage().equals("No refresh token found")) {
+                        throw e;
+                    }
+                }
+                return this.getPlayer();
+            }
+            else if(e.getMessage().equals("No refresh token found")) {
+                throw e;
+            }
+            else {
+                System.out.println("SpotifyWebApiException in getPlayer");
+                System.out.println(e.getMessage());
+                System.out.println(e);
+                return null;
+            }
         }
     }
 
@@ -150,7 +171,7 @@ public class SpotifyPlayerController
     /**
      * There's no way to play directly from a URI
      * ...sooo we set it to the queue, then skip to the next song
-     * this works for now, but might get stupid once the stations and queues are used more...
+     * then we loop and keep skipping the track until it is the right one
      *
      * @param trackURI track to play
      * @return true if successful, false if not
@@ -161,9 +182,29 @@ public class SpotifyPlayerController
         try {
             this.spotifyApi.addItemToUsersPlaybackQueue(trackURI).build().execute();
             this.spotifyApi.skipUsersPlaybackToNextTrack().build().execute();
+
+            Thread.sleep(5000);
+            IPlaylistItem current = this.spotifyApi.getUsersCurrentlyPlayingTrack().build().execute().getItem();
+
+            // Loop until the queue and current playing track is right
+            int count = 0;
+            while(!current.getUri().equals(trackURI)) {
+                System.out.println("Track not found...");
+                // Counter in case it got skipped over somehow...
+                this.spotifyApi.skipUsersPlaybackToNextTrack().build().execute();
+                // Sleep for a couple seconds for the line above to finish executing
+                Thread.sleep(2000);
+                current = this.spotifyApi.getUsersCurrentlyPlayingTrack().build().execute().getItem();
+                count++;
+                if(count > 3) {
+                    this.spotifyApi.addItemToUsersPlaybackQueue(trackURI).build().execute();
+                }
+                Thread.sleep(2000);
+            }
+
             return true;
         }
-        catch (IOException | SpotifyWebApiException | ParseException e)
+        catch (IOException | SpotifyWebApiException | ParseException | InterruptedException e)
         {
             System.out.println("Exception caught in player/pause");
             System.out.println(e.getMessage());
