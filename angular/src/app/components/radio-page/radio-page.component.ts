@@ -233,13 +233,13 @@ export class RadioPageComponent implements OnInit, OnChanges {
   // Event callback for repeat changes detected by Spotify SDK player
   onRepeatChange(event: any): void {
     this.repeat = parseInt(event.detail.attributes.repeat.nodeValue);
-    this.toggleLoading(false);
+    // this.toggleLoading(false);
   }
 
   // Event callback for shuffle changes detected by Spotify SDK player
   onShuffleChange(event: any): void {
     this.shuffle = (event.detail.attributes.shuffle.nodeValue === "true");
-    this.toggleLoading(false);
+    // this.toggleLoading(false);
   }
 
   // This will get the current player and set the data to the UI
@@ -249,8 +249,6 @@ export class RadioPageComponent implements OnInit, OnChanges {
         // Set the data
         this.currentlyPlaying = data.item;
         this.currentDevice = data.device;
-
-        // this.toggleLoading(false);
       }
     });
   }
@@ -293,8 +291,6 @@ export class RadioPageComponent implements OnInit, OnChanges {
     // this.playerService.shuffle(false).subscribe();
     // this.playerService.repeat("off").subscribe();
 
-    this.toggleLoading(true);
-
     // Get station at given number
     this.radioService.getStation(stationNum).subscribe(data => {
       // This route checks if it exists first, if not it returns back null
@@ -318,9 +314,8 @@ export class RadioPageComponent implements OnInit, OnChanges {
         this.currentStation = new Station(stationNum);
         if(!this.showPlaylistBar) this.toggleBar(0);
         if(!this.showStationBar) this.toggleBar(1);
+        this.toggleLoading(false);
       }
-
-      this.toggleLoading(false);
     });
   }
 
@@ -370,7 +365,9 @@ export class RadioPageComponent implements OnInit, OnChanges {
       this.changeStation(0);
     }
 
-    this.playerService.playTrack(track.track.uri).subscribe();
+    this.playerService.playTrack(track.track.uri).subscribe(data => {
+      this.toggleLoading(false);
+    });
   }
 
   // Play a playlist on am_radio 000
@@ -380,7 +377,9 @@ export class RadioPageComponent implements OnInit, OnChanges {
       this.changeStation(0);
     }
 
-    this.playerService.playPlaylist(this.selectedPlaylist.uri).subscribe();
+    this.playerService.playPlaylist(this.selectedPlaylist.uri).subscribe(data => {
+      this.toggleLoading(false);
+    });
     this.playingPlaylist = this.selectedPlaylist;
   }
 
@@ -425,12 +424,13 @@ export class RadioPageComponent implements OnInit, OnChanges {
 
   // Set the isLoading icon to spin or not
   toggleLoading(start: boolean): void {
+    console.log("Yeehaw");
+    console.log(start);
     this.isLoading = start;
   }
 
   // Check for keyboard input typing in chatroom
   toggleTyping(typing: boolean): void {
-    console.log(typing);
     this.isTyping = typing;
   }
 

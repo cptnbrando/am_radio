@@ -103,7 +103,7 @@ export class PlayerComponent implements OnInit {
   // Event for clicking play button, toggles play
   togglePlay() {
     if(!this.isLoading) {
-      this.toggleLoadingEvent.emit(true);
+      // this.toggleLoadingEvent.emit(true);
   
       if(this.isPlaying) {
         // The player is playing, so we want to pause it!
@@ -119,7 +119,7 @@ export class PlayerComponent implements OnInit {
   // Event for right arrow, skip to the next track
   skip() {
     if(!this.isLoading) {
-      this.toggleLoadingEvent.emit(true);
+      // this.toggleLoadingEvent.emit(true);
       this.playerService.next().subscribe();
     }
   }
@@ -127,7 +127,7 @@ export class PlayerComponent implements OnInit {
   // Event for left arrow, go to previous track
   back() {
     if(!this.isLoading) {
-      this.toggleLoadingEvent.emit(true);
+      // this.toggleLoadingEvent.emit(true);
       this.playerService.previous().subscribe();
     }
   }
@@ -135,7 +135,7 @@ export class PlayerComponent implements OnInit {
   // Event for shuffle button, toggle shuffle
   shuffleChange(): void {
     if(!this.isLoading) {
-      this.toggleLoadingEvent.emit(true);
+      // this.toggleLoadingEvent.emit(true);
       this.playerService.shuffle(!this.shuffle).subscribe();
     }
   }
@@ -144,7 +144,7 @@ export class PlayerComponent implements OnInit {
   repeatChange(): void {
     if(!this.isLoading)
     {
-      this.toggleLoadingEvent.emit(true);
+      // this.toggleLoadingEvent.emit(true);
       switch(this.repeat) {
         case 0:
           this.playerService.repeat("context").subscribe();

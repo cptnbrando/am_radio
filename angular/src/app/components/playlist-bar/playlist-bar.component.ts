@@ -31,7 +31,7 @@ export class PlaylistBarComponent implements OnInit {
   }
 
   clickPlaylist(playlist: any): void{
-    this.toggleLoadingEvent.emit(true);
+    // this.toggleLoadingEvent.emit(true);
     if(playlist != this.selectedPlaylist) {
       this.changePlaylistEvent.emit(playlist);
     }
@@ -43,12 +43,12 @@ export class PlaylistBarComponent implements OnInit {
   }
 
   playTrack(track: any): void {
-    this.toggleLoadingEvent.emit(true);
+    // this.toggleLoadingEvent.emit(true);
     this.playTrackEvent.emit(track);
   }
 
   playPlaylist(): void {
-    this.toggleLoadingEvent.emit(true);
+    // this.toggleLoadingEvent.emit(true);
     this.playPlaylistEvent.emit();
   }
 

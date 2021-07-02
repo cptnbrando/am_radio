@@ -1,13 +1,6 @@
 package com.example.AMRadioServer.service;
 
 import com.example.AMRadioServer.model.Station;
-import com.wrapper.spotify.SpotifyApi;
-import com.wrapper.spotify.exceptions.SpotifyWebApiException;
-import com.wrapper.spotify.model_objects.specification.PlaylistTrack;
-import org.apache.hc.core5.http.ParseException;
-
-import java.io.IOException;
-import java.util.*;
 
 /**
  * Runnable thread class for a radio to loop and update fields

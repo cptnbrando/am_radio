@@ -16,6 +16,10 @@ export class StationBarComponent implements OnInit {
 
   @Output() createdStation = new EventEmitter<any>();
 
+  // Loading icon
+  @Input() isLoading: boolean = true;
+  @Output() toggleLoadingEvent = new EventEmitter<boolean>();
+
   constructor(private radioService: RadioService) {
     this.currentStation = new Station;
   }
@@ -25,12 +29,14 @@ export class StationBarComponent implements OnInit {
   }
 
   createRadio() {
-    this.radioService.createStation(this.stationNum, this.selectedPlaylist).subscribe(data => {
-      if(data.message === "Created"){
-        console.log(data);
-        this.createdStation.emit();
-      }
-    });
+    if(!this.isLoading) {
+      this.toggleLoadingEvent.emit(true);
+      this.radioService.createStation(this.stationNum, this.selectedPlaylist).subscribe(data => {
+        if(data.message === "Created"){
+          console.log(data);
+          this.createdStation.emit();
+        }
+      });
+    }
   }
-
 }

@@ -1,7 +1,7 @@
 <div id="overlay">
   <app-header [showControls]="showControls" (toggleBarEvent)="toggleBar($event)" [stationNum]="stationNum"
     (changeStationEvent)="changeStation($event)" [isLoading]="isLoading" (toggleLoadingEvent)="toggleLoading($event)">
-    </app-header>
+  </app-header>
 
   <div id="settingsBars">
     <app-playlist-bar class="side setting" [showPlaylistBar]="showPlaylistBar" [selectedPlaylist]="selectedPlaylist"
@@ -9,7 +9,9 @@
       (changePlaylistEvent)="changePlaylist($event)" (playPlaylistEvent)="playPlaylist()"
       (playTrackEvent)="playTrack($event)" (toggleLoadingEvent)="toggleLoading($event)"></app-playlist-bar>
     <app-controls class="mid setting" [showControls]="showControls" (isTypingEvent)="toggleTyping($event)"></app-controls>
-    <app-station-bar class="side setting" [stationNum]="stationNum" [showStationBar]="showStationBar" [currentStation]="currentStation" [selectedPlaylist]="selectedPlaylist" (createdStation)="createdStation()"></app-station-bar>
+    <app-station-bar class="side setting" [stationNum]="stationNum" [showStationBar]="showStationBar"
+      [currentStation]="currentStation" [selectedPlaylist]="selectedPlaylist" (createdStation)="createdStation()"
+      [isLoading]="isLoading" (toggleLoadingEvent)="toggleLoading($event)"></app-station-bar>
   </div>
 
   <app-player id="appPlayer" [stationNum]="stationNum" [currentDevice]="currentDevice"

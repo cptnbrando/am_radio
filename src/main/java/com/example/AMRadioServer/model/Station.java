@@ -1,22 +1,15 @@
 package com.example.AMRadioServer.model;
 
-import com.wrapper.spotify.SpotifyApi;
-import com.wrapper.spotify.exceptions.SpotifyWebApiException;
 import com.wrapper.spotify.model_objects.IPlaylistItem;
 import com.wrapper.spotify.model_objects.specification.PlaylistSimplified;
 import com.wrapper.spotify.model_objects.specification.PlaylistTrack;
 import com.wrapper.spotify.model_objects.specification.User;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.apache.hc.core5.http.ParseException;
 import org.hibernate.annotations.CreationTimestamp;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Scope;
 import org.springframework.data.annotation.CreatedDate;
-import org.springframework.scheduling.annotation.Async;
 
 import javax.persistence.*;
-import java.io.IOException;
 import java.util.*;
 
 /**
