@@ -211,8 +211,8 @@ public class Station
             this.setNotPlayedTracks(trackList);
         }
 
-        System.out.println("In update()");
-        System.out.println(this.getNotPlayedTracks().size());
+//        System.out.println("In update()");
+//        System.out.println(this.getNotPlayedTracks().size());
 
         // If next is null, then we get a new random track
         if(this.next == null) {

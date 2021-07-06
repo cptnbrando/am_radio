@@ -5,6 +5,7 @@ import com.example.AMRadioServer.model.Station;
 import com.example.AMRadioServer.repository.StationRepository;
 import com.wrapper.spotify.SpotifyApi;
 import com.wrapper.spotify.exceptions.SpotifyWebApiException;
+import com.wrapper.spotify.model_objects.specification.Playlist;
 import com.wrapper.spotify.model_objects.specification.PlaylistSimplified;
 import com.wrapper.spotify.model_objects.specification.PlaylistTrack;
 import com.wrapper.spotify.model_objects.specification.User;
@@ -58,11 +59,35 @@ public class StationService {
         this.allStations = new HashMap<>();
         this.allRadioThreads = new HashMap<>();
 
-
         // Initialize with all currently created Stations from db
         List<Station> all = this.stationRepo.findAll();
         for(Station station: all) {
             allStations.put(station.getStationID(), station);
+        }
+    }
+
+    /**
+     * SpotifyAPI needs a session, so the first user to access it can fill it with theirs
+     * Also saves it to the db
+     * @param station - Station to fill
+     */
+    private Station fillStationData(Station station) {
+        try {
+            if(station.getAllTracks() == null) {
+                PlaylistTrack[] tracks = this.spotifyApi.getPlaylist(station.getPlaylistID()).build().execute().getTracks().getItems();
+                station.setAllTracks(Arrays.asList(tracks));
+                station.setNotPlayedTracks(new ArrayList<>(Arrays.asList(tracks)));
+            }
+            if(station.getCreator() == null) {
+                station.setCreator(this.spotifyApi.getUsersProfile(station.getCreatorID()).build().execute());
+            }
+            this.saveStation(station);
+            return station;
+        } catch (IOException | SpotifyWebApiException | ParseException e)
+        {
+            System.out.println("Spotify exception caught in StationService/fillStation");
+            System.out.println(e.getMessage());
+            return null;
         }
     }
 
@@ -123,7 +148,12 @@ public class StationService {
                 // Check if it exists in the db
                 // If so, return the HashMap value (so listeners and tracks also get returned)
                 if(stationRepo.existsById(stationID)) {
-                    return this.allStations.get(stationID);
+                    Station station = this.allStations.get(stationID);
+                    // We can fill in the HashMap Transient values here, if they're empty
+                    if(station.getCreator() == null) {
+                        station = this.fillStationData(station);
+                    }
+                    return station;
                 }
 
                 return null;
@@ -222,6 +252,12 @@ public class StationService {
         System.out.println("Started radio #" + stationNum);
     }
 
+    /**
+     * Wrapper for station.update()
+     * Also saves data to db
+     *
+     * @param station Station to update
+     */
     public void updateStation(Station station) {
         station.update();
         this.saveStation(station);

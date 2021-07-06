@@ -195,6 +195,7 @@ public class SpotifyPlayerController
                 count++;
                 if(count > 5) {
                     this.spotifyApi.addItemToUsersPlaybackQueue(trackURI).build().execute();
+                    Thread.sleep(2000);
                     count = 0;
                 }
             }

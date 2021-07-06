@@ -31,12 +31,14 @@ export class StationBarComponent implements OnInit {
   createRadio() {
     if(!this.isLoading) {
       this.toggleLoadingEvent.emit(true);
-      this.radioService.createStation(this.stationNum, this.selectedPlaylist).subscribe(data => {
-        if(data.message === "Created"){
-          console.log(data);
-          this.createdStation.emit();
-        }
-      });
+      if(this.selectedPlaylist) {
+        this.radioService.createStation(this.stationNum, this.selectedPlaylist).subscribe(data => {
+          if(data.message === "Created"){
+            console.log(data);
+            this.createdStation.emit();
+          }
+        });
+      }
     }
   }
 }

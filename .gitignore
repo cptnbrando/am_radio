@@ -41,3 +41,5 @@ h2Database/
 
 ### Added Stuff ###
 gradle.properties
+
+/.env
