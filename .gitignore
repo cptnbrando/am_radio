@@ -42,6 +42,6 @@ h2Database/
 ### Added Stuff ###
 gradle.properties
 
-/.env
+.env
 
 ./angular/dist/

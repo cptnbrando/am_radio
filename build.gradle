@@ -24,12 +24,6 @@ node {
 	npmVersion = '7.18.1'
 }
 
-//configurations {
-//	compileOnly {
-//		extendsFrom annotationProcessor
-//	}
-//}
-
 repositories {
 	mavenCentral()
 }

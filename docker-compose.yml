@@ -1,0 +1,13 @@
+version: '3'
+services:
+  app:
+    image: captainbrando/am_radio
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:h2:file:./h2Database/h2Stations
+      - AWS_AM_RADIO_ENDPOINT=${AWS_AM_RADIO_ENDPOINT}
+      - AWS_AM_RADIO_PASSWORD=${AWS_AM_RADIO_PASSWORD}
+      - AWS_AM_RADIO_USERNAME=${AWS_AM_RADIO_USERNAME}
+      - SPOTIFY_CLI_ID=${SPOTIFY_CLI_ID}
+      - SPOTIFY_CLI_SECRET=${SPOTIFY_CLI_SECRET}
+    ports:
+      - 9015:9015
