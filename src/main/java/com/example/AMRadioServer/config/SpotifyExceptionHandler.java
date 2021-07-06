@@ -8,7 +8,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @ControllerAdvice
 public class SpotifyExceptionHandler {
 
-    private static final String appURL = "http://localhost:4200";
+    private static final String appURL = "http://localhost:9015";
 
     @ExceptionHandler(SpotifyWebApiException.class)
     public String redirect(SpotifyWebApiException e, RedirectAttributes redirectAttributes) {

@@ -5,7 +5,8 @@ import { RouterModule, Routes } from '@angular/router';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent },
-  { path: 'app', component: RadioPageComponent }
+  { path: 'app', component: RadioPageComponent },
+  { path: '**', redirectTo: "", pathMatch: 'full' }
 ];
 
 @NgModule({

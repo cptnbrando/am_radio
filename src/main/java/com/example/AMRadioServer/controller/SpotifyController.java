@@ -74,17 +74,11 @@ public class SpotifyController {
             spotifyApi.setAccessToken(authorizationCodeCredentials.getAccessToken());
             spotifyApi.setRefreshToken(authorizationCodeCredentials.getRefreshToken());
 
-//            System.out.println("Access: " + spotifyApi.getAccessToken());
-//            System.out.println("Refresh: " + spotifyApi.getRefreshToken());
-//
-//            System.out.println("Expires in: " + authorizationCodeCredentials.getExpiresIn());
-
         } catch (IOException | SpotifyWebApiException | org.apache.hc.core5.http.ParseException e) {
-            System.out.println("Error: " + e.getMessage());
-            response.sendRedirect("http://localhost:4200/");
+            response.sendRedirect("http://localhost:9015/");
         }
 
-        response.sendRedirect("http://localhost:4200/app");
+        response.sendRedirect("http://localhost:9015/app");
 
         return spotifyApi.getAccessToken();
     }

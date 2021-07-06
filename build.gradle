@@ -2,17 +2,33 @@ plugins {
 	id 'org.springframework.boot' version '2.5.1'
 	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
 	id 'java'
+
+	// added angular for spring
+	id "com.github.node-gradle.node" version "3.0.1"
 }
 
 group = 'com.example'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '11'
+sourceCompatibility = JavaVersion.VERSION_11
 
-configurations {
-	compileOnly {
-		extendsFrom annotationProcessor
-	}
+// Extensions or Variables to use throughout the build.gradle
+ext {
+	angularAppName = "amradio"
+	angularDir = "$projectDir/angular"
 }
+
+node {
+	nodeProjectDir = file(angularDir)
+	download = true
+	version = '16.4.0'
+	npmVersion = '7.18.1'
+}
+
+//configurations {
+//	compileOnly {
+//		extendsFrom annotationProcessor
+//	}
+//}
 
 repositories {
 	mavenCentral()
@@ -37,3 +53,28 @@ dependencies {
 test {
 	useJUnitPlatform()
 }
+
+task compileAngular(type: NpmTask, dependsOn: npmInstall) {
+	def inputFiles = project.fileTree(dir: "${angularDir}", exclude: "**/karma-test-results.xml")
+	inputs.files(inputFiles)
+
+	def outputFile = "${angularDir}/dist/${angularAppName}"
+	outputs.dir outputFile
+
+	group 'build'
+	description = 'Compile client side assets for production'
+	args = ['run', 'build']
+}
+
+task copyAngular(type: Copy, dependsOn: compileAngular) {
+	def inputFiles = project.fileTree(dir: "${angularDir}/dist/${angularAppName}") as Object
+	inputs.files(inputFiles)
+
+	def outputFile = "${projectDir}/src/main/resources/static/"
+	outputs.dir outputFile
+
+	from "${angularDir}/dist/${angularAppName}"
+	into "${projectDir}/src/main/resources/static"
+}
+
+tasks.processResources.dependsOn(copyAngular)
