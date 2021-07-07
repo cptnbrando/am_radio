@@ -223,10 +223,12 @@ public class Station
 
         // Current to next
         this.setCurrent(this.getNext());
+        this.setCurrentURI(this.getCurrent().getUri());
 
         // Set a random next track and remove it from the list to avoid repeated tracks
         int rnd = new Random().nextInt(this.getNotPlayedTracks().size());
         this.setNext(this.getNotPlayedTracks().remove(rnd).getTrack());
+        this.setNextURI(this.getNext().getUri());
 
         // Set new playTime
         this.setPlayTime(System.currentTimeMillis());

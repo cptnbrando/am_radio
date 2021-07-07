@@ -12,26 +12,20 @@ import com.wrapper.spotify.model_objects.miscellaneous.CurrentlyPlayingContext;
 import com.wrapper.spotify.model_objects.miscellaneous.Device;
 import com.wrapper.spotify.model_objects.specification.AudioFeatures;
 import com.wrapper.spotify.model_objects.specification.PlaylistSimplified;
-import com.wrapper.spotify.model_objects.specification.PlaylistTrack;
 import com.wrapper.spotify.model_objects.specification.User;
 import org.apache.hc.core5.http.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.net.URI;
 import java.util.Random;
 
 @RestController
 @CrossOrigin(originPatterns = "*", allowCredentials = "true")
 @SessionAttributes("spotifyApi")
 @RequestMapping("/api/spotify/player")
-public class SpotifyPlayerController
-{
+public class SpotifyPlayerController {
     private final SpotifyApi spotifyApi;
-    private static final String errorURL = "http://localhost:4200";
 
     @Autowired
     public SpotifyPlayerController(SpotifyApi spotifyApi) {
@@ -53,23 +47,6 @@ public class SpotifyPlayerController
             System.out.println("Exception in player/getPlayer");
             System.out.println(e);
             return null;
-        } catch (SpotifyWebApiException e) {
-            if(e.getMessage().equals("Invalid access token") || e.getMessage().equals("The access token expired")) {
-                try {
-                    this.newTokens();
-                } catch (SpotifyWebApiException g) {
-                    if(g.getMessage().equals("No refresh token found")) {
-                        throw g;
-                    }
-                }
-                return this.getPlayer();
-            }
-            else {
-                System.out.println("SpotifyWebApiException in getPlayer");
-                System.out.println(e.getMessage());
-                System.out.println(e);
-                return null;
-            }
         }
     }
 
@@ -79,10 +56,10 @@ public class SpotifyPlayerController
      * @return CurrentlyPlaying for track
      */
     @GetMapping(value = "/getCurrentlyPlaying")
-    public CurrentlyPlaying getCurrentlyPlaying() {
+    public CurrentlyPlaying getCurrentlyPlaying() throws SpotifyWebApiException {
         try {
             return this.spotifyApi.getUsersCurrentlyPlayingTrack().build().execute();
-        } catch (IOException | SpotifyWebApiException | ParseException e)
+        } catch (IOException | ParseException e)
         {
             System.out.println("Exception in player/getCurrentlyPlaying");
             System.out.println(e.getMessage());
@@ -190,12 +167,12 @@ public class SpotifyPlayerController
                 // Counter in case it got skipped over somehow...
                 this.spotifyApi.skipUsersPlaybackToNextTrack().build().execute();
                 // Sleep for a couple seconds for the line above to finish executing
-                Thread.sleep(2000);
+                Thread.sleep(1500);
                 current = this.spotifyApi.getUsersCurrentlyPlayingTrack().build().execute().getItem();
                 count++;
                 if(count > 5) {
                     this.spotifyApi.addItemToUsersPlaybackQueue(trackURI).build().execute();
-                    Thread.sleep(2000);
+                    Thread.sleep(1500);
                     count = 0;
                 }
             }
@@ -218,17 +195,17 @@ public class SpotifyPlayerController
      * @return the current device playing
      */
     @PutMapping(value = "/playOn")
-    public Device playOn(@RequestParam String deviceID)
-    {
+    public Device playOn(@RequestParam String deviceID) {
         //Create a JSONArray and add the ID
         JsonArray deviceArray = new JsonArray();
         deviceArray.add(deviceID);
 
         try {
             this.spotifyApi.transferUsersPlayback(deviceArray).build().execute();
+            System.out.println("Playback transferred!");
             return this.getCurrentDevice();
         }
-        catch (IOException | SpotifyWebApiException | ParseException e)
+        catch (IOException | SpotifyWebApiException | ParseException | InterruptedException e)
         {
             System.out.println("Exception in player/playOn");
             System.out.println(e.getMessage());
@@ -244,15 +221,14 @@ public class SpotifyPlayerController
      * TODO: if there's another am_radio instance connected, set it to that one and return a bad response
      */
     @GetMapping(value = "/getAMRadio")
-    public Device getAMRadio() {
+    public Device getAMRadio() throws InterruptedException {
         Device[] myDevices = this.getDevices();
-        if(myDevices != null)
-        {
-            for(Device device: myDevices)
-            {
-                if(device.getName().equals("am_radio"))
-                {
-                    return this.playOn(device.getId());
+        if(myDevices != null) {
+            for(Device device: myDevices) {
+                if(device.getName().equals("am_radio")) {
+                    System.out.println("/getAMRadio found and set");
+                    this.playOn(device.getId());
+                    return device;
                 }
             }
         }
@@ -266,6 +242,7 @@ public class SpotifyPlayerController
     @GetMapping(value = "/startAMRadio")
     public PlaylistSimplified startAMRadio() {
         try {
+            System.out.println("/startAMRadio");
             // Playback's already on am_radio, so we want to shuffle and repeat on a random recent playlist
             // and skip to the next track
             PlaylistSimplified[] lists = this.spotifyApi.getListOfCurrentUsersPlaylists().limit(25).build().execute().getItems();
@@ -457,15 +434,12 @@ public class SpotifyPlayerController
      * @return an active Device
      */
     @GetMapping(value = "/getCurrentDevice")
-    public Device getCurrentDevice() {
+    public Device getCurrentDevice() throws InterruptedException {
         Device[] myDevices = this.getDevices();
 
-        if(myDevices != null)
-        {
-            for(Device device: myDevices)
-            {
-                if(device.getIs_active())
-                {
+        if(myDevices != null) {
+            for(Device device: myDevices) {
+                if(device.getIs_active()) {
                     return device;
                 }
             }
@@ -488,46 +462,5 @@ public class SpotifyPlayerController
             System.out.println(e.getMessage());
             return null;
         }
-    }
-
-    /**
-     * Gets new valid access/refresh tokens and sets them to the api
-     *
-     * @return a valid access token
-     */
-    private ResponseMessage newTokens() throws SpotifyWebApiException {
-        try {
-            String[] tokens = this.getNewTokens();
-            this.spotifyApi.setAccessToken(tokens[0]);
-            this.spotifyApi.setRefreshToken(tokens[1]);
-            return new ResponseMessage(this.spotifyApi.getAccessToken());
-        } catch (IOException | ParseException e) {
-            System.out.println("Exception caught in newTokens(): " + e.getMessage());
-            return null;
-        }
-    }
-
-    /**
-     * Trade the current refresh token for a new access token
-     *
-     * @return access token and refresh token
-     */
-    protected String[] getNewTokens() throws IOException, ParseException, SpotifyWebApiException {
-        String clientID = spotifyApi.getClientId();
-        String clientSecret = spotifyApi.getClientSecret();
-        String refreshToken = spotifyApi.getRefreshToken();
-
-        if(refreshToken == null || clientID == null || clientSecret == null)
-        {
-            throw new SpotifyWebApiException("No refresh token found");
-        }
-
-        AuthorizationCodeCredentials auth = spotifyApi.authorizationCodeRefresh(clientID, clientSecret, refreshToken).build().execute();
-
-        String[] tokens = new String[2];
-        tokens[0] = auth.getAccessToken();
-        tokens[1] = auth.getRefreshToken();
-
-        return tokens;
     }
 }

@@ -13,10 +13,6 @@ window.onSpotifyWebPlaybackSDKReady = () => {
 
   const initCanvas = () => {
     canvas = document.querySelector("canvas");
-    canvas.setAttribute("state", "false");
-    canvas.setAttribute("current", "");
-    canvas.setAttribute("paused", "true");
-    canvas.setAttribute("badState", "false");
   }
 
   // Error handling
@@ -51,7 +47,6 @@ window.onSpotifyWebPlaybackSDKReady = () => {
   // Ready
   player.addListener('ready', ({ device_id }) => {
     console.log('Ready with Device ID', device_id);
-    // We change the dom once it's ready, so angular can see it
     canvas.setAttribute("state", "true");
   });
 
@@ -63,7 +58,7 @@ window.onSpotifyWebPlaybackSDKReady = () => {
 
   // Connect to the player!
   player.connect().then(success => {
-    if (success) {
+    if(success) {
       console.log('The Web Playback SDK successfully connected to Spotify!');
     }
   })

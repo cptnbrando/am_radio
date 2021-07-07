@@ -13,6 +13,7 @@ import java.net.URI;
 public class SpotifyConfiguration {
 
     private static final URI redirectURI = SpotifyHttpManager.makeUri("http://localhost:9015/api/spotify/getUserCode");
+    public static final String appURL = "http://localhost:9015/app";
 
     @Bean
     @SessionScope

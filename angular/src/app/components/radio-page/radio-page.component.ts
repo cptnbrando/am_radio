@@ -32,6 +32,8 @@ export class RadioPageComponent implements OnInit, OnChanges {
   // What station the user is on, begins on 0
   @Output() stationNum: number = 0;
   @Output() currentStation: any = {};
+  @Output() nextURI: string = "";
+  @Output() currentURI: string = "";
 
   // Spotify track information
   @Output() currentlyPlaying: any = {};
@@ -154,6 +156,7 @@ export class RadioPageComponent implements OnInit, OnChanges {
     }
     else
     {
+      console.log("onPlayerReady else");
       // If nothing is playing, we get am_radio from the server, then attempt to play the most recently played track
       this.beginAMRadio();
     }
@@ -166,6 +169,8 @@ export class RadioPageComponent implements OnInit, OnChanges {
     this.currentStation = new Station();
     this.toggleLoading(true);
 
+    console.log("beginAMRadio");
+
     if(this.currentDevice.name != "am_radio") {
       // Get am_radio (This server endpoint find am_radio and sets it as the active device in the Spotify API)
       this.playerService.getAMRadio().subscribe(data => {
@@ -173,9 +178,12 @@ export class RadioPageComponent implements OnInit, OnChanges {
           // If found, set it as the active player
           this.currentDevice = data;
 
+          console.log("beginAMRadio found and set");
+
           // Attempt to play a random playlist on am_radio
           this.playerService.startAMRadio().subscribe(data => {
-            if(data != null) {
+            if(data) {
+              console.log("startAMRadio success!");
               this.playingPlaylist = data;
               this.changePlaylist(data);
               this.currentStation.stationName = "Recently Played";  
@@ -187,6 +195,7 @@ export class RadioPageComponent implements OnInit, OnChanges {
         }
       });
     } else {
+      console.log("beginAMRadio else");
       // If the device is already set, just play a random playlist
       this.playerService.startAMRadio().subscribe(data => {
         this.playingPlaylist = data;
@@ -197,7 +206,6 @@ export class RadioPageComponent implements OnInit, OnChanges {
         this.toggleLoading(false);
       });
     }
-
   }
 
   /**
@@ -218,6 +226,17 @@ export class RadioPageComponent implements OnInit, OnChanges {
   // Event callback for Spotify SDK script
   onCurrentChange(event: any): void {
     this.setPlayerData();
+
+    if(this.stationNum > 0 && this.currentStation.playTime != 0) {
+      this.radioService.getStation(this.stationNum).subscribe(data => {
+        if(data) {
+          if(data.nextURI != this.nextURI) {
+            this.nextURI = data.nextURI;
+            this.playerService.addToQueue(this.nextURI).subscribe();
+          }
+        }
+      })
+    }
   }
 
   // Event callback for Spotify SDK script
@@ -257,7 +276,7 @@ export class RadioPageComponent implements OnInit, OnChanges {
   changeStation(stationNum: number) {
     this.toggleLoading(true);
 
-    if(this.stationNum > 0) {
+    if(this.stationNum > 0 && this.currentStation.playTime != 0) {
       // Leave the old station if not playing on 000
       this.radioService.leaveStation(this.stationNum).subscribe();
     }
@@ -272,6 +291,7 @@ export class RadioPageComponent implements OnInit, OnChanges {
 
     // BeginAMRadio on station 000, otherwise join/start the station
     if(stationNum === 0){
+      console.log("changeStation if");
       this.beginAMRadio();
       return;
     }
@@ -307,6 +327,7 @@ export class RadioPageComponent implements OnInit, OnChanges {
           if(data) {
             this.toggleLoading(false);
             this.changeVolume(myVol);
+            this.nextURI = data.nextURI;
           }
         });
       }
@@ -424,8 +445,6 @@ export class RadioPageComponent implements OnInit, OnChanges {
 
   // Set the isLoading icon to spin or not
   toggleLoading(start: boolean): void {
-    console.log("Yeehaw");
-    console.log(start);
     this.isLoading = start;
   }
 

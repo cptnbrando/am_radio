@@ -5,13 +5,15 @@ pipeline {
         stage('build-gradle') {
             agent {
                 docker {
-                    image 'openjdk:11'
+                    image 'gradle:7.1-jdk11'
                     reuseNode true
                 }
             }
             steps {
                 sh 'ls'
-                sh 'cp ~/home/ec2-user/repos/dcruz-assets/amRadio/.env ${workspace}'
+                echo ${WORKSPACE}
+                sh 'cp -help'
+//                 sh 'cp ~/home/ec2-user/repos/dcruz-assets/amRadio/.env ${WORKSPACE}'
                 sh './gradlew clean build'
             }
         }

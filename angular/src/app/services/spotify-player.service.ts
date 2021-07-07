@@ -25,7 +25,7 @@ export class SpotifyPlayerService {
   }
 
   getAMRadio(): Observable<any>{
-    return this.httpCli.get<any>(this.serverURL + "/getAMRadio");
+    return this.httpCli.get<any>(`${this.serverURL}/getAMRadio`);
   }
 
   getAudioFeatures(trackID: any): Observable<any>{

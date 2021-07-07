@@ -1,5 +1,6 @@
 package com.example.AMRadioServer.controller;
 
+import com.example.AMRadioServer.config.SpotifyConfiguration;
 import com.example.AMRadioServer.model.ResponseMessage;
 import com.wrapper.spotify.SpotifyApi;
 import com.wrapper.spotify.exceptions.SpotifyWebApiException;
@@ -64,8 +65,7 @@ public class SpotifyController {
      * @throws IOException
      */
     @GetMapping(value = "/getUserCode")
-    public String getSpotifyUserCode(@RequestParam("code") String userCode, HttpServletResponse response) throws IOException
-    {
+    public String getSpotifyUserCode(@RequestParam("code") String userCode, HttpServletResponse response) throws IOException {
         AuthorizationCodeRequest authorizationCodeRequest = spotifyApi.authorizationCode(userCode).build();
 
         try {
@@ -78,7 +78,7 @@ public class SpotifyController {
             response.sendRedirect("http://localhost:9015/");
         }
 
-        response.sendRedirect("http://localhost:9015/app");
+        response.sendRedirect(SpotifyConfiguration.appURL);
 
         return spotifyApi.getAccessToken();
     }
@@ -92,14 +92,8 @@ public class SpotifyController {
     @GetMapping(value = "/getUserPlaylists")
     public PlaylistSimplified[] getUserPlaylists()
     {
-        final GetListOfCurrentUsersPlaylistsRequest getListOfCurrentUsersPlaylistsRequest = spotifyApi.getListOfCurrentUsersPlaylists()
-                .limit(25)
-                .build();
-
         try {
-            // Simplified playlists contain track collections, so it should work. Idk what makes them simplified lol
-            final Paging<PlaylistSimplified> playlistPaging = getListOfCurrentUsersPlaylistsRequest.execute();
-            return playlistPaging.getItems();
+            return spotifyApi.getListOfCurrentUsersPlaylists().limit(25).build().execute().getItems();
         }
         catch (IOException | SpotifyWebApiException | ParseException e)
         {
@@ -130,11 +124,10 @@ public class SpotifyController {
      * @return User object of signed in user
      */
     @GetMapping(value = "/getUser")
-    public User getUser() {
+    public User getUser() throws SpotifyWebApiException {
         try {
             return spotifyApi.getCurrentUsersProfile().build().execute();
-        } catch (IOException | SpotifyWebApiException | ParseException e)
-        {
+        } catch (IOException | ParseException e) {
             System.out.println("Exception caught in getUser");
             System.out.println(e.getMessage());
             return null;
@@ -149,22 +142,18 @@ public class SpotifyController {
     @GetMapping(value = "/checkTokens")
     public ResponseMessage checkTokens()
     {
+        // Try getUser(), if it fails then the tokens are bad, return null
+//        try {
+//            this.getUser();
+//            return new ResponseMessage(spotifyApi.getAccessToken());
+//        } catch (SpotifyWebApiException e) {
+//            System.out.println("bad checkTokens");
+//            e.printStackTrace();
+//            return null;
+//        }
         if(this.spotifyApi.getAccessToken() == null || this.getUserPlaylists() == null)
         {
-            // This should get new tokens from the current refresh token, if there's one there
-            String[] tokens;
-
-            try {
-                tokens = this.getNewTokens();
-                this.spotifyApi.setAccessToken(tokens[0]);
-                this.spotifyApi.setRefreshToken(tokens[1]);
-            } catch (IOException | SpotifyWebApiException | ParseException e) {
-                return null;
-            }
-
-            // 0 is the access token, 1 is the refresh token
-            // yes, they get set in the getNewTokens function to the spotifyApi
-            return new ResponseMessage(tokens[0]);
+            return this.newTokens();
         }
         else
         {
@@ -201,8 +190,7 @@ public class SpotifyController {
         String clientSecret = spotifyApi.getClientSecret();
         String refreshToken = spotifyApi.getRefreshToken();
 
-        if(refreshToken == null || clientID == null || clientSecret == null)
-        {
+        if(refreshToken == null || clientID == null || clientSecret == null) {
             throw new SpotifyWebApiException("No refresh token found");
         }
 
