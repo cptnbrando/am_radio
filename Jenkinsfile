@@ -1,34 +1,35 @@
 pipeline {
-    agent {
-        dockerfile true
-    }
+    agent any
+
     stages {
         stage('build-gradle') {
-            steps {
-                script {
-                    echo 'Build gradle...'
+            agent {
+                docker {
+                    image 'openjdk:11'
+                    reuseNode true
                 }
             }
-        }
-        stage("build-backend-image") {
             steps {
-                script {
-                    echo 'Build docker image...'
-                }
+                sh 'ls'
+                sh 'cp ~/home/ec2-user/repos/dcruz-assets/amRadio/.env ${workspace}'
+                sh './gradlew clean build'
+            }
+        }
+        stage("build-docker") {
+            steps {
+                sh 'docker build -t captainbrando/am_radio .'
             }
         }
         stage("push-image") {
             steps {
-                script {
-                    echo 'Push docker image...'
+                withDockerRegistry(credentialsId: 'dc04754e-2f26-4602-ab49-9bcebb7475f5', url: 'https://registry.hub.docker.com') {
+                    sh 'docker push captainbrando/am_radio'
                 }
             }
         }
         stage("deploy-image") {
             steps {
-                script {
-                    echo 'Deploy docker image...'
-                }
+                sh 'docker run -d -p 9015:9015 captainbrando/am_radio'
             }
          }
     }
