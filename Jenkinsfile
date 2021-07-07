@@ -11,7 +11,7 @@ pipeline {
             }
             steps {
                 sh 'ls'
-                echo ${WORKSPACE}
+                echo '${WORKSPACE}'
                 sh 'cp -help'
 //                 sh 'cp ~/home/ec2-user/repos/dcruz-assets/amRadio/.env ${WORKSPACE}'
                 sh './gradlew clean build'
