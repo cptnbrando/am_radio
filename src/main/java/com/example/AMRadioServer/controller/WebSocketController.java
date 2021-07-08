@@ -47,34 +47,34 @@ public class WebSocketController {
         this.template.convertAndSend("/message", message);
     }
 
-    /**
-     * Gets a given Station
-     * If User is first connected listener, begin a playback loop to update Station
-     *
-     * @param stationID ID of station
-     * @return a Station object
-     */
-    @MessageMapping("/radio/{stationID}")
-    @SendTo("/topic/stations/{stationID}")
-    public Station getStation(@PathVariable("stationID") int stationID)
-    {
-        System.out.println("in WSController/getStation");
-
-        Station myStation = stationService.getStation(stationID, true);
-
-        // Check if the station has any listeners
-        if(myStation.getListeners().isEmpty())
-        {
-            System.out.println(stationID + " found empty listeners");
-            // If it does, add the current user to the listeners list
-            // If this is successful, start the station
-            if(stationService.updateListener(stationID)) {
-                stationService.start(stationID);
-            }
-        }
-
-        return myStation;
-    }
+//    /**
+//     * Gets a given Station
+//     * If User is first connected listener, begin a playback loop to update Station
+//     *
+//     * @param stationID ID of station
+//     * @return a Station object
+//     */
+//    @MessageMapping("/radio/{stationID}")
+//    @SendTo("/topic/stations/{stationID}")
+//    public Station getStation(@PathVariable("stationID") int stationID)
+//    {
+//        System.out.println("in WSController/getStation");
+//
+//        Station myStation = stationService.getStation(stationID, true);
+//
+//        // Check if the station has any listeners
+//        if(myStation.getListeners().isEmpty())
+//        {
+//            System.out.println(stationID + " found empty listeners");
+//            // If it does, add the current user to the listeners list
+//            // If this is successful, start the station
+//            if(stationService.updateListener(stationID)) {
+//                stationService.start(stationID);
+//            }
+//        }
+//
+//        return myStation;
+//    }
 
     /**
      * Gets and updates the listeners list for a given StationID

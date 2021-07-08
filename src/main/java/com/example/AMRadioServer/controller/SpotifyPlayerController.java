@@ -1,11 +1,9 @@
 package com.example.AMRadioServer.controller;
 
-import com.example.AMRadioServer.model.ResponseMessage;
 import com.google.gson.JsonArray;
 import com.wrapper.spotify.SpotifyApi;
 import com.wrapper.spotify.exceptions.SpotifyWebApiException;
 import com.wrapper.spotify.model_objects.IPlaylistItem;
-import com.wrapper.spotify.model_objects.credentials.AuthorizationCodeCredentials;
 import com.wrapper.spotify.model_objects.miscellaneous.AudioAnalysis;
 import com.wrapper.spotify.model_objects.miscellaneous.CurrentlyPlaying;
 import com.wrapper.spotify.model_objects.miscellaneous.CurrentlyPlayingContext;
@@ -21,7 +19,7 @@ import java.io.IOException;
 import java.util.Random;
 
 @RestController
-@CrossOrigin(originPatterns = "*", allowCredentials = "true")
+//@CrossOrigin(originPatterns = "*", allowCredentials = "true")
 @SessionAttributes("spotifyApi")
 @RequestMapping("/api/spotify/player")
 public class SpotifyPlayerController {
@@ -205,7 +203,7 @@ public class SpotifyPlayerController {
             System.out.println("Playback transferred!");
             return this.getCurrentDevice();
         }
-        catch (IOException | SpotifyWebApiException | ParseException | InterruptedException e)
+        catch (IOException | SpotifyWebApiException | ParseException e)
         {
             System.out.println("Exception in player/playOn");
             System.out.println(e.getMessage());
@@ -218,19 +216,49 @@ public class SpotifyPlayerController {
      * Sets it to the active player, plays the track, and returns the device
      *
      * @return a spotify player device named am_radio
+     *
+     * IDK WHY BUT GRADLE/ANGULAR/PROXIES/WHATEVER BROKE THIS SO I JUST DID THE SAME THING WITH /setAMRadio
+     * NEVER SPEAK TO ME ABOUT THIS METHOD, EVER
      * TODO: if there's another am_radio instance connected, set it to that one and return a bad response
      */
     @GetMapping(value = "/getAMRadio")
-    public Device getAMRadio() throws InterruptedException {
+    public Device getAMRadio() throws SpotifyWebApiException {
         Device[] myDevices = this.getDevices();
         if(myDevices != null) {
             for(Device device: myDevices) {
                 if(device.getName().equals("am_radio")) {
                     System.out.println("/getAMRadio found and set");
-                    this.playOn(device.getId());
+                    return this.playOn(device.getId());
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Goes through the list of devices and sets am_radio as the active device if found
+     *
+     * @return an active spotify player device named am_radio
+     */
+    @GetMapping(value = "/setAMRadio")
+    public Device setAMRadio() throws SpotifyWebApiException {
+        try {
+            // First get all the devices and find am_radio
+            Device[] myDevices = this.spotifyApi.getUsersAvailableDevices().build().execute();
+            for(Device device: myDevices) {
+                if(device.getName().equals("am_radio")) {
+                    //Create a JSONArray and add the ID, then transfer playback
+                    JsonArray deviceArray = new JsonArray();
+                    deviceArray.add(device.getId());
+                    this.spotifyApi.transferUsersPlayback(deviceArray).build().execute();
                     return device;
                 }
             }
+        } catch (IOException | ParseException e) {
+            System.out.println("Exception caught in getAMRadio");
+            System.out.println(e.getMessage());
+            return null;
         }
 
         return null;
@@ -240,15 +268,17 @@ public class SpotifyPlayerController {
      * Gets a random recently played playlist, sets shuffle and repeat to true, and plays it
      */
     @GetMapping(value = "/startAMRadio")
-    public PlaylistSimplified startAMRadio() {
+    public PlaylistSimplified startAMRadio() throws SpotifyWebApiException {
         try {
-            System.out.println("/startAMRadio");
             // Playback's already on am_radio, so we want to shuffle and repeat on a random recent playlist
             // and skip to the next track
             PlaylistSimplified[] lists = this.spotifyApi.getListOfCurrentUsersPlaylists().limit(25).build().execute().getItems();
-
+            // Rest a bit lol
+            Thread.sleep(500);
             // toggle shuffle
             this.spotifyApi.toggleShuffleForUsersPlayback(true).build().execute();
+            // Rest a bit lol
+            Thread.sleep(500);
             // toggle context repeat
             this.spotifyApi.setRepeatModeOnUsersPlayback("context").build().execute();
 
@@ -258,7 +288,7 @@ public class SpotifyPlayerController {
             this.playPlaylist(randomPlaylist.getUri());
             return randomPlaylist;
         }
-        catch (IOException | SpotifyWebApiException | ParseException e)
+        catch (IOException | ParseException | InterruptedException e)
         {
             System.out.println("Exception caught in player/seek");
             System.out.println(e.getMessage());
@@ -272,12 +302,12 @@ public class SpotifyPlayerController {
      * @return true if successful, false if not
      */
     @PutMapping(value = "/play")
-    public boolean play() {
+    public boolean play() throws SpotifyWebApiException {
         try {
             this.spotifyApi.startResumeUsersPlayback().build().execute();
             return true;
         }
-        catch (IOException | SpotifyWebApiException | ParseException e)
+        catch (IOException | ParseException e)
         {
             System.out.println("Exception in player/play");
             System.out.println(e.getMessage());
@@ -291,12 +321,12 @@ public class SpotifyPlayerController {
      * @return true if successful, false if not
      */
     @PutMapping(value = "/pause")
-    public boolean pause() {
+    public boolean pause() throws SpotifyWebApiException {
         try {
             this.spotifyApi.pauseUsersPlayback().build().execute();
             return true;
         }
-        catch (IOException | SpotifyWebApiException | ParseException e)
+        catch (IOException | ParseException e)
         {
             System.out.println("Exception in player/pause");
             System.out.println(e.getMessage());
@@ -310,13 +340,12 @@ public class SpotifyPlayerController {
      * @param time ms time
      */
     @PutMapping(value = "/seek")
-    public boolean seek(@RequestParam int time) {
+    public boolean seek(@RequestParam int time) throws SpotifyWebApiException {
         try {
             this.spotifyApi.seekToPositionInCurrentlyPlayingTrack(time).build().execute();
             return true;
         }
-        catch (IOException | SpotifyWebApiException | ParseException e)
-        {
+        catch (IOException | ParseException e) {
             System.out.println("Exception caught in player/seek");
             System.out.println(e.getMessage());
             return false;
@@ -330,12 +359,12 @@ public class SpotifyPlayerController {
      * @return true if successful, false if not
      */
     @PutMapping(value = "/shuffle")
-    public boolean shuffle(@RequestParam boolean activate) {
+    public boolean shuffle(@RequestParam boolean activate) throws SpotifyWebApiException {
         try {
             this.spotifyApi.toggleShuffleForUsersPlayback(activate).build().execute();
             return true;
         }
-        catch (IOException | SpotifyWebApiException | ParseException e)
+        catch (IOException | ParseException e)
         {
             System.out.println("Exception caught in player/shuffle");
             System.out.println(e.getMessage());
@@ -350,12 +379,12 @@ public class SpotifyPlayerController {
      * @return true if successful, false if not
      */
     @PutMapping(value = "/repeat")
-    public boolean repeat(@RequestParam String type) {
+    public boolean repeat(@RequestParam String type) throws SpotifyWebApiException {
         try {
             this.spotifyApi.setRepeatModeOnUsersPlayback(type).build().execute();
             return true;
         }
-        catch (IOException | SpotifyWebApiException | ParseException e)
+        catch (IOException | ParseException e)
         {
             System.out.println("Exception caught in player/repeat");
             System.out.println(e.getMessage());
@@ -370,13 +399,13 @@ public class SpotifyPlayerController {
      * @return true if successful, false if not
      */
     @PutMapping(value = "/volume")
-    public boolean volume(@RequestParam int percent)
+    public boolean volume(@RequestParam int percent) throws SpotifyWebApiException
     {
         try {
             this.spotifyApi.setVolumeForUsersPlayback(percent).build().execute();
             return true;
         }
-        catch (IOException | SpotifyWebApiException | ParseException e)
+        catch (IOException | ParseException e)
         {
             System.out.println("Exception in player/volume");
             System.out.println(e.getMessage());
@@ -385,11 +414,11 @@ public class SpotifyPlayerController {
     }
 
     @GetMapping(value = "/getAudioFeatures")
-    public AudioFeatures getAudioFeatures(@RequestParam String trackID)
+    public AudioFeatures getAudioFeatures(@RequestParam String trackID) throws SpotifyWebApiException
     {
         try {
             return this.spotifyApi.getAudioFeaturesForTrack(trackID).build().execute();
-        } catch (IOException | SpotifyWebApiException | ParseException e)
+        } catch (IOException | ParseException e)
         {
             System.out.println("Exception caught in player/getAudioFeatures");
             System.out.println(e.getMessage());
@@ -398,11 +427,11 @@ public class SpotifyPlayerController {
     }
 
     @GetMapping(value = "/getAudioAnalysis")
-    public AudioAnalysis getAudioAnalysis(@RequestParam String trackID)
+    public AudioAnalysis getAudioAnalysis(@RequestParam String trackID) throws SpotifyWebApiException
     {
         try {
             return this.spotifyApi.getAudioAnalysisForTrack(trackID).build().execute();
-        } catch (IOException | SpotifyWebApiException | ParseException e)
+        } catch (IOException | ParseException e)
         {
             System.out.println("Exception caught in player/getAudioAnalysis");
             System.out.println(e.getMessage());
@@ -417,10 +446,10 @@ public class SpotifyPlayerController {
      * @return Device[] of all found Devices
      */
     @GetMapping(value = "/getDevices")
-    public Device[] getDevices() {
+    public Device[] getDevices() throws SpotifyWebApiException {
         try {
             return this.spotifyApi.getUsersAvailableDevices().build().execute();
-        } catch (IOException | SpotifyWebApiException | ParseException e) {
+        } catch (IOException | ParseException e) {
             System.out.println("Exception caught in player/getDevices");
             System.out.println(e.getMessage());
             return null;
@@ -434,7 +463,7 @@ public class SpotifyPlayerController {
      * @return an active Device
      */
     @GetMapping(value = "/getCurrentDevice")
-    public Device getCurrentDevice() throws InterruptedException {
+    public Device getCurrentDevice() throws SpotifyWebApiException {
         Device[] myDevices = this.getDevices();
 
         if(myDevices != null) {

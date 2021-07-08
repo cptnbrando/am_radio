@@ -2,6 +2,7 @@ import { Component, HostListener, Input, OnChanges, OnInit, Output, SimpleChange
 import { faSpotify } from '@fortawesome/free-brands-svg-icons';
 import { AppComponent } from 'src/app/app.component';
 import { RadioService } from 'src/app/services/radio.service';
+import { Device } from 'src/app/shared/models/device.model';
 import { Station } from 'src/app/shared/models/station.model';
 import { ScriptService } from '../../services/script.service';
 import { SpotifyPlayerService } from '../../services/spotify-player.service'
@@ -45,8 +46,8 @@ export class RadioPageComponent implements OnInit, OnChanges {
   @Output() volume: number = 100;
 
   // The device currently playing
-  @Output() currentDevice: any = {};
-  @Output() devices: any = {};
+  @Output() currentDevice: any | Device = {};
+  @Output() devices: any | Device[] = {};
 
   // Whether the spotify sdk is ready or not
   // Uses a directive watcher to watch for the canvas state attribute to change to true
@@ -82,6 +83,7 @@ export class RadioPageComponent implements OnInit, OnChanges {
   }
 
   ngOnInit() {
+
     // Start isLoading
     this.toggleLoading(true);
 
@@ -136,29 +138,24 @@ export class RadioPageComponent implements OnInit, OnChanges {
   // It uses dom-watcher to watch the canvas element for attribute changes, updated by the spotifyPlayerSDK.js in /assets
   onPlayerReady(event: any) {
     this.playerReady = event.returnValue;
+
+    // get current device and playback information
+    this.getCurrentDevice();
     
     // Once the radio player is ready, we should prompt the user to swap to the new player
     // ...or we could change it automatically if there's nothing playing rn
     if(this.isPlaying) {
       // Device toggling done via Station Bar
       this.setPlayerData();
-
-      // Also set userDevices
-      // this.setDevices();
-
-      // Also set currentDevice
-      this.getCurrentDevice();
-
-      // We get the currently playing player
-      this.playerService.getPlayer().subscribe(data => {
-        if(data) this.currentDevice = data;
-      });
     }
-    else
-    {
-      console.log("onPlayerReady else");
-      // If nothing is playing, we get am_radio from the server, then attempt to play the most recently played track
-      this.beginAMRadio();
+    else {
+      // If nothing is playing, we set am_radio as the active device, then attempt to play the most recently played track
+      this.playerService.setAMRadio().subscribe(data => {
+        if(data) {
+          this.currentDevice = data;
+          this.beginAMRadio();
+        }
+      });
     }
   }
 
@@ -169,43 +166,18 @@ export class RadioPageComponent implements OnInit, OnChanges {
     this.currentStation = new Station();
     this.toggleLoading(true);
 
-    console.log("beginAMRadio");
-
-    if(this.currentDevice.name != "am_radio") {
-      // Get am_radio (This server endpoint find am_radio and sets it as the active device in the Spotify API)
-      this.playerService.getAMRadio().subscribe(data => {
-        if(data) {
-          // If found, set it as the active player
-          this.currentDevice = data;
-
-          console.log("beginAMRadio found and set");
-
-          // Attempt to play a random playlist on am_radio
-          this.playerService.startAMRadio().subscribe(data => {
-            if(data) {
-              console.log("startAMRadio success!");
-              this.playingPlaylist = data;
-              this.changePlaylist(data);
-              this.currentStation.stationName = "Recently Played";  
-            }
-
-            // stop isLoading
-            this.toggleLoading(false);
-          });
-        }
-      });
-    } else {
-      console.log("beginAMRadio else");
-      // If the device is already set, just play a random playlist
-      this.playerService.startAMRadio().subscribe(data => {
+    // Attempt to play a random playlist on am_radio
+    this.playerService.startAMRadio().subscribe(data => {
+      if(data) {
+        console.log("startAMRadio success!");
         this.playingPlaylist = data;
         this.changePlaylist(data);
-        this.currentStation.stationName = "Recently Played";
+        this.currentStation.stationName = "Recently Played";  
+      }
 
-        // stop isLoading
-        this.toggleLoading(false);
-      });
-    }
+      // stop isLoading
+      this.toggleLoading(false);
+    });
   }
 
   /**

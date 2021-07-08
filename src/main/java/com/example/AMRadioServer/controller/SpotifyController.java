@@ -5,10 +5,12 @@ import com.example.AMRadioServer.model.ResponseMessage;
 import com.wrapper.spotify.SpotifyApi;
 import com.wrapper.spotify.exceptions.SpotifyWebApiException;
 import com.wrapper.spotify.model_objects.credentials.AuthorizationCodeCredentials;
-import com.wrapper.spotify.model_objects.specification.*;
+import com.wrapper.spotify.model_objects.specification.Paging;
+import com.wrapper.spotify.model_objects.specification.PlaylistSimplified;
+import com.wrapper.spotify.model_objects.specification.PlaylistTrack;
+import com.wrapper.spotify.model_objects.specification.User;
 import com.wrapper.spotify.requests.authorization.authorization_code.AuthorizationCodeRequest;
 import com.wrapper.spotify.requests.authorization.authorization_code.AuthorizationCodeUriRequest;
-import com.wrapper.spotify.requests.data.playlists.GetListOfCurrentUsersPlaylistsRequest;
 import org.apache.hc.core5.http.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +22,7 @@ import java.net.URI;
 
 @RestController
 // If you're wondering why you have CORS issues with a Controller and withCredentials, boy do I have the annotation for you
-@CrossOrigin(originPatterns = "*", allowCredentials = "true")
+//@CrossOrigin(originPatterns = "*", allowCredentials = "true")
 @SessionAttributes("spotifyApi")
 @RequestMapping("/api/spotify")
 public class SpotifyController {
@@ -90,12 +92,11 @@ public class SpotifyController {
      * (Spotify doesn't like returning actual Playlist objects, but a PlaylistSimplified has pretty much everything)
      */
     @GetMapping(value = "/getUserPlaylists")
-    public PlaylistSimplified[] getUserPlaylists()
-    {
+    public PlaylistSimplified[] getUserPlaylists() throws SpotifyWebApiException {
         try {
             return spotifyApi.getListOfCurrentUsersPlaylists().limit(25).build().execute().getItems();
         }
-        catch (IOException | SpotifyWebApiException | ParseException e)
+        catch (IOException | ParseException e)
         {
             System.out.println("Exception caught in getUserPlaylists");
             System.out.println(e.getMessage());
@@ -104,13 +105,11 @@ public class SpotifyController {
     }
 
     @GetMapping(value = "/getPlaylistTracks")
-    public PlaylistTrack[] getPlaylistTracks(@RequestParam String playlistID)
-    {
+    public PlaylistTrack[] getPlaylistTracks(@RequestParam String playlistID) throws SpotifyWebApiException {
         try {
-            Paging<PlaylistTrack> tracks = spotifyApi.getPlaylistsItems(playlistID).build().execute();
-            return tracks.getItems();
+            return spotifyApi.getPlaylistsItems(playlistID).build().execute().getItems();
         }
-        catch (IOException | SpotifyWebApiException | ParseException e)
+        catch (IOException | ParseException e)
         {
             System.out.println("Exception caught in getPlaylistTracks");
             System.out.println(e.getMessage());
@@ -135,71 +134,18 @@ public class SpotifyController {
     }
 
     /**
-     * Attempts to access user data and if rejected, refreshes the tokens and returns new ones
+     * Attempts to access playlist data and if rejected, throws an exception which will attempt to refresh tokens
      *
      * @return a valid access token
      */
     @GetMapping(value = "/checkTokens")
-    public ResponseMessage checkTokens()
-    {
-        // Try getUser(), if it fails then the tokens are bad, return null
-//        try {
-//            this.getUser();
-//            return new ResponseMessage(spotifyApi.getAccessToken());
-//        } catch (SpotifyWebApiException e) {
-//            System.out.println("bad checkTokens");
-//            e.printStackTrace();
-//            return null;
-//        }
-        if(this.spotifyApi.getAccessToken() == null || this.getUserPlaylists() == null)
-        {
-            return this.newTokens();
+    public ResponseMessage checkTokens() throws SpotifyWebApiException {
+        if(this.spotifyApi.getAccessToken() == null || this.spotifyApi.getRefreshToken() == null || this.getUserPlaylists() == null) {
+            throw new SpotifyWebApiException("No refresh token found");
         }
-        else
-        {
+        else {
             // If the playlists can be good, then the token is good!
             return new ResponseMessage(spotifyApi.getAccessToken());
         }
-    }
-
-    /**
-     * Gets new valid access/refresh tokens and sets them to the api
-     *
-     * @return a valid access token
-     */
-    @GetMapping(value = "/newTokens")
-    public ResponseMessage newTokens() {
-        try {
-            String[] tokens = this.getNewTokens();
-            this.spotifyApi.setAccessToken(tokens[0]);
-            this.spotifyApi.setRefreshToken(tokens[1]);
-            return new ResponseMessage(this.spotifyApi.getAccessToken());
-        } catch (IOException | SpotifyWebApiException | ParseException e) {
-            System.out.println("Exception caught in newTokens(): " + e.getMessage());
-            return null;
-        }
-    }
-
-    /**
-     * Trade the current refresh token for a new access token
-     *
-     * @return access token and refresh token
-     */
-    protected String[] getNewTokens() throws IOException, ParseException, SpotifyWebApiException {
-        String clientID = spotifyApi.getClientId();
-        String clientSecret = spotifyApi.getClientSecret();
-        String refreshToken = spotifyApi.getRefreshToken();
-
-        if(refreshToken == null || clientID == null || clientSecret == null) {
-            throw new SpotifyWebApiException("No refresh token found");
-        }
-
-        AuthorizationCodeCredentials auth = spotifyApi.authorizationCodeRefresh(clientID, clientSecret, refreshToken).build().execute();
-
-        String[] tokens = new String[2];
-        tokens[0] = auth.getAccessToken();
-        tokens[1] = auth.getRefreshToken();
-
-        return tokens;
     }
 }

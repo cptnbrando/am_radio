@@ -1,7 +1,6 @@
 import Sketch from "./sketch.model"
 import Sync from "./sync.model"
 
-
 export default class Visualizer {
 
     sync: Sync;

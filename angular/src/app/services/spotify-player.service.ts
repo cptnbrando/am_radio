@@ -1,7 +1,9 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { MatOptionSelectionChange } from '@angular/material/core';
 import { Observable } from 'rxjs';
 import { AppComponent } from '../app.component';
+import { Device } from '../shared/models/device.model';
 
 @Injectable({
   providedIn: 'root'
@@ -26,6 +28,10 @@ export class SpotifyPlayerService {
 
   getAMRadio(): Observable<any>{
     return this.httpCli.get<any>(`${this.serverURL}/getAMRadio`);
+  }
+
+  setAMRadio(): Observable<any>{
+    return this.httpCli.get<any>(`${this.serverURL}/setAMRadio`);
   }
 
   getAudioFeatures(trackID: any): Observable<any>{

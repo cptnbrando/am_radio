@@ -34,14 +34,23 @@ window.onSpotifyWebPlaybackSDKReady = () => {
     duration,
     track_window: { current_track }
   }) => {
+    if(typeof duration === null || typeof duration === undefined || typeof track_window === null || typeof track_window === undefined) {
+      return;
+    }
     // Detects for playback changes
     player.getCurrentState().then(data => {
+      if (!data) {
+        console.error('User is not playing music through the Web Playback SDK');
+        return;
+      }
       canvas.setAttribute("current", current_track.uri);
       canvas.setAttribute("paused", data.paused);
       canvas.setAttribute("duration", duration);
       canvas.setAttribute("repeat", data.repeat_mode);
       canvas.setAttribute("shuffle", data.shuffle);
     });
+  }, error => {
+    console.log("Error on player_state_changed");
   });
 
   // Ready
