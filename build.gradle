@@ -21,7 +21,7 @@ node {
 	nodeProjectDir = file(angularDir)
 	download = true
 	version = '16.4.0'
-	npmVersion = '7.18.1'
+	npmVersion = '7.19.1'
 }
 
 repositories {

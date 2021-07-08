@@ -34,8 +34,8 @@ export class StationBarComponent implements OnInit {
       if(this.selectedPlaylist) {
         this.radioService.createStation(this.stationNum, this.selectedPlaylist).subscribe(data => {
           if(data.message === "Created"){
-            console.log(data);
-            this.createdStation.emit();
+            // console.log(data);
+            this.createdStation.emit(data);
           }
         });
       }

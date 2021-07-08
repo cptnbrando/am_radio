@@ -10,7 +10,8 @@
       (playTrackEvent)="playTrack($event)" (toggleLoadingEvent)="toggleLoading($event)"></app-playlist-bar>
     <app-controls class="mid setting" [showControls]="showControls" (isTypingEvent)="toggleTyping($event)"></app-controls>
     <app-station-bar class="side setting" [stationNum]="stationNum" [showStationBar]="showStationBar"
-      [currentStation]="currentStation" [selectedPlaylist]="selectedPlaylist" (createdStation)="createdStation()"
+      [currentStation]="currentStation" [selectedPlaylist]="selectedPlaylist"
+      (createdStation)="onCreatedStation($event)"
       [isLoading]="isLoading" (toggleLoadingEvent)="toggleLoading($event)"></app-station-bar>
   </div>
 

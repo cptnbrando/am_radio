@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
@@ -41,9 +42,17 @@ public class SpotifyExceptionHandler {
 
     }
 
-    @SuppressWarnings("all")
+    /**
+     * All SpotifyWebApiExceptions will trigger this function, which will attempt to
+     * refresh access tokens or redirect to the front landing page
+     *
+     * @param e exception called
+     * @param request incoming request
+     * @param response outgoing response
+     * @return redirect or null
+     */
     @ExceptionHandler(value = {SpotifyWebApiException.class})
-    public String redirect(SpotifyWebApiException e, HttpServletResponse response) {
+    public String redirect(SpotifyWebApiException e, HttpServletRequest request, HttpServletResponse response) {
         // Catches Exception from newTokens()
         if(e.getMessage().equals("No refresh token found")) {
             return "redirect:" + SpotifyConfiguration.appURL;
@@ -60,6 +69,7 @@ public class SpotifyExceptionHandler {
         }
 
         System.out.println("SpotifyExceptionHandler: " + e.getMessage());
+        System.out.println(request.getRequestURL());
         return null;
     }
 }

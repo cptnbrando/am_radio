@@ -111,8 +111,6 @@ public class SpotifyPlayerController {
      */
     @PutMapping(value = "/addToQueue")
     public void addToQueue(@RequestParam(name = "trackURI") String trackURI) {
-        System.out.println("in addToQueue");
-        System.out.println(trackURI);
         try {
             this.spotifyApi.addItemToUsersPlaybackQueue(trackURI).build().execute();
         }
@@ -149,8 +147,7 @@ public class SpotifyPlayerController {
      * @return true if successful, false if not
      */
     @PutMapping(value = "/playTrack")
-    public boolean playTrack(@RequestParam(name = "trackURI") String trackURI)
-    {
+    public boolean playTrack(@RequestParam(name = "trackURI") String trackURI) throws SpotifyWebApiException {
         try {
             this.spotifyApi.addItemToUsersPlaybackQueue(trackURI).build().execute();
             this.spotifyApi.skipUsersPlaybackToNextTrack().build().execute();
@@ -161,23 +158,23 @@ public class SpotifyPlayerController {
             // Loop until the queue and current playing track is right
             int count = 0;
             while(!current.getUri().equals(trackURI)) {
-                System.out.println("Track not found...");
+//                System.out.println("Track not found...");
                 // Counter in case it got skipped over somehow...
                 this.spotifyApi.skipUsersPlaybackToNextTrack().build().execute();
                 // Sleep for a couple seconds for the line above to finish executing
-                Thread.sleep(1500);
+                Thread.sleep(1000);
                 current = this.spotifyApi.getUsersCurrentlyPlayingTrack().build().execute().getItem();
                 count++;
                 if(count > 5) {
                     this.spotifyApi.addItemToUsersPlaybackQueue(trackURI).build().execute();
-                    Thread.sleep(1500);
+                    Thread.sleep(1000);
                     count = 0;
                 }
             }
 
             return true;
         }
-        catch (IOException | SpotifyWebApiException | ParseException | InterruptedException e)
+        catch (IOException | ParseException | InterruptedException e)
         {
             System.out.println("Exception caught in player/pause");
             System.out.println(e.getMessage());

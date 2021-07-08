@@ -141,8 +141,7 @@ public class StationService {
      * @param checkDB whether to check the DB as well
      * @return a Station if it exists, null if it cannot be found
      */
-    public Station getStation(int stationID, boolean... checkDB)
-    {
+    public Station getStation(int stationID, boolean... checkDB) {
         if(checkDB.length == 1 && checkDB[0]) {
             try {
                 // Check if it exists in the db
@@ -158,8 +157,7 @@ public class StationService {
 
                 return null;
             }
-            catch (IllegalArgumentException e)
-            {
+            catch (IllegalArgumentException e) {
                 System.out.println("Exception caught in stationService/getStation");
                 System.out.println(e.getMessage());
                 return null;
@@ -176,8 +174,7 @@ public class StationService {
      * @param stationID ID of station
      * @return true if it exists, false if not
      */
-    public boolean updateListener(int stationID)
-    {
+    public boolean updateListener(int stationID) throws SpotifyWebApiException {
         try {
             User myUser = this.spotifyApi.getCurrentUsersProfile().build().execute();
 
@@ -188,7 +185,7 @@ public class StationService {
 
             return true;
         }
-        catch (IOException | SpotifyWebApiException | ParseException e) {
+        catch (IOException | ParseException e) {
             System.out.println("Spotify exception caught in StationService checkListeners");
             System.out.println(e.getMessage());
             return false;
@@ -229,8 +226,8 @@ public class StationService {
             // Save station
             this.saveStation(station);
         }
-        catch (NullPointerException e) {
-            System.out.println("NullPointer caught in StationService/removeListener");
+        catch (NullPointerException ignored) {
+//            System.out.println("NullPointer caught in StationService/removeListener");
         } catch (SecurityException e) {
             System.out.println("SecurityException caught in StationService/removeListener");
         }

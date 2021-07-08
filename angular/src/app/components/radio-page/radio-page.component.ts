@@ -83,7 +83,6 @@ export class RadioPageComponent implements OnInit, OnChanges {
   }
 
   ngOnInit() {
-
     // Start isLoading
     this.toggleLoading(true);
 
@@ -197,18 +196,35 @@ export class RadioPageComponent implements OnInit, OnChanges {
 
   // Event callback for Spotify SDK script
   onCurrentChange(event: any): void {
-    this.setPlayerData();
+    if(this.canvas.getAttribute("current") != this.currentURI) {
+      // Update the player data if the current song was changed
+      this.setPlayerData();
+      this.currentURI = this.canvas.getAttribute("current");
 
-    if(this.stationNum > 0 && this.currentStation.playTime != 0) {
-      this.radioService.getStation(this.stationNum).subscribe(data => {
-        if(data) {
-          if(data.nextURI != this.nextURI) {
-            this.nextURI = data.nextURI;
-            this.playerService.addToQueue(this.nextURI).subscribe();
-          }
-        }
-      })
+      // This is going to be our queue loop to add new songs to the queue
+      if(this.stationNum > 0 && this.currentStation.playTime > 0) {
+        this.queueNextTrack(this.stationNum);
+      }
     }
+
+  }
+
+  /**
+   * Gets the station at the given number and queues up the nextURI track if it hasn't been queued already
+   * @param stationNum the number to get
+   */
+  queueNextTrack(stationNum: number): void {
+    this.radioService.getStation(stationNum).subscribe(data => {
+      if(data) {
+        this.currentStation = data;
+        this.currentURI = data.currentURI;
+        if(data.nextURI != this.nextURI) {
+          this.nextURI = data.nextURI;
+          this.playerService.addToQueue(this.nextURI).subscribe();
+          console.log("Added to queue", data.nextURI);
+        }
+      }
+    });
   }
 
   // Event callback for Spotify SDK script
@@ -218,19 +234,17 @@ export class RadioPageComponent implements OnInit, OnChanges {
 
   // Event callback for next_track Spotify SDK script
   onNextChange(event: any): void {
-    this.next = event.detail.attributes.next;
+    this.next = this.canvas.getAttribute("next");
   }
 
   // Event callback for repeat changes detected by Spotify SDK player
   onRepeatChange(event: any): void {
-    this.repeat = parseInt(event.detail.attributes.repeat.nodeValue);
-    // this.toggleLoading(false);
+    this.repeat = parseInt(this.canvas.getAttribute("repeat"));
   }
 
   // Event callback for shuffle changes detected by Spotify SDK player
   onShuffleChange(event: any): void {
-    this.shuffle = (event.detail.attributes.shuffle.nodeValue === "true");
-    // this.toggleLoading(false);
+    this.shuffle = (this.canvas.getAttribute("shuffle") === "true");
   }
 
   // This will get the current player and set the data to the UI
@@ -239,9 +253,21 @@ export class RadioPageComponent implements OnInit, OnChanges {
       if(data) {
         // Set the data
         this.currentlyPlaying = data.item;
+        this.currentURI = data.item.uri;
         this.currentDevice = data.device;
       }
     });
+  }
+
+  setStationData(): void {
+    if(this.stationNum > 0) {
+      this.radioService.getStation(this.stationNum).subscribe(data => {
+        if(data) {
+          this.currentStation = data;
+          this.currentURI = data.currentURI;
+        }
+      })
+    }
   }
 
   // This is called by the EventEmitter in the header component
@@ -263,7 +289,6 @@ export class RadioPageComponent implements OnInit, OnChanges {
 
     // BeginAMRadio on station 000, otherwise join/start the station
     if(stationNum === 0){
-      console.log("changeStation if");
       this.beginAMRadio();
       return;
     }
@@ -276,12 +301,10 @@ export class RadioPageComponent implements OnInit, OnChanges {
   setStation(stationNum: number): void {
     this.toggleLoading(true);
 
+    // This shouldn't get here if we're at 000...
     if(stationNum === 0) {
       return;
     }
-
-    // this.playerService.shuffle(false).subscribe();
-    // this.playerService.repeat("off").subscribe();
 
     // Get station at given number
     this.radioService.getStation(stationNum).subscribe(data => {
@@ -292,14 +315,14 @@ export class RadioPageComponent implements OnInit, OnChanges {
         let myVol = this.volume;
         this.changeVolume(0);
         this.currentStation = data;
-
         this.radioService.joinStation(stationNum).subscribe((data) => {
           // now we check if the queue is right
           // if not, we keep skipping until the station is lined up
           if(data) {
             this.toggleLoading(false);
             this.changeVolume(myVol);
-            this.nextURI = data.nextURI;
+            this.queueNextTrack(stationNum);
+            console.log(`setStation, joinStation ${stationNum}`, data);
           }
         });
       }
@@ -312,7 +335,9 @@ export class RadioPageComponent implements OnInit, OnChanges {
     });
   }
 
-  createdStation(): void {
+  // Event callback for station bar createStation()
+  onCreatedStation(data: any): void {
+    console.log("onCreatedStation", data);
     this.setStation(this.stationNum);
   }
 

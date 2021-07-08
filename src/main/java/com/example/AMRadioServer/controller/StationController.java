@@ -31,8 +31,6 @@ public class StationController extends SpotifyPlayerController {
      */
     @PostMapping(value = "/{stationID}")
     public ResponseMessage insertNewStation(@PathVariable("stationID") int stationID, @RequestBody PlaylistSimplified playlist) {
-        System.out.println("stationController/insertNewStation");
-        System.out.println(playlist.getId());
         return this.stationService.createStation(stationID, playlist);
     }
 
@@ -73,19 +71,18 @@ public class StationController extends SpotifyPlayerController {
             this.stationService.start(stationID);
 
             // Wait a second for the fields to get right
-            Thread.sleep(3000);
+            Thread.sleep(1300);
         }
 
         // Play the current track and seek it to the right time if the station is playing
         // System.currentTime - station.getPlayTime
         if(station.isPlaying() && super.playTrack(station.getCurrentURI())) {
-            long seekValue = System.currentTimeMillis() - station.getPlayTime();
-            System.out.println("Station is playing, seeking to: " + seekValue);
-            super.seek((int) seekValue);
+            super.seek((int) (System.currentTimeMillis() - station.getPlayTime()));
         }
 
         // Add the next one to the queue
-        super.addToQueue(station.getNextURI());
+        // nvm, frontend will take care of it
+//        super.addToQueue(station.getNextURI());
 
         return true;
     }
