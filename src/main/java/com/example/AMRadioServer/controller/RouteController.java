@@ -5,6 +5,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.http.HttpServletRequest;
 
+/**
+ * Controller that routes all unknown /paths back to the homepage
+ */
 @Controller
 public class RouteController {
 

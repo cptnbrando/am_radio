@@ -1,25 +1,18 @@
 pipeline {
-    agent any
+    agent {
+        label 'main'
+    }
 
     stages {
         stage('build-gradle') {
-            agent {
-                docker {
-                    image 'gradle:7.1-jdk11'
-                    reuseNode true
+            steps {
+                script {
+                    sh './gradlew clean build'
                 }
-            }
-            steps {
-                sh 'ls'
-                echo '${WORKSPACE}'
-                sh 'cp -help'
-//                 sh 'cp ~/home/ec2-user/repos/dcruz-assets/amRadio/.env ${WORKSPACE}'
-                sh './gradlew clean build'
-            }
         }
-        stage("build-docker") {
+        stage("build-docker-image") {
             steps {
-                sh 'docker build -t captainbrando/am_radio .'
+                sh 'docker build -t captainbrando/am_radio:deployed .'
             }
         }
         stage("push-image") {
