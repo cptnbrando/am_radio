@@ -21,7 +21,7 @@ node {
 	nodeProjectDir = file(angularDir)
 	download = true
 	version = '16.4.0'
-	npmVersion = '7.19.1'
+	npmVersion = '7.18.1'
 }
 
 repositories {
@@ -52,7 +52,7 @@ task compileAngular(type: NpmTask, dependsOn: npmInstall) {
 	def inputFiles = project.fileTree(dir: "${angularDir}", exclude: "**/karma-test-results.xml")
 	inputs.files(inputFiles)
 
-	def outputFile = "${angularDir}/dist/${angularAppName}"
+	def outputFile = "${angularDir}/dist/${angularAppName}" as Object
 	outputs.dir outputFile
 
 	group 'build'
@@ -61,10 +61,10 @@ task compileAngular(type: NpmTask, dependsOn: npmInstall) {
 }
 
 task copyAngular(type: Copy, dependsOn: compileAngular) {
-	def inputFiles = project.fileTree(dir: "${angularDir}/dist/${angularAppName}") as Object
+	def inputFiles = project.fileTree(dir: "${angularDir}/dist/${angularAppName}")
 	inputs.files(inputFiles)
 
-	def outputFile = "${projectDir}/src/main/resources/static/"
+	def outputFile = "${projectDir}/src/main/resources/static/" as Object
 	outputs.dir outputFile
 
 	from "${angularDir}/dist/${angularAppName}"

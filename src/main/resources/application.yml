@@ -20,7 +20,7 @@ spring:
     initialization-mode: always
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
-    show-sql: true
+    show-sql: false
     hibernate:
       ddl-auto: create
     properties:
@@ -30,3 +30,5 @@ spring:
         jdbc:
           lob:
             non_contextual_creation: true
+  mvc:
+    log-resolved-exception: false
