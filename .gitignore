@@ -47,4 +47,4 @@ gradle.properties
 
 ./angular/dist/
 
-/certs/
+*.keystore

@@ -5,7 +5,7 @@ server:
   ssl:
     enabled: true
     key-alias: amradio.app
-    key-store: "./certs/amRadio.keystore"
+    key-store: "src/main/resources/certs/amRadio.keystore"
     key-store-type: jks
     key-store-password: ${RADIO_DB_PASSWORD}
     key-password: ${RADIO_DB_PASSWORD}
