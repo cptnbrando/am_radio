@@ -196,12 +196,17 @@ export class RadioPageComponent implements OnInit, OnChanges {
 
   // Event callback for Spotify SDK script
   onCurrentChange(event: any): void {
+    // This is gonna call it soooo much...
+    // I thought keeping it below worked but it's not too responsive and kinda janky...
+    // TODO fix
     this.setPlayerData();
 
     // This is the queue loop for an infinite station
     if(this.canvas.getAttribute("current") != this.currentURI) {
       // Update the player data if the current song was changed
       this.currentURI = this.canvas.getAttribute("current");
+
+      this.setPlayerData();
 
       // This is going to be our queue loop to add new songs to the queue
       if(this.stationNum > 0 && this.currentStation.playTime > 0) {
@@ -223,6 +228,7 @@ export class RadioPageComponent implements OnInit, OnChanges {
         if(data.nextURI != this.nextURI) {
           this.nextURI = data.nextURI;
           this.playerService.addToQueue(this.nextURI).subscribe();
+          this.setPlayerData();
           console.log("Added to queue", data.nextURI);
         }
       }
@@ -333,6 +339,7 @@ export class RadioPageComponent implements OnInit, OnChanges {
         if(!this.showPlaylistBar) this.toggleBar(0);
         if(!this.showStationBar) this.toggleBar(1);
         this.toggleLoading(false);
+        this.setPlayerData();
       }
     });
   }
