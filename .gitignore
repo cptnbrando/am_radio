@@ -46,3 +46,5 @@ gradle.properties
 *.env
 
 ./angular/dist/
+
+/certs/

@@ -2,6 +2,13 @@
 
 server:
   port: 443
+  ssl:
+    enabled: true
+    key-alias: amradio.app
+    key-store: "./certs/amRadio.keystore"
+    key-store-type: jks
+    key-store-password: ${RADIO_DB_PASSWORD}
+    key-password: ${RADIO_DB_PASSWORD}
 
 spring:
   application:
