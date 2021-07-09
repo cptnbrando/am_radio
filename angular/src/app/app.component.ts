@@ -1,4 +1,5 @@
 import { Component, HostListener } from '@angular/core';
+import { environment } from 'src/environments/environment';
 
 
 @Component({
@@ -9,8 +10,9 @@ import { Component, HostListener } from '@angular/core';
 export class AppComponent {
   title = 'am_radio';
 
-  public static serverRoot = `http://localhost:9015`;
-  public static webURL = `http://localhost:9015`;
+  public static serverRoot = environment.appURL;
+  public static webURL = environment.appURL;
+  public static appURL: string = environment.appURL;
 
   constructor() {}
 

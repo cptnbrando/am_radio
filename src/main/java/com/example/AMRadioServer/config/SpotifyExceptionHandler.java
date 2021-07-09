@@ -39,7 +39,7 @@ public class SpotifyExceptionHandler {
         AuthorizationCodeCredentials auth = spotifyApi.authorizationCodeRefresh(clientID, clientSecret, refreshToken).build().execute();
         this.spotifyApi.setAccessToken(auth.getAccessToken());
         this.spotifyApi.setRefreshToken(auth.getRefreshToken());
-
+//        System.out.println("Tokens refreshed!");
     }
 
     /**
@@ -55,7 +55,7 @@ public class SpotifyExceptionHandler {
     public String redirect(SpotifyWebApiException e, HttpServletRequest request, HttpServletResponse response) {
         // Catches Exception from newTokens()
         if(e.getMessage().equals("No refresh token found")) {
-            return "redirect:" + SpotifyConfiguration.appURL;
+            return "redirect:" + SpotifyConfiguration.url;
         }
 
         // Catches invalid access tokens
@@ -64,12 +64,12 @@ public class SpotifyExceptionHandler {
                 this.newTokens();
                 return null;
             } catch (Exception g) {
-                return "redirect:" + SpotifyConfiguration.appURL;
+                return "redirect:" + SpotifyConfiguration.url;
             }
         }
 
-        System.out.println("SpotifyExceptionHandler: " + e.getMessage());
         System.out.println(request.getRequestURL());
+        System.out.println("SpotifyExceptionHandler: " + e.getMessage());
         return null;
     }
 }

@@ -77,7 +77,7 @@ public class SpotifyController {
             spotifyApi.setRefreshToken(authorizationCodeCredentials.getRefreshToken());
 
         } catch (IOException | SpotifyWebApiException | org.apache.hc.core5.http.ParseException e) {
-            response.sendRedirect("http://localhost:9015/");
+            response.sendRedirect(SpotifyConfiguration.url);
         }
 
         response.sendRedirect(SpotifyConfiguration.appURL);

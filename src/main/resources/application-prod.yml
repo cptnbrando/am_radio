@@ -1,0 +1,27 @@
+#am_radio CONFIG - prod
+
+server:
+  port: 9015
+
+spring:
+  application:
+    name: am_radio
+  datasource:
+    url: ${RADIO_DB_URL}
+    username: ${RADIO_DB_USERNAME}
+    password: ${RADIO_DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: false
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        temp:
+          use_jdbc_metadata_defaults: false
+        jdbc:
+          lob:
+            non_contextual_creation: true
+  mvc:
+    log-resolved-exception: false

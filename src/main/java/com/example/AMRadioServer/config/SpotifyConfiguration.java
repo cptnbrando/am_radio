@@ -12,12 +12,15 @@ import java.net.URI;
 @Configuration
 public class SpotifyConfiguration {
 
-    private static final URI redirectURI = SpotifyHttpManager.makeUri("http://localhost:9015/api/spotify/getUserCode");
-    public static final String appURL = "http://localhost:9015/app";
+    public static String url = System.getenv("RADIO_APP_URL");
+    private static final URI redirectURI = SpotifyHttpManager.makeUri(System.getenv("RADIO_APP_URL") + "/api/spotify/getUserCode");
+    public static String appURL = url + "/app";
 
     @Bean
     @SessionScope
     public SpotifyApi spotifyApi() {
+        System.out.println(SpotifyConfiguration.redirectURI);
+        System.out.println(SpotifyConfiguration.appURL);
         return new SpotifyApi.Builder()
                 .setClientId(System.getenv("SPOTIFY_CLI_ID"))
                 .setClientSecret(System.getenv("SPOTIFY_CLI_SECRET"))

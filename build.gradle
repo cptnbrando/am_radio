@@ -11,10 +11,19 @@ group = 'com.example'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = JavaVersion.VERSION_11
 
+//tasks.bootRun {
+//	args("--spring.profiles.active=${profile}")
+//}
+//
+//tasks.processResources {
+//	rename("application-${profile}.properties", "application.properties")
+//}
+
 // Extensions or Variables to use throughout the build.gradle
 ext {
 	angularAppName = "amradio"
 	angularDir = "$projectDir/angular"
+	profile = System.getenv("SPRING_PROFILES_ACTIVE")
 }
 
 node {
@@ -35,8 +44,17 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
-	runtimeOnly 'com.h2database:h2'
-	runtimeOnly 'org.postgresql:postgresql'
+
+//	runtimeOnly("org.postgresql:postgresql")
+//	runtimeOnly("com.h2database:h2")
+
+	// Database from profile, h2 for dev postgresql for prod
+	if (System.getenv("SPRING_PROFILES_ACTIVE") == "prod") {
+		runtimeOnly("org.postgresql:postgresql")
+	} else {
+		runtimeOnly("com.h2database:h2")
+	}
+
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
@@ -55,9 +73,17 @@ task compileAngular(type: NpmTask, dependsOn: npmInstall) {
 	def outputFile = "${angularDir}/dist/${angularAppName}" as Object
 	outputs.dir outputFile
 
-	group 'build'
+	def buildCmd
+	if (System.getenv("SPRING_PROFILES_ACTIVE") == "prod") {
+		buildCmd = "buildProd"
+	}
+	else {
+		buildCmd = "buildDev"
+	}
+
+	group "build"
 	description = 'Compile client side assets for production'
-	args = ['run', 'build']
+	args = ['run', "${buildCmd}"]
 }
 
 task copyAngular(type: Copy, dependsOn: compileAngular) {
