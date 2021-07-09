@@ -196,9 +196,11 @@ export class RadioPageComponent implements OnInit, OnChanges {
 
   // Event callback for Spotify SDK script
   onCurrentChange(event: any): void {
+    this.setPlayerData();
+
+    // This is the queue loop for an infinite station
     if(this.canvas.getAttribute("current") != this.currentURI) {
       // Update the player data if the current song was changed
-      this.setPlayerData();
       this.currentURI = this.canvas.getAttribute("current");
 
       // This is going to be our queue loop to add new songs to the queue
