@@ -1,7 +1,7 @@
 const PROXY_CONFIG = [
   {
     context: ['/app'],
-    target: 'https://18.191.81.161:9015/',
+    target: 'https://amradio.app',
     secure: false
   }
 ]

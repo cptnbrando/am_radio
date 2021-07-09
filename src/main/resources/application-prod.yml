@@ -1,7 +1,7 @@
 #am_radio CONFIG - prod
 
 server:
-  port: 9015
+  port: 443
 
 spring:
   application:

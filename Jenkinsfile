@@ -21,14 +21,14 @@ pipeline {
         stage("push-image") {
             steps {
                 withDockerRegistry(credentialsId: 'dc04754e-2f26-4602-ab49-9bcebb7475f5', url: 'https://registry.hub.docker.com') {
-                    sh 'docker push captainbrando/am_radio'
+                    sh 'docker push captainbrando/am_radio:deployed'
                 }
             }
         }
 
         stage("deploy-image") {
             steps {
-                sh 'docker run -d -p 9015:9015 captainbrando/am_radio'
+                sh 'docker run -d -p 443:443 captainbrando/am_radio:deployed'
             }
         }
     }
