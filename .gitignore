@@ -48,3 +48,4 @@ gradle.properties
 ./angular/dist/
 
 *.keystore
+*.p12
