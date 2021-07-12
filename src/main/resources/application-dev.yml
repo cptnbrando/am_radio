@@ -10,9 +10,9 @@ spring:
         console:
             enabled: true
     datasource:
-        url: ${RADIO_DB_URL}
-        username: ${RADIO_DB_USERNAME}
-        password: ${RADIO_DB_PASSWORD}
+        url: jdbc:h2:file:./h2Database/h2Stations
+        username: sa
+        password:
         driverClassName: org.h2.Driver
         initialize: true
         initialization-mode: always

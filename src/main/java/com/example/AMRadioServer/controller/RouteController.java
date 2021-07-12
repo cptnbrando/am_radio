@@ -14,6 +14,11 @@ public class RouteController {
 
     @RequestMapping(value = "/{path:[^\\\\.]+}")
     public String redirect(HttpServletRequest request, @PathVariable String path) {
-        return "forward:/";
+        if(System.getenv("SPRING_PROFILES_ACTIVE").equals("prod")) {
+            return "forward:/";
+        }
+        else {
+            return "";
+        }
     }
 }

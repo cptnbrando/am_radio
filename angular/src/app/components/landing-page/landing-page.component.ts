@@ -43,8 +43,8 @@ export class LandingPageComponent implements OnInit {
   login(): void {
     // Get a login URI from the server
     this.spotifyService.getCodeURL().subscribe(data => {
-      if(data)
-      {
+      if(data) {
+        console.log(data);
         window.location.replace(data.message);
       }
     })

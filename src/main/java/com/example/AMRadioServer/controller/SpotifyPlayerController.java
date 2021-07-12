@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.util.Random;
 
 @RestController
-//@CrossOrigin(originPatterns = "*", allowCredentials = "true")
+@CrossOrigin(originPatterns = "*", allowCredentials = "true")
 @SessionAttributes("spotifyApi")
 @RequestMapping("/api/spotify/player")
 public class SpotifyPlayerController {

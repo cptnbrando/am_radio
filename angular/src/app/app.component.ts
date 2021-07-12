@@ -10,9 +10,9 @@ import { environment } from 'src/environments/environment';
 export class AppComponent {
   title = 'am_radio';
 
-  public static serverRoot = environment.appURL;
-  public static webURL = environment.appURL;
-  public static appURL: string = environment.appURL;
+  public static serverRoot: string = environment.serverURL;
+  public static webURL: string = environment.appURL;
+  public static appURL: string = environment.appURL + "/app";
 
   constructor() {}
 

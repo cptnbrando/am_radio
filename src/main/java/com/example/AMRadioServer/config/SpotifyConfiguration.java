@@ -13,14 +13,12 @@ import java.net.URI;
 public class SpotifyConfiguration {
 
     public static String url = System.getenv("RADIO_APP_URL");
-    private static final URI redirectURI = SpotifyHttpManager.makeUri(System.getenv("RADIO_APP_URL") + "/api/spotify/getUserCode");
+    private static final URI redirectURI = SpotifyHttpManager.makeUri(System.getenv("SPOTIFY_CLI_REDIRECT"));
     public static String appURL = url + "/app";
 
     @Bean
     @SessionScope
     public SpotifyApi spotifyApi() {
-        System.out.println(SpotifyConfiguration.redirectURI);
-        System.out.println(SpotifyConfiguration.appURL);
         return new SpotifyApi.Builder()
                 .setClientId(System.getenv("SPOTIFY_CLI_ID"))
                 .setClientSecret(System.getenv("SPOTIFY_CLI_SECRET"))

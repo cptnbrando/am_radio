@@ -22,7 +22,7 @@ import java.net.URI;
 
 @RestController
 // If you're wondering why you have CORS issues with a Controller and withCredentials, boy do I have the annotation for you
-//@CrossOrigin(originPatterns = "*", allowCredentials = "true")
+@CrossOrigin(originPatterns = "*", allowCredentials = "true")
 @SessionAttributes("spotifyApi")
 @RequestMapping("/api/spotify")
 public class SpotifyController {
