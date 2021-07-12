@@ -39,7 +39,6 @@ public class SpotifyExceptionHandler {
         AuthorizationCodeCredentials auth = spotifyApi.authorizationCodeRefresh(clientID, clientSecret, refreshToken).build().execute();
         this.spotifyApi.setAccessToken(auth.getAccessToken());
         this.spotifyApi.setRefreshToken(auth.getRefreshToken());
-//        System.out.println("Tokens refreshed!");
     }
 
     /**

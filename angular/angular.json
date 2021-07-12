@@ -65,7 +65,7 @@
           "configurations": {
             "production": {
               "browserTarget": "amradio:build:production",
-              "proxyConfig": "src/proxy.conf.prod.js"
+              "proxyConfig": "src/proxy.conf.js"
             },
             "development": {
               "browserTarget": "amradio:build:development"

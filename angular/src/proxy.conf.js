@@ -1,7 +1,7 @@
 const PROXY_CONFIG = [
   {
     context: ['/app'],
-    target: 'http://localhost:4200',
+    target: 'https://amradio.app',
     secure: false
   }
 ]
