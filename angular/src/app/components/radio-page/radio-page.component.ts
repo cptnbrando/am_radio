@@ -1,4 +1,4 @@
-import { Component, HostListener, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
+import { Component, HostListener, OnInit, Output } from '@angular/core';
 import { faSpotify } from '@fortawesome/free-brands-svg-icons';
 import { AppComponent } from 'src/app/app.component';
 import { RadioService } from 'src/app/services/radio.service';
@@ -13,7 +13,7 @@ import { SpotifyService } from '../../services/spotify.service';
   templateUrl: './radio-page.component.html',
   styleUrls: ['./radio-page.component.scss']
 })
-export class RadioPageComponent implements OnInit, OnChanges {
+export class RadioPageComponent implements OnInit {
 
   faSpotify = faSpotify;
 
@@ -77,9 +77,6 @@ export class RadioPageComponent implements OnInit, OnChanges {
       window.location.replace(AppComponent.webURL);
       throw new Error;
     }
-  }
-  ngOnChanges(changes: SimpleChanges): void {
-    throw new Error('Method not implemented.');
   }
 
   ngOnInit() {
@@ -199,10 +196,10 @@ export class RadioPageComponent implements OnInit, OnChanges {
     // This is gonna call it soooo much...
     // I thought keeping it below worked but it's not too responsive and kinda janky...
     // TODO fix
-    this.setPlayerData();
+    // this.setPlayerData();
 
     // This is the queue loop for an infinite station
-    if(this.canvas.getAttribute("current") != this.currentURI) {
+    if(this.canvas.getAttribute("current") != this.currentURI && !this.isLoading) {
       // Update the player data if the current song was changed
       this.currentURI = this.canvas.getAttribute("current");
 
@@ -242,7 +239,8 @@ export class RadioPageComponent implements OnInit, OnChanges {
 
   // Event callback for next_track Spotify SDK script
   onNextChange(event: any): void {
-    this.next = this.canvas.getAttribute("next");
+    // this.next = this.canvas.getAttribute("next");
+    // console.log(event);
   }
 
   // Event callback for repeat changes detected by Spotify SDK player
@@ -329,7 +327,11 @@ export class RadioPageComponent implements OnInit, OnChanges {
           if(data) {
             this.toggleLoading(false);
             this.changeVolume(myVol);
-            this.queueNextTrack(stationNum);
+            this.currentURI = data.currentURI;
+            this.nextURI = data.nextURI;
+            this.currentStation = data;
+            this.setPlayerData();
+            // this.queueNextTrack(stationNum);
             console.log(`setStation, joinStation ${stationNum}`, data);
           }
         });

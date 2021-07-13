@@ -31,11 +31,11 @@ window.onSpotifyWebPlaybackSDKReady = () => {
   // Soooo we edit DOM elements and watch for DOM changes with a dom-watcher directive
   // It's a hacky fix, but it works lol
   player.addListener('player_state_changed', ({
-    duration,
-    track_window: { current_track }
+    duration=0,
+    track_window: { current_track, next_track }
   }) => {
-    if(typeof duration === null || typeof duration === undefined || typeof track_window === null || typeof track_window === undefined) {
-      return;
+    if(typeof track_window === 'undefined') {
+      track_window: {current_track={}, next_track={}};
     }
     // Detects for playback changes
     player.getCurrentState().then(data => {
@@ -44,12 +44,15 @@ window.onSpotifyWebPlaybackSDKReady = () => {
         return;
       }
       canvas.setAttribute("current", current_track.uri);
+      canvas.setAttribute("next", next_track.uri);
       canvas.setAttribute("paused", data.paused);
       canvas.setAttribute("duration", duration);
       canvas.setAttribute("repeat", data.repeat_mode);
       canvas.setAttribute("shuffle", data.shuffle);
+    }, error => {
+      console.log("Error on player_state_changed");
     });
-  }, error => {
+  }, _error => {
     console.log("Error on player_state_changed");
   });
 

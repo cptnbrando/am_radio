@@ -150,15 +150,13 @@ public class SpotifyPlayerController {
     public boolean playTrack(@RequestParam(name = "trackURI") String trackURI) throws SpotifyWebApiException {
         try {
             this.spotifyApi.addItemToUsersPlaybackQueue(trackURI).build().execute();
+            Thread.sleep(1500);
             this.spotifyApi.skipUsersPlaybackToNextTrack().build().execute();
-
-            Thread.sleep(2500);
             IPlaylistItem current = this.spotifyApi.getUsersCurrentlyPlayingTrack().build().execute().getItem();
 
             // Loop until the queue and current playing track is right
             int count = 0;
             while(!current.getUri().equals(trackURI)) {
-//                System.out.println("Track not found...");
                 // Counter in case it got skipped over somehow...
                 this.spotifyApi.skipUsersPlaybackToNextTrack().build().execute();
                 // Sleep for a couple seconds for the line above to finish executing
@@ -167,14 +165,13 @@ public class SpotifyPlayerController {
                 count++;
                 if(count > 5) {
                     this.spotifyApi.addItemToUsersPlaybackQueue(trackURI).build().execute();
-                    Thread.sleep(1000);
                     count = 0;
                 }
             }
 
             return true;
         }
-        catch (IOException | ParseException | InterruptedException e)
+        catch (IOException | ParseException | NullPointerException | InterruptedException e)
         {
             System.out.println("Exception caught in player/pause");
             System.out.println(e.getMessage());
@@ -216,7 +213,6 @@ public class SpotifyPlayerController {
      *
      * IDK WHY BUT GRADLE/ANGULAR/PROXIES/WHATEVER BROKE THIS SO I JUST DID THE SAME THING WITH /setAMRadio
      * NEVER SPEAK TO ME ABOUT THIS METHOD, EVER
-     * TODO: if there's another am_radio instance connected, set it to that one and return a bad response
      */
     @GetMapping(value = "/getAMRadio")
     public Device getAMRadio() throws SpotifyWebApiException {
@@ -224,7 +220,6 @@ public class SpotifyPlayerController {
         if(myDevices != null) {
             for(Device device: myDevices) {
                 if(device.getName().equals("am_radio")) {
-                    System.out.println("/getAMRadio found and set");
                     return this.playOn(device.getId());
                 }
             }
@@ -270,12 +265,8 @@ public class SpotifyPlayerController {
             // Playback's already on am_radio, so we want to shuffle and repeat on a random recent playlist
             // and skip to the next track
             PlaylistSimplified[] lists = this.spotifyApi.getListOfCurrentUsersPlaylists().limit(25).build().execute().getItems();
-            // Rest a bit lol
-            Thread.sleep(500);
             // toggle shuffle
             this.spotifyApi.toggleShuffleForUsersPlayback(true).build().execute();
-            // Rest a bit lol
-            Thread.sleep(500);
             // toggle context repeat
             this.spotifyApi.setRepeatModeOnUsersPlayback("context").build().execute();
 
@@ -285,7 +276,7 @@ public class SpotifyPlayerController {
             this.playPlaylist(randomPlaylist.getUri());
             return randomPlaylist;
         }
-        catch (IOException | ParseException | InterruptedException e)
+        catch (IOException | ParseException e)
         {
             System.out.println("Exception caught in player/seek");
             System.out.println(e.getMessage());
@@ -411,8 +402,7 @@ public class SpotifyPlayerController {
     }
 
     @GetMapping(value = "/getAudioFeatures")
-    public AudioFeatures getAudioFeatures(@RequestParam String trackID) throws SpotifyWebApiException
-    {
+    public AudioFeatures getAudioFeatures(@RequestParam String trackID) throws SpotifyWebApiException {
         try {
             return this.spotifyApi.getAudioFeaturesForTrack(trackID).build().execute();
         } catch (IOException | ParseException e)
@@ -424,8 +414,7 @@ public class SpotifyPlayerController {
     }
 
     @GetMapping(value = "/getAudioAnalysis")
-    public AudioAnalysis getAudioAnalysis(@RequestParam String trackID) throws SpotifyWebApiException
-    {
+    public AudioAnalysis getAudioAnalysis(@RequestParam String trackID) throws SpotifyWebApiException {
         try {
             return this.spotifyApi.getAudioAnalysisForTrack(trackID).build().execute();
         } catch (IOException | ParseException e)

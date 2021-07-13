@@ -24,11 +24,37 @@ export class Station
     // When the last track began playback
     playTime: number;
 
-    // The currently playing track
-    current: string;
+    // The currently playing track URI
+    currentURI: string;
 
-    // The next track
-    next: string;
+    // The next track URI
+    nextURI: string;
+
+    // Whether the station is playing or not
+    isPlaying: boolean;
+
+    //// OBJECTS - all from SpotifyAPI
+
+    // The creator of the playlist, User object
+    creator: any;
+
+    // The playlist, PlaylistSimplified object
+    playlist: any;
+
+    // All the track objects of the playlist, List<PlaylistTrack>
+    allTracks: any;
+
+    // All the track objects that haven't been played yet, List<PlaylistTrack>
+    notPlayedTracks: any;
+
+    // The currently playing track, IPlaylistItem
+    current: any;
+
+    // The next track, IPlaylistItem
+    next: any;
+
+    // All of the currently listening Users, HashMap<String, User>
+    listeners: any;
 
     constructor(stationID?: number)
     {
@@ -39,10 +65,19 @@ export class Station
         this.creatorID = "";
         this.playlistID = "";
         this.playTime = 0;
-        this.current = "";
-        this.next = "";
-        if(stationID)
-        {
+        this.currentURI = "";
+        this.nextURI = "";
+        this.isPlaying = false;
+        this.creator = {};
+        this.creator.displayName = "You";
+        this.playlist = {};
+        this.allTracks = {};
+        this.notPlayedTracks = {};
+        this.current = {};
+        this.next = {};
+        this.listeners = {};
+
+        if(stationID) {
             this.stationID = stationID;
             this.stationName = "No Station";
             this.stationInfo = "This station is available";

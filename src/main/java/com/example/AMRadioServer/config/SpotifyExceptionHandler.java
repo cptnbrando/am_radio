@@ -67,6 +67,11 @@ public class SpotifyExceptionHandler {
             }
         }
 
+        // Catches play/pause requests when already playing/paused
+        if(e.getMessage().equals("Player command failed: Restriction violated")) {
+            return null;
+        }
+
         System.out.println(request.getRequestURL());
         System.out.println("SpotifyExceptionHandler: " + e.getMessage());
         return null;

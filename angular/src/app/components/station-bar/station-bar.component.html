@@ -4,7 +4,7 @@
     <h4>Info:</h4>
     <p>{{currentStation.stationInfo}}</p>
 
-    <h4 *ngIf="currentStation.creatorID">Created by: {{currentStation.creatorID}}</h4>
+    <h4 *ngIf="currentStation.creatorID">Created by: {{currentStation.creator.displayName}}</h4>
 
     <div *ngIf="currentStation.stationName === 'No Station'">
         <h4>Playlist Selected:</h4>

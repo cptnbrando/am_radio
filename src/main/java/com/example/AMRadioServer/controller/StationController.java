@@ -52,10 +52,10 @@ public class StationController extends SpotifyPlayerController {
      * @param stationID ID of station to join
      */
     @GetMapping(value = "/{stationID}/join")
-    public boolean joinStation(@PathVariable("stationID") int stationID) throws SpotifyWebApiException, InterruptedException {
+    public Station joinStation(@PathVariable("stationID") int stationID) throws SpotifyWebApiException, InterruptedException {
         Station station = this.stationService.getStation(stationID, false);
         if(station == null) {
-            return false;
+            return null;
         }
 
         // Set repeat and shuffle to off
@@ -63,7 +63,6 @@ public class StationController extends SpotifyPlayerController {
         super.repeat("off");
 
         // Add the listener
-//        User user = super.getUser();
         this.stationService.updateListener(stationID);
 
         // If the station's not playing, start it
@@ -71,7 +70,7 @@ public class StationController extends SpotifyPlayerController {
             this.stationService.start(stationID);
 
             // Wait a second for the fields to get right
-            Thread.sleep(1300);
+            Thread.sleep(1000);
         }
 
         // Play the current track and seek it to the right time if the station is playing
@@ -80,11 +79,13 @@ public class StationController extends SpotifyPlayerController {
             super.seek((int) (System.currentTimeMillis() - station.getPlayTime()));
         }
 
-        // Add the next one to the queue
-        // nvm, frontend will take care of it
-//        super.addToQueue(station.getNextURI());
+        // Wait a second for the playTrack to go through
+        Thread.sleep(1000);
 
-        return true;
+        // Add the next one to the queue
+        super.addToQueue(station.getNextURI());
+
+        return station;
     }
 
     /**
