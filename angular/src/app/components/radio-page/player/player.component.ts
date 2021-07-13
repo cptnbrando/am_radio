@@ -1,6 +1,6 @@
 import { Component, EventEmitter, HostListener, Input, OnInit, Output } from '@angular/core';
 import { faAngleLeft, faAngleRight, faPause, faPlay, faRandom, faRecycle, faSync, faVolumeDown, faVolumeMute, faVolumeOff, faVolumeUp } from '@fortawesome/free-solid-svg-icons';
-import { SpotifyPlayerService } from '../../services/spotify-player.service';
+import { SpotifyPlayerService } from '../../../services/spotify-player.service';
 
 @Component({
   selector: 'app-player',

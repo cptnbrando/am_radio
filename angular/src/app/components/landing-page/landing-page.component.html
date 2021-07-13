@@ -1,14 +1,74 @@
 <div id="appDiv">
   <div id="header">
     <h2 class="clickable">am_radio</h2>
-    <div id="scrollbar">
-        <!-- This is where a scrollbar can goooo -->
-    </div>
-  </div> 
+  </div>
 
   <div id="appWindow">
-    <button (click)="login()" class="clickable">
-      <fa-icon [icon]="faSpotify"></fa-icon> Login with Spotify
-    </button>
+    <div id="overlay">
+      <div id="arrows">
+        <div>
+          <fa-icon [icon]="faAngleDoubleLeft" class="clickable" size="4x" (click)="loginPage()" *ngIf="this.currentPage !== 0"></fa-icon>
+        </div>
+        <div>
+          <fa-icon [icon]="faAngleDoubleRight" class="clickable" size="4x" (click)="aboutPage()" *ngIf="this.currentPage !== 1"></fa-icon>
+        </div>
+      </div>
+    </div>
+    <div id="appPage">
+      <div id="loginPage" class="page" *ngIf="this.currentPage === 0">
+        <h1>welcome to am_radio</h1>
+        <button (click)="login()" class="clickable spotifyButton">
+          <fa-icon [icon]="faSpotify"></fa-icon> Login with Spotify
+        </button>
+      </div>
+      <div id="aboutPage" class="page" *ngIf="this.currentPage === 1">
+        <div>
+          <h1>about</h1>
+          <br>
+          <p>am_radio is a way to share and listen to Spotify playlists with others.</p>
+          <p>Log in with Spotify and the app will load in one of your recently played playlists. Click the now playing
+            info in the bottom left corner to open up the playlists panel. Click through your playlists and click on any
+            track to play it, or click the playlist name to play the entire playlist.</p>
+          <p>The top right corner lists the current playing station. Left click it to increment, or right click it to
+            decrement. The app will go through numbers 000-999 and attempt to play the listed station, if one exists. If
+            not, it will be free and you can create a new station from one of your playlists.</p>
+          <p>Simply click the station
+            info in the bottom right corner and open the station panel. Then go back to the playlist panel and select a
+            playlist. If it's valid, you should see a "create station" button. Click it, and a station will be created
+            from your playlist, live for anybody on the internet to listen to.</p>
+          <p>Stations reset whenever I update the app, which is pretty much daily right now. I'm working on some cool
+            ideas including a visualizer and a chat function (which is sorta kinda there if you left click the logo and
+            use the text box). Right now, feel free to share your playlists and send them to friends, the music will be
+            synced amongst all the listeners.</p>
+          <p>If you're interested in the project, <a href="https://github.com/cptnbrando/am_radio" target="_blank">my
+            github can be found here</a>. You can also reach me on Twitter <a href="https://twitter.com/captainbrandooo" target="_blank">
+            @CaptainBrandooo</a>.</p>
+          <br><br>
+          <p>Thank you,
+            Brandon aka Captain Brando!</p>
+          </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="footer">
+    <h3 class="clickable">&#169; Created by Captain Brando! 2020</h3>
+    <div>
+      <a href="https://github.com/cptnbrando/am_radio" target="_blank">
+        <fa-icon [icon]="faGithub" size="2x"></fa-icon>
+      </a>
+      <a href="https://twitter.com/captainbrandooo" target="_blank">
+        <fa-icon [icon]="faTwitter" size="2x"></fa-icon>
+      </a>
+      <a href="https://www.instagram.com/captainbrandooo/" target="_blank">
+        <fa-icon [icon]="faInstagram" size="2x"></fa-icon>
+      </a>
+      <a href="https://www.youtube.com/c/captainbrando" target="_blank">
+        <fa-icon [icon]="faYoutube" size="2x"></fa-icon>
+      </a>
+      <a href="https://open.spotify.com/artist/5jAV7NfXioEK4rS1WmoeDA" target="_blank">
+        <fa-icon [icon]="faSpotify" size="2x"></fa-icon>
+      </a>
+    </div>
   </div>
 </div>

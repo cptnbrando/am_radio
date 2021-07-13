@@ -1,7 +1,7 @@
 import { AfterViewInit } from '@angular/core';
 import { HostListener } from '@angular/core';
 import { Component, OnInit } from '@angular/core';
-import { SpotifyService } from '../../services/spotify.service';
+import { SpotifyService } from '../../../services/spotify.service';
 
 @Component({
   selector: 'app-visualizer',
