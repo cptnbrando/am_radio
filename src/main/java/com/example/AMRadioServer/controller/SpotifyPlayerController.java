@@ -106,6 +106,7 @@ public class SpotifyPlayerController {
 
     /**
      * Removes all items from the queue and queues up the given track
+     * Also sets shuffle and repeat to off, in case they aren't already
      *
      * @param trackURI URI of track to queue
      */
@@ -113,6 +114,8 @@ public class SpotifyPlayerController {
     public void addToQueue(@RequestParam(name = "trackURI") String trackURI) {
         try {
             this.spotifyApi.addItemToUsersPlaybackQueue(trackURI).build().execute();
+            this.shuffle(false);
+            this.repeat("off");
         }
         catch (IOException | SpotifyWebApiException | ParseException e)
         {
@@ -149,22 +152,26 @@ public class SpotifyPlayerController {
     @PutMapping(value = "/playTrack")
     public boolean playTrack(@RequestParam(name = "trackURI") String trackURI) throws SpotifyWebApiException {
         try {
+            // Add the track to the queue and wait a second for it to go through
             this.spotifyApi.addItemToUsersPlaybackQueue(trackURI).build().execute();
-            Thread.sleep(1500);
+            Thread.sleep(1200);
+
+            // Skip to the next track and get the currentPlayingTrack to check if it was successful
             this.spotifyApi.skipUsersPlaybackToNextTrack().build().execute();
             IPlaylistItem current = this.spotifyApi.getUsersCurrentlyPlayingTrack().build().execute().getItem();
 
             // Loop until the queue and current playing track is right
             int count = 0;
             while(!current.getUri().equals(trackURI)) {
-                // Counter in case it got skipped over somehow...
                 this.spotifyApi.skipUsersPlaybackToNextTrack().build().execute();
-                // Sleep for a couple seconds for the line above to finish executing
-                Thread.sleep(1000);
                 current = this.spotifyApi.getUsersCurrentlyPlayingTrack().build().execute().getItem();
+
+                // If this has happened more than 5 times, maybe this function messed up
+                // and it needs to be queued again
                 count++;
                 if(count > 5) {
                     this.spotifyApi.addItemToUsersPlaybackQueue(trackURI).build().execute();
+                    Thread.sleep(1200);
                     count = 0;
                 }
             }

@@ -31,10 +31,6 @@ export class DomWatcherDirective implements OnInit {
           case "current":
             el.dispatchEvent(new CustomEvent('currentChange', {detail: mutation, bubbles: true}));
             break;
-          // This means the player has detected a new next song, like a queued up track
-          case "next":
-            el.dispatchEvent(new CustomEvent('nextChange', {detail: mutation.target, bubbles: true}));
-            break;
           // This means the player has detected a playback change
           case "paused":
             el.dispatchEvent(new CustomEvent('playbackChange', {detail: mutation.target, bubbles: true}));

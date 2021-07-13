@@ -172,6 +172,7 @@ public class Station
         this.creator = playlist.getOwner();
         this.playlist = playlist;
         this.allTracks = tracks;
+        Collections.shuffle(tracks);
         this.notPlayedTracks = new ArrayList<>(tracks);
         this.current = null;
         this.next = null;
@@ -204,15 +205,11 @@ public class Station
      */
     public void update() {
         // Refresh the tracks list if it is empty
-        if(this.getNotPlayedTracks().isEmpty())
-        {
-            List<PlaylistTrack> trackList = this.allTracks;
+        if(this.getNotPlayedTracks().isEmpty()) {
+            ArrayList<PlaylistTrack> trackList = new ArrayList<>(this.allTracks);
             Collections.shuffle(trackList);
             this.setNotPlayedTracks(trackList);
         }
-
-//        System.out.println("In update()");
-//        System.out.println(this.getNotPlayedTracks().size());
 
         // If next is null, then we get a new random track
         if(this.next == null) {
@@ -240,7 +237,9 @@ public class Station
     public void stop() {
         this.setPlaying(false);
         this.setListeners(new HashMap<>());
-        this.setNotPlayedTracks(new ArrayList<>(this.allTracks));
+        ArrayList<PlaylistTrack> trackList = new ArrayList<>(this.allTracks);
+        Collections.shuffle(trackList);
+        this.setNotPlayedTracks(trackList);
         this.setCurrent(null);
         this.setNext(null);
         this.setPlayTime(0);

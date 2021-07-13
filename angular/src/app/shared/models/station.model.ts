@@ -56,8 +56,7 @@ export class Station
     // All of the currently listening Users, HashMap<String, User>
     listeners: any;
 
-    constructor(stationID?: number)
-    {
+    constructor(stationID?: number) {
         this.stationID = 0;
         this.stationCreated = new Date();
         this.stationName = "Recently Played";

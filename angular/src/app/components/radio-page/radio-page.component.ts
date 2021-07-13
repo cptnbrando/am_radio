@@ -186,33 +186,6 @@ export class RadioPageComponent implements OnInit {
     });
   }
 
-  // Event callback for Spotify SDK script
-  onPlaybackChange(event: any): void {
-    this.isPlaying = !(this.canvas.getAttribute("paused") === "true");
-  }
-
-  // Event callback for Spotify SDK script
-  onCurrentChange(event: any): void {
-    // This is gonna call it soooo much...
-    // I thought keeping it below worked but it's not too responsive and kinda janky...
-    // TODO fix
-    // this.setPlayerData();
-
-    // This is the queue loop for an infinite station
-    if(this.canvas.getAttribute("current") != this.currentURI && !this.isLoading) {
-      // Update the player data if the current song was changed
-      this.currentURI = this.canvas.getAttribute("current");
-
-      this.setPlayerData();
-
-      // This is going to be our queue loop to add new songs to the queue
-      if(this.stationNum > 0 && this.currentStation.playTime > 0) {
-        this.queueNextTrack(this.stationNum);
-      }
-    }
-
-  }
-
   /**
    * Gets the station at the given number and queues up the nextURI track if it hasn't been queued already
    * @param stationNum the number to get
@@ -233,14 +206,25 @@ export class RadioPageComponent implements OnInit {
   }
 
   // Event callback for Spotify SDK script
-  onPositionChange(event: any): void {
-    // this.setPlayerData();
+  onPlaybackChange(event: any): void {
+    this.isPlaying = !(this.canvas.getAttribute("paused") === "true");
   }
 
-  // Event callback for next_track Spotify SDK script
-  onNextChange(event: any): void {
-    // this.next = this.canvas.getAttribute("next");
-    // console.log(event);
+  // Event callback for Spotify SDK script
+  onCurrentChange(event: any): void {
+    // This is the queue loop for an infinite station
+    let currentCanvas = this.canvas.getAttribute("current");
+    if(currentCanvas && currentCanvas !== this.currentURI && !this.isLoading) {
+      // Update the player data if the current song was changed
+      this.currentURI = currentCanvas;
+
+      this.setPlayerData();
+
+      // This is going to be our queue loop to add new songs to the queue
+      if(this.stationNum > 0 && this.currentStation.playTime > 0) {
+        this.queueNextTrack(this.stationNum);
+      }
+    }
   }
 
   // Event callback for repeat changes detected by Spotify SDK player

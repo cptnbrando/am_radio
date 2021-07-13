@@ -19,8 +19,8 @@
     [showPlaylistBar]="showPlaylistBar" [showStationBar]="showStationBar" (toggleBarEvent)="toggleBar($event)"
     [currentlyPlaying]="currentlyPlaying" [isPlaying]="isPlaying" [position]="position" [user]="user"
     [currentStation]="currentStation" [repeat]="repeat" [shuffle]="shuffle" [playingPlaylist]="playingPlaylist" (toggleLoadingEvent)="toggleLoading($event)" [isLoading]="isLoading" [isTyping]="isTyping" (volumeEvent)="changeVolume($event)" [volume]="volume"></app-player>
-  
 </div>
 
 <app-visualizer id="visualizer" appDomWatcher (ready)="onPlayerReady($event)" (currentChange)="onCurrentChange($event)"
-  (playbackChange)="onPlaybackChange($event)" (positionChange)="onPositionChange($event)" (nextChange)="onNextChange($event)" (shuffleChange)="onShuffleChange($event)" (repeatChange)="onRepeatChange($event)"></app-visualizer>
+  (playbackChange)="onPlaybackChange($event)" (shuffleChange)="onShuffleChange($event)" (repeatChange)="onRepeatChange($event)">
+</app-visualizer>
