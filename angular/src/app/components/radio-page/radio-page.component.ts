@@ -61,9 +61,6 @@ export class RadioPageComponent implements OnInit {
   // isLoading
   @Output() isLoading: boolean = true;
 
-  // isTyping
-  @Output() isTyping: boolean = false;
-
   // This is the canvas element
   // We update attributes of it to display changes to the player
   canvas: any;
@@ -440,11 +437,6 @@ export class RadioPageComponent implements OnInit {
     this.isLoading = start;
   }
 
-  // Check for keyboard input typing in chatroom
-  toggleTyping(typing: boolean): void {
-    this.isTyping = typing;
-  }
-
   @HostListener('window:unload', [ '$event' ])
   unloadHandler(event: any) {
     console.log("window unload buh bye");
@@ -457,11 +449,4 @@ export class RadioPageComponent implements OnInit {
       this.radioService.leaveStation(this.stationNum).subscribe();
     }
   }
-
-  // If the user is clicking anywhere, they are not typing
-  @HostListener('window:click', [ '$event' ])
-  clearTyping(event: any) {
-    this.toggleTyping(false);
-  }
-
 }

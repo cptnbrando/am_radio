@@ -29,6 +29,7 @@ export class PlayerComponent implements OnInit {
   // Setting bars
   @Input() showPlaylistBar: boolean = false;
   @Input() showStationBar: boolean = false;
+  @Input() showControls: boolean = false;
 
   // Spotify data
   @Input() user: any = {};
@@ -48,8 +49,6 @@ export class PlayerComponent implements OnInit {
 
   @Input() isLoading: boolean = true;
   @Output() toggleLoadingEvent = new EventEmitter<boolean>();
-
-  @Input() isTyping: boolean = false;
 
   constructor(private playerService: SpotifyPlayerService) {
 
@@ -179,8 +178,8 @@ export class PlayerComponent implements OnInit {
   // Listens for keyboard events to control the player
   @HostListener('window:keyup', ['$event'])
   keyEvent(event: KeyboardEvent) {
-    // console.log(event);
-    if(!this.isTyping) {
+    // Only work if neither the control or station panel are up and it's not loading
+    if(!(this.showControls || this.showStationBar) && !this.isLoading) {
       switch(event.code) {
         // Spacebar togglePlay
         case "Space":

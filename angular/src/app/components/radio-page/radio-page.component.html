@@ -8,7 +8,7 @@
       [selectedPlaylistTracks]="selectedPlaylistTracks" [userPlaylists]="userPlaylists"
       (changePlaylistEvent)="changePlaylist($event)" (playPlaylistEvent)="playPlaylist()"
       (playTrackEvent)="playTrack($event)" (toggleLoadingEvent)="toggleLoading($event)"></app-playlist-bar>
-    <app-controls class="mid setting" [showControls]="showControls" (isTypingEvent)="toggleTyping($event)"></app-controls>
+    <app-controls class="mid setting" [showControls]="showControls"></app-controls>
     <app-station-bar class="side setting" [stationNum]="stationNum" [showStationBar]="showStationBar"
       [currentStation]="currentStation" [selectedPlaylist]="selectedPlaylist"
       (createdStation)="onCreatedStation($event)"
@@ -16,9 +16,8 @@
   </div>
 
   <app-player id="appPlayer" [stationNum]="stationNum" [currentDevice]="currentDevice"
-    [showPlaylistBar]="showPlaylistBar" [showStationBar]="showStationBar" (toggleBarEvent)="toggleBar($event)"
-    [currentlyPlaying]="currentlyPlaying" [isPlaying]="isPlaying" [position]="position" [user]="user"
-    [currentStation]="currentStation" [repeat]="repeat" [shuffle]="shuffle" [playingPlaylist]="playingPlaylist" (toggleLoadingEvent)="toggleLoading($event)" [isLoading]="isLoading" [isTyping]="isTyping" (volumeEvent)="changeVolume($event)" [volume]="volume"></app-player>
+    [showPlaylistBar]="showPlaylistBar" [showStationBar]="showStationBar" [showControls]="showControls" (toggleBarEvent)="toggleBar($event)" [currentlyPlaying]="currentlyPlaying" [isPlaying]="isPlaying" [position]="position" [user]="user"
+    [currentStation]="currentStation" [repeat]="repeat" [shuffle]="shuffle" [playingPlaylist]="playingPlaylist" (toggleLoadingEvent)="toggleLoading($event)" [isLoading]="isLoading" (volumeEvent)="changeVolume($event)" [volume]="volume"></app-player>
 </div>
 
 <app-visualizer id="visualizer" appDomWatcher (ready)="onPlayerReady($event)" (currentChange)="onCurrentChange($event)"
