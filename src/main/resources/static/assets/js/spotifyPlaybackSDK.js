@@ -6,14 +6,10 @@ window.onSpotifyWebPlaybackSDKReady = () => {
   const player = new Spotify.Player({
     name: 'am_radio',
     getOAuthToken: cb => { 
-      initCanvas();
+      canvas = document.querySelector("canvas");
       cb(localStorage.getItem("accessToken"));
     }
   });
-
-  const initCanvas = () => {
-    canvas = document.querySelector("canvas");
-  }
 
   // Error handling
   const error = (message) => {
@@ -31,12 +27,13 @@ window.onSpotifyWebPlaybackSDKReady = () => {
   // Soooo we edit DOM elements and watch for DOM changes with a dom-watcher directive
   // It's a hacky fix, but it works lol
   player.addListener('player_state_changed', ({
-    duration,
+    duration=0,
     track_window: { current_track }
   }) => {
-    if(typeof duration === null || typeof duration === undefined || typeof track_window === null || typeof track_window === undefined) {
-      return;
+    if(typeof track_window === 'undefined') {
+      track_window: {current_track};
     }
+    
     // Detects for playback changes
     player.getCurrentState().then(data => {
       if (!data) {
@@ -48,8 +45,10 @@ window.onSpotifyWebPlaybackSDKReady = () => {
       canvas.setAttribute("duration", duration);
       canvas.setAttribute("repeat", data.repeat_mode);
       canvas.setAttribute("shuffle", data.shuffle);
+    }, _error => {
+      console.log("Error on player.getCurrentState");
     });
-  }, error => {
+  }, _error => {
     console.log("Error on player_state_changed");
   });
 

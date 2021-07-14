@@ -23,6 +23,10 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatSliderModule } from '@angular/material/slider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { SeekerComponent } from './components/radio-page/player/seeker/seeker.component';
+import { ChatComponent } from './components/radio-page/controls/chat/chat.component';
+import { AppSettingsComponent } from './components/radio-page/controls/app-settings/app-settings.component';
+import { VisualizerSettingsComponent } from './components/radio-page/controls/visualizer-settings/visualizer-settings.component';
+import { AboutComponent } from './components/radio-page/controls/about/about.component';
 
 @NgModule({
   declarations: [
@@ -36,7 +40,11 @@ import { SeekerComponent } from './components/radio-page/player/seeker/seeker.co
     LandingPageComponent,
     RadioPageComponent,
     DomWatcherDirective,
-    SeekerComponent
+    SeekerComponent,
+    ChatComponent,
+    VisualizerSettingsComponent,
+    AppSettingsComponent,
+    AboutComponent
   ],
   imports: [
     BrowserModule,

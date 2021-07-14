@@ -27,7 +27,7 @@ public class SpotifyExceptionHandler {
      *
      * @return a valid access token
      */
-    private void newTokens() throws SpotifyWebApiException, IOException, ParseException {
+    private void newTokens() throws SpotifyWebApiException {
         String clientID = spotifyApi.getClientId();
         String clientSecret = spotifyApi.getClientSecret();
         String refreshToken = spotifyApi.getRefreshToken();
@@ -36,9 +36,16 @@ public class SpotifyExceptionHandler {
             throw new SpotifyWebApiException("No refresh token found");
         }
 
-        AuthorizationCodeCredentials auth = spotifyApi.authorizationCodeRefresh(clientID, clientSecret, refreshToken).build().execute();
-        this.spotifyApi.setAccessToken(auth.getAccessToken());
-        this.spotifyApi.setRefreshToken(auth.getRefreshToken());
+        try {
+            AuthorizationCodeCredentials auth = spotifyApi.authorizationCodeRefresh(clientID, clientSecret, refreshToken).build().execute();
+            this.spotifyApi.setAccessToken(auth.getAccessToken());
+            this.spotifyApi.setRefreshToken(auth.getRefreshToken());
+        }
+        catch(ParseException | IOException | SpotifyWebApiException e) {
+            System.out.println("Exception in newTokens");
+            System.out.println(e.getMessage());
+            throw new SpotifyWebApiException("No refresh token found");
+        }
     }
 
     /**
@@ -58,7 +65,7 @@ public class SpotifyExceptionHandler {
         }
 
         // Catches invalid access tokens
-        if(e.getMessage().equals("Invalid access token")) {
+        if(e.getMessage().equals("Invalid access token") || e.getMessage().equals("The access token expired")) {
             try {
                 this.newTokens();
                 return null;
