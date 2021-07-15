@@ -54,8 +54,7 @@ export class PlayerComponent implements OnInit {
 
   }
 
-  ngOnInit(): void 
-  {
+  ngOnInit(): void {
     // First, set default values
     this.setDefaults();
   }

@@ -74,6 +74,10 @@ export class RadioPageComponent implements OnInit {
       window.location.replace(AppComponent.webURL);
       throw new Error;
     }
+    else {
+      // We've got an access token, so let's make a spotify web sdk player
+      this.loadPlayerScript();
+    }
   }
 
   ngOnInit() {
@@ -130,6 +134,7 @@ export class RadioPageComponent implements OnInit {
   // This is the event handler for the playerReady sdk js script events
   // It uses dom-watcher to watch the canvas element for attribute changes, updated by the spotifyPlayerSDK.js in /assets
   onPlayerReady(event: any) {
+    console.log("onPlayerReady", event);
     this.playerReady = event.returnValue;
 
     // get current device and playback information
@@ -404,10 +409,6 @@ export class RadioPageComponent implements OnInit {
       else {
         // We have to set it to local storage so the playback sdk js script can get it
         localStorage.setItem("accessToken", data.message);
-
-        // We've got an access token, so let's make a spotify web sdk player
-        this.loadPlayerScript();
-
         return true;
       }
     }, error => {

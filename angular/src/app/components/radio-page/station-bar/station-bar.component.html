@@ -1,5 +1,5 @@
 <div id="stationBar" *ngIf="showStationBar">
-    <h2>{{currentStation.stationName}}</h2>
+    <h2>{{this.stationNumDisplay()}} : {{currentStation.stationName}}</h2>
 
     <h4>Info:</h4>
     <p>{{currentStation.stationInfo}}</p>

@@ -11,12 +11,12 @@
     </div>
     <div id="tracks" class="playlistBarDiv" *ngIf="selectedPlaylistTracks && selectedPlaylist">
         <div class="playlistBarHead">
-            <h2 (click)="back()" id="tracksBack" class="clickable">
+            <h3 (click)="back()" id="tracksBack" class="clickable">
                 <fa-icon [icon]="faArrowLeft"></fa-icon> Tracks
-            </h2>
-            <h2 (click)="playPlaylist()" id="playPlaylist" class="clickable">
+            </h3>
+            <h3 (click)="playPlaylist()" id="playPlaylist" class="clickable">
                 {{selectedPlaylist.name}} <fa-icon [icon]="faPlay" style="margin-left: 15px"></fa-icon>
-            </h2>
+            </h3>
         </div>
         <div class="bigList">
             <ol>

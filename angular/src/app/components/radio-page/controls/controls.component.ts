@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { AfterViewChecked, AfterViewInit, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { SocketService } from 'src/app/services/socket.service';
 
 @Component({
@@ -6,15 +6,21 @@ import { SocketService } from 'src/app/services/socket.service';
   templateUrl: './controls.component.html',
   styleUrls: ['./controls.component.scss']
 })
-export class ControlsComponent implements OnInit {
+export class ControlsComponent implements OnInit, AfterViewChecked {
 
   @Input() showControls: boolean = false;
-
   selected: number = 0;
+
+  @Input() isLoading: boolean = true;
 
   constructor(public socketService: SocketService) { }
 
   ngOnInit(): void {
+  }
+
+  // So that the selected tab appears when panel is mounted
+  ngAfterViewChecked(): void {
+    this.tabClick(this.selected);
   }
 
   /**

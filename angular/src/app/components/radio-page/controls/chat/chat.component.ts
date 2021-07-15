@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, Input, OnInit } from '@angular/core';
 import { SocketService } from 'src/app/services/socket.service';
 
 @Component({
@@ -9,6 +9,7 @@ import { SocketService } from 'src/app/services/socket.service';
 export class ChatComponent implements OnInit {
 
   input: string = '';
+  @Input() isLoading: boolean = false;
 
   constructor(public socketService: SocketService) { }
 
@@ -22,4 +23,16 @@ export class ChatComponent implements OnInit {
     }
   }
 
+  // Listens for keyboard events to control the player
+  @HostListener('window:keyup', ['$event'])
+  keyEvent(event: KeyboardEvent) {
+    if(!this.isLoading) {
+      switch(event.code) {
+        // Enter key sends message
+        case "Enter":
+          this.sendMessage();
+          break;
+      }
+    }
+  }
 }

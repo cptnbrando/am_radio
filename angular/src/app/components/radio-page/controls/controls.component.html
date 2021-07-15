@@ -14,7 +14,7 @@
             <div id="controlsPanel">
                 <about *ngIf="selected === 0"></about>
                 <app-settings *ngIf="selected === 1"></app-settings>
-                <chat *ngIf="selected === 2"></chat>
+                <chat *ngIf="selected === 2" [isLoading]="isLoading"></chat>
                 <visualizer-settings *ngIf="selected === 3"></visualizer-settings>
             </div>
         </div>
