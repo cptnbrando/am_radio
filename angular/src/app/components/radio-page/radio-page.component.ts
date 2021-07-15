@@ -147,6 +147,7 @@ export class RadioPageComponent implements OnInit {
         if(data) {
           this.currentDevice = data;
           this.beginAMRadio();
+          this.toggleBar(2);
         }
       });
     }
