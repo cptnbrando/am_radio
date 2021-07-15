@@ -18,6 +18,7 @@
     align-items: center;
     margin-top: 20px;
     margin-bottom: 20px;
+    margin-left: 15px;
     height: 40px;
 
     .clickable {
@@ -27,14 +28,11 @@
     }
 
     #tracksBack {
-      flex: .5;
-      // font-size: 1.2vw;
-      border-right: solid;
+      flex: 3.5;
     }
 
     #playPlaylist {
-      flex: 1;
-      // font-size: 1.2vw;
+      flex: 5;
       display: flex;
       justify-content: flex-end;
       align-items: center;

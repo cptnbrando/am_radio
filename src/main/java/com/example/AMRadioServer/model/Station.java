@@ -162,6 +162,7 @@ public class Station
         this.stationInfo = null;
         this.creatorID = playlist.getOwner().getId();
         this.playlistID = playlist.getId();
+        this.stationCreated = new Date();
 
         this.playTime = 0;
         this.currentURI = null;

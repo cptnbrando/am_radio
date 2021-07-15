@@ -1,7 +1,25 @@
 #stationBar {
-    // max-height: 100%;
     border: solid;
     border-color: red;
-    height: 100%;
     color: white;
+    position: relative;
+    height: 100%;
+    width: 99%;
+}
+
+.absoluteDiv {
+    display: block;
+    position: absolute;
+    height: 100%;
+    width: 95%;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+h2 {
+    border-bottom: solid;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-bottom: 15px;
 }

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, HostListener, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, HostListener, Input, OnChanges, OnInit, Output } from '@angular/core';
 import { AppComponent } from 'src/app/app.component';
 
 @Component({
@@ -6,9 +6,10 @@ import { AppComponent } from 'src/app/app.component';
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss']
 })
-export class HeaderComponent implements OnInit {
+export class HeaderComponent implements OnInit, OnChanges {
   @Input() showControls: boolean = false;
   @Input() stationNum: number = 0;
+  _stationNum: string = "000";
 
   @Output() toggleBarEvent = new EventEmitter<number>();
   @Output() changeStationEvent = new EventEmitter<number>();
@@ -26,6 +27,12 @@ export class HeaderComponent implements OnInit {
   constructor() { }
 
   ngOnInit(): void {
+  }
+
+  ngOnChanges(changes: any): void {
+    if(changes.stationNum) {
+      this._stationNum = this.stationNumDisplay(this.stationNum);
+    }
   }
 
   // Changes when a number key is pressed from Player
@@ -70,6 +77,7 @@ export class HeaderComponent implements OnInit {
       }
 
       this.stationNum = num;
+      this._stationNum = this.stationNumDisplay(num);
 
       // Timer so we can quickly move through stations without actually changing the station
       clearTimeout(this.stationTimer);
@@ -86,11 +94,11 @@ export class HeaderComponent implements OnInit {
   }
 
   // Used to format the displayed number into a 000 leading zero varient
-  stationNumDisplay(): string {
-    if(this.stationNum < 10) {
+  stationNumDisplay(num: number): string {
+    if(num < 10) {
       return `00${this.stationNum}`;
     }
-    else if(this.stationNum < 100) {
+    else if(num < 100) {
       return `0${this.stationNum}`;
     }
     else {

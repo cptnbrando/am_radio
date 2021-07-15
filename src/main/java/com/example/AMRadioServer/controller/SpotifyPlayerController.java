@@ -10,6 +10,7 @@ import com.wrapper.spotify.model_objects.miscellaneous.CurrentlyPlayingContext;
 import com.wrapper.spotify.model_objects.miscellaneous.Device;
 import com.wrapper.spotify.model_objects.specification.AudioFeatures;
 import com.wrapper.spotify.model_objects.specification.PlaylistSimplified;
+import com.wrapper.spotify.model_objects.specification.PlaylistTrack;
 import com.wrapper.spotify.model_objects.specification.User;
 import org.apache.hc.core5.http.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -154,7 +155,7 @@ public class SpotifyPlayerController {
         try {
             // Add the track to the queue and wait a second for it to go through
             this.spotifyApi.addItemToUsersPlaybackQueue(trackURI).build().execute();
-            Thread.sleep(1200);
+            Thread.sleep(1500);
 
             // Skip to the next track and get the currentPlayingTrack to check if it was successful
             this.spotifyApi.skipUsersPlaybackToNextTrack().build().execute();
@@ -162,6 +163,7 @@ public class SpotifyPlayerController {
 
             // Loop until the queue and current playing track is right
             int count = 0;
+            int bigCount = 0;
             while(!current.getUri().equals(trackURI)) {
                 this.spotifyApi.skipUsersPlaybackToNextTrack().build().execute();
                 current = this.spotifyApi.getUsersCurrentlyPlayingTrack().build().execute().getItem();
@@ -173,6 +175,13 @@ public class SpotifyPlayerController {
                     this.spotifyApi.addItemToUsersPlaybackQueue(trackURI).build().execute();
                     Thread.sleep(1200);
                     count = 0;
+                    bigCount++;
+                }
+
+                // If this is hit, then it's really struggling to play the track
+                // So we give up lol
+                if(bigCount > 3) {
+                    return false;
                 }
             }
 
@@ -277,10 +286,14 @@ public class SpotifyPlayerController {
             // toggle context repeat
             this.spotifyApi.setRepeatModeOnUsersPlayback("context").build().execute();
 
-            // Get a random playlist and play it
-            Random rand = new Random();
-            PlaylistSimplified randomPlaylist = lists[rand.nextInt((lists.length))];
-            this.playPlaylist(randomPlaylist.getUri());
+            // Get a random playlist and play a random track from it (so the queue gets reset)
+            PlaylistSimplified randomPlaylist = lists[new Random().nextInt((lists.length))];
+            PlaylistTrack[] tracks = spotifyApi.getPlaylistsItems(randomPlaylist.getId()).build().execute().getItems();
+            PlaylistTrack randomTrack = tracks[new Random().nextInt((tracks.length))];
+            boolean played = this.playTrack(randomTrack.getTrack().getUri());
+            if(played) {
+                this.playPlaylist(randomPlaylist.getUri());
+            }
             return randomPlaylist;
         }
         catch (IOException | ParseException e)

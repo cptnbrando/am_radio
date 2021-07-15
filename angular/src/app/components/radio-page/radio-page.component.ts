@@ -134,7 +134,6 @@ export class RadioPageComponent implements OnInit {
   // This is the event handler for the playerReady sdk js script events
   // It uses dom-watcher to watch the canvas element for attribute changes, updated by the spotifyPlayerSDK.js in /assets
   onPlayerReady(event: any) {
-    console.log("onPlayerReady", event);
     this.playerReady = event.returnValue;
 
     // get current device and playback information
@@ -152,7 +151,6 @@ export class RadioPageComponent implements OnInit {
         if(data) {
           this.currentDevice = data;
           this.beginAMRadio();
-          this.toggleBar(2);
         }
       });
     }
@@ -164,17 +162,22 @@ export class RadioPageComponent implements OnInit {
     // So that the station bar doesn't tweak from missing fields
     this.currentStation = new Station();
     this.toggleLoading(true);
+    // So that it doesn't sound awful loading up
+    let currentVol = this.volume;
+    this.changeVolume(0);
 
     // Attempt to play a random playlist on am_radio
     this.playerService.startAMRadio().subscribe(data => {
       if(data) {
         console.log("startAMRadio success!");
         this.playingPlaylist = data;
+        this.currentStation.stationName = data.name;
         this.changePlaylist(data);
-        this.currentStation.stationName = "Recently Played";  
+        this.changeVolume(currentVol);
       }
-
-      // stop isLoading
+      
+      // open controls panel, change volume back, and toggle loading
+      this.toggleBar(2);
       this.toggleLoading(false);
     });
   }
@@ -335,7 +338,6 @@ export class RadioPageComponent implements OnInit {
 
   // Event callback for station bar createStation()
   onCreatedStation(data: any): void {
-    console.log("onCreatedStation", data);
     this.setStation(this.stationNum);
   }
 
@@ -359,19 +361,15 @@ export class RadioPageComponent implements OnInit {
     this.selectedPlaylist = playlist;
     if(playlist === null) {
       this.selectedPlaylistTracks = null;
-    } else {
-      // Set the station 000 name
-      if(this.currentStation && this.stationNum === 0) {
-        this.currentStation.stationName = playlist.name;
+      return;
+    } 
+    // get the tracks from the chosen playlist
+    this.spotifyService.getPlaylistTracks(playlist.id).subscribe(data => {
+      if(data) {
+        this.selectedPlaylistTracks = data;
+        this.toggleLoading(false);
       }
-      // get the tracks from the chosen playlist
-      this.spotifyService.getPlaylistTracks(playlist.id).subscribe(data => {
-        if(data) {
-          this.selectedPlaylistTracks = data;
-          this.toggleLoading(false);
-        }
-      });
-    }
+    });
   }
 
   // Play a track on am_radio 000
@@ -386,7 +384,7 @@ export class RadioPageComponent implements OnInit {
     });
   }
 
-  // Play a playlist on am_radio 000
+  // EventListener for playPlaylistEvent
   playPlaylist() {
     this.toggleLoading(true);
     if(this.stationNum != 0) {
@@ -394,9 +392,10 @@ export class RadioPageComponent implements OnInit {
     }
 
     this.playerService.playPlaylist(this.selectedPlaylist.uri).subscribe(data => {
+      this.playingPlaylist = this.selectedPlaylist;
+      this.currentStation.stationName = this.selectedPlaylist.name;
       this.toggleLoading(false);
     });
-    this.playingPlaylist = this.selectedPlaylist;
   }
 
   async checkTokens(): Promise<boolean> {
@@ -442,6 +441,9 @@ export class RadioPageComponent implements OnInit {
   @HostListener('window:unload', [ '$event' ])
   unloadHandler(event: any) {
     console.log("window unload buh bye");
+    if(this.stationNum > 0) {
+      this.radioService.leaveStation(this.stationNum).subscribe();
+    }
   }
 
   @HostListener('window:beforeunload', [ '$event' ])

@@ -1,15 +1,33 @@
 <div id="stationBar" *ngIf="showStationBar">
-    <h2>{{this.stationNumDisplay()}} : {{currentStation.stationName}}</h2>
+    <div class="absoluteDiv">
+        <h2>{{this._stationNumDisplay}} : {{currentStation.stationName}}</h2>
+    
+        <h3>{{currentStation.stationInfo}}</h3>
 
-    <h4>Info:</h4>
-    <p>{{currentStation.stationInfo}}</p>
-
-    <h4 *ngIf="currentStation.creatorID">Created by: {{currentStation.creator.displayName}}</h4>
-
-    <div *ngIf="currentStation.stationName === 'No Station'">
-        <h4>Playlist Selected:</h4>
-        <p *ngIf="selectedPlaylist">{{selectedPlaylist.name}}</p>
-        <p *ngIf="!selectedPlaylist">none (use the playlist bar)</p>
-        <button *ngIf="selectedPlaylist" (click)="createRadio()">Create Radio</button>
+        <div *ngIf="currentStation.stationID != 0 && !isLoading">
+            <h3 *ngIf="currentStation.creatorID">Created by: {{currentStation.creator.displayName}}<br> at
+              {{this._stationDateDisplay}}</h3>
+            <div *ngIf="currentStation.playTime != 0">
+                <div>
+                    <h4>Now Playing: {{currentStation.current.name}}
+                    <br>By: {{currentStation.current.artists[0].name}}
+                    <br>From: {{currentStation.current.album.name}}</h4>
+                </div>
+                <div>
+                    <h4>Up Next: {{currentStation.next.name}}
+                    <br>By: {{currentStation.next.artists[0].name}}
+                    <br>From: {{currentStation.next.album.name}}</h4>
+                </div>
+            </div>
+        
+            <div *ngIf="currentStation.playTime === 0">
+                <h4>Playlist Selected:</h4>
+                <p *ngIf="selectedPlaylist">{{selectedPlaylist.name}}</p>
+                <p *ngIf="!selectedPlaylist">none (use the playlist bar)</p>
+                <button *ngIf="selectedPlaylist" (click)="createRadio()">Create Radio</button>
+                <p *ngIf="errorMessage">{{errorMessage}}</p>
+            </div>
+        </div>
+    
     </div>
 </div>

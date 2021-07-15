@@ -1,5 +1,5 @@
 <div id="playlistBar" *ngIf="showPlaylistBar">
-    <div id="playlists" class="playlistBarDiv" *ngIf="!selectedPlaylist && !selectedPlaylistTracks">
+    <div class="playlistBarDiv" *ngIf="!selectedPlaylist && !selectedPlaylistTracks">
         <div class="playlistBarHead">
           <h2>My Playlists</h2>
         </div>
@@ -9,8 +9,8 @@
             </ol>
         </div>
     </div>
-    <div id="tracks" class="playlistBarDiv" *ngIf="selectedPlaylistTracks && selectedPlaylist">
-        <div class="playlistBarHead">
+    <div id="tracks" class="playlistBarDiv" *ngIf="selectedPlaylistTracks || selectedPlaylist">
+        <div class="playlistBarHead" *ngIf="selectedPlaylist">
             <h3 (click)="back()" id="tracksBack" class="clickable">
                 <fa-icon [icon]="faArrowLeft"></fa-icon> Tracks
             </h3>
@@ -18,7 +18,7 @@
                 {{selectedPlaylist.name}} <fa-icon [icon]="faPlay" style="margin-left: 15px"></fa-icon>
             </h3>
         </div>
-        <div class="bigList">
+        <div class="bigList" *ngIf="selectedPlaylistTracks">
             <ol>
                 <li *ngFor="let track of selectedPlaylistTracks" class="clickable" (click)="playTrack(track)">
                     {{track.track.artists[0].name}} - {{track.track.name}}

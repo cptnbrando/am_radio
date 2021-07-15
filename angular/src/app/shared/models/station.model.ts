@@ -7,7 +7,7 @@ export class Station
     stationID: number;
 
     // Date of Station creation
-    stationCreated: Date;
+    stationCreated: any;
 
     // Name of the Station, should be set to the Spotify Playlist initially
     stationName: string;
@@ -58,7 +58,7 @@ export class Station
 
     constructor(stationID?: number) {
         this.stationID = 0;
-        this.stationCreated = new Date();
+        this.stationCreated = "";
         this.stationName = "Recently Played";
         this.stationInfo = "A random playlist from the last 25 that you've last played from your Spotify library";
         this.creatorID = "";
@@ -73,7 +73,15 @@ export class Station
         this.allTracks = {};
         this.notPlayedTracks = {};
         this.current = {};
+        this.current.artists = [1];
+        this.current.artists[0] = {};
+        this.current.artists[0].name = "No artist";
+        this.current.album = {};
         this.next = {};
+        this.next.artists = [1];
+        this.next.artists[0] = {};
+        this.next.artists[0].name = "No artist";
+        this.next.album = {};
         this.listeners = {};
 
         if(stationID) {
