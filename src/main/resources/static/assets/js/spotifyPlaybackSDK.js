@@ -30,6 +30,10 @@ window.onSpotifyWebPlaybackSDKReady = () => {
     duration=0,
     track_window: { current_track }
   }) => {
+    if(typeof current_track === 'undefined') {
+      current_track = {};
+    }
+
     if(typeof track_window === 'undefined') {
       track_window: {current_track};
     }
@@ -69,5 +73,5 @@ window.onSpotifyWebPlaybackSDKReady = () => {
     if(success) {
       console.log('The Web Playback SDK successfully connected to Spotify!');
     }
-  })
+  });
 };

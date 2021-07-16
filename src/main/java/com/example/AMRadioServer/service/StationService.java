@@ -107,7 +107,8 @@ public class StationService {
 
         // If there's already a Station with the given Playlist
         if(this.stationRepo.existsByPlaylistID(playlist.getId())) {
-            return new ResponseMessage("Playlist Exists: " + playlist.getName() + " on " + stationID);
+            int found = this.stationRepo.getByPlaylistID(playlist.getId()).getStationID();
+            return new ResponseMessage("Playlist Exists: " + playlist.getName() + " on " + found);
         }
 
         try {

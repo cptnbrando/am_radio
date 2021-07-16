@@ -1,3 +1,4 @@
+///  <reference types="@types/spotify-web-playback-sdk"/>
 import { Component, EventEmitter, HostListener, Input, OnChanges, OnInit, Output } from '@angular/core';
 import { AppComponent } from 'src/app/app.component';
 
@@ -37,27 +38,39 @@ export class HeaderComponent implements OnInit, OnChanges {
 
   // Changes when a number key is pressed from Player
   changeNumberKey(value: number) {
-    if(this._numberKey === -1) {
-      this._numberKey = value;
-    } else {
-      let current = String(this._numberKey);
-      if(current.length < 3) {
-        current += String(value);
-        this._numberKey = parseInt(current);
+    if(!this.isLoading) {
+      clearTimeout(this.stationTimer);
+      if(this._numberKey === -1) {
+        this._numberKey = value;
       } else {
-        return;
+        let current = String(this._numberKey);
+        if(current.length === 2) {
+          current += String(value);
+          this._numberKey = parseInt(current);
+          this.stationNum = this._numberKey;
+          this._stationNum = this.stationNumDisplay(this._numberKey);
+          this.actuallyChangeStation(this._numberKey);
+          return;
+        }
+        if(current.length < 3) {
+          current += String(value);
+          this._numberKey = parseInt(current);
+        }
+        else {
+          return;
+        }
       }
+  
+      if(this._numberKey < 1000 && this._numberKey > -1) {
+        this.stationNum = this._numberKey;
+        this._stationNum = this.stationNumDisplay(this._numberKey);
+      }
+  
+      // Timer so we can quickly move through stations without actually changing the station
+      this.stationTimer = setTimeout(() => {
+        this.actuallyChangeStation(this._numberKey);
+      }, 1500);
     }
-
-    if(this._numberKey < 1000 && this._numberKey > -1) {
-      this.stationNum = this._numberKey;
-    }
-
-    // Timer so we can quickly move through stations without actually changing the station
-    clearTimeout(this.stationTimer);
-    this.stationTimer = setTimeout(() => {
-      this.actuallyChangeStation(this._numberKey);
-    }, 1500);
   }
 
   get numberKey(): number {
@@ -72,6 +85,7 @@ export class HeaderComponent implements OnInit, OnChanges {
   // Sends an event to the app with a new station number
   changeStation(num: number) {
     if(!this.isLoading) {
+      clearTimeout(this.stationTimer);
       if(num < 0 || num > 999){
         return;
       }
@@ -80,7 +94,6 @@ export class HeaderComponent implements OnInit, OnChanges {
       this._stationNum = this.stationNumDisplay(num);
 
       // Timer so we can quickly move through stations without actually changing the station
-      clearTimeout(this.stationTimer);
       this.stationTimer = setTimeout(() => {
         this.actuallyChangeStation(num);
       }, 1500);
@@ -96,13 +109,13 @@ export class HeaderComponent implements OnInit, OnChanges {
   // Used to format the displayed number into a 000 leading zero varient
   stationNumDisplay(num: number): string {
     if(num < 10) {
-      return `00${this.stationNum}`;
+      return `00${num}`;
     }
     else if(num < 100) {
-      return `0${this.stationNum}`;
+      return `0${num}`;
     }
     else {
-      return `${this.stationNum}`;
+      return `${num}`;
     }
   }
 

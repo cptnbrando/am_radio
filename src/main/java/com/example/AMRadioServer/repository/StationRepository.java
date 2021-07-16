@@ -12,4 +12,6 @@ public interface StationRepository extends JpaRepository<Station, Integer>
     boolean existsById(Integer stationID);
 
     boolean existsByPlaylistID(String playlistID);
+
+    Station getByPlaylistID(String playlistID);
 }
