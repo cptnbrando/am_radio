@@ -1,6 +1,7 @@
 package com.example.AMRadioServer.service;
 
 import com.example.AMRadioServer.model.Station;
+import lombok.SneakyThrows;
 
 /**
  * Runnable thread class for a radio to loop and update fields
@@ -30,6 +31,7 @@ public class RadioThread implements Runnable {
      *
      * @see Thread#run()
      */
+    @SneakyThrows
     @Override
     public void run() {
         Station station = stationService.getStation(stationNum, true);
@@ -43,13 +45,20 @@ public class RadioThread implements Runnable {
         // Here we use a while loop to continue getting new songs as long as there are present listeners
         // We want to wait until the current system time is past the playTime + currentTrack time
         while(!station.getListeners().isEmpty()) {
+            try {
+                // We should delay the while loop a bit each time so that it's not so intense
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                System.out.println("Interrupted!");
+                break;
+            }
+
             // We don't have to check the DB every loop, just get it from the HashMap
             station = stationService.getStation(stationNum);
 
             // If the SystemTime is greater than the PlayTime + current track elapsed time, update the station
             assert station.getCurrent() != null;
-            if(System.currentTimeMillis() >= (station.getPlayTime() + station.getCurrent().getDurationMs()))
-            {
+            if(System.currentTimeMillis() >= (station.getPlayTime() + station.getCurrent().getDurationMs())) {
                 stationService.updateStation(station);
             }
         }

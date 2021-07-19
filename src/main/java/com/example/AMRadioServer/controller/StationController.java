@@ -99,4 +99,23 @@ public class StationController extends SpotifyPlayerController {
         User user = super.getUser();
         this.stationService.removeListener(stationID, user);
     }
+
+    /**
+     * Plays and seeks the currently playing Station track to the synced value
+     * @param stationID Station to sync to
+     */
+    @GetMapping(value = "/{stationID}/sync")
+    public void sync(@PathVariable("stationID") int stationID) throws SpotifyWebApiException {
+        // Get the station
+        Station station = this.stationService.getStation(stationID);
+
+        // Play the currently playing track
+        if(this.playTrack(station.getCurrentURI())) {
+            // Queue up the next track
+            this.addToQueue(station.getNextURI());
+
+            // Seek current to the right time
+            this.seek((int) (System.currentTimeMillis() - station.getPlayTime()));
+        }
+    }
 }

@@ -197,18 +197,21 @@ export class RadioPageComponent implements OnInit {
    * @param stationNum the number to get
    */
   queueNextTrack(stationNum: number): void {
-    this.radioService.getStation(stationNum).subscribe(data => {
-      if(data) {
-        this.currentStation = data;
-        this.currentURI = data.currentURI;
-        if(data.nextURI != this.nextURI) {
-          this.nextURI = data.nextURI;
-          this.playerService.addToQueue(this.nextURI).subscribe();
-          this.setPlayerData();
-          console.log("Added to queue", data.nextURI);
+    // Wait a few seconds so that the station gets updated first
+    setTimeout(() => {
+      this.radioService.getStation(stationNum).subscribe(data => {
+        if(data) {
+          this.currentStation = data;
+          this.currentURI = data.currentURI;
+          if(data.nextURI != this.nextURI) {
+            this.nextURI = data.nextURI;
+            this.playerService.addToQueue(this.nextURI).subscribe();
+            this.setPlayerData();
+            console.log("Added to queue", data.nextURI);
+          }
         }
-      }
-    });
+      });
+    }, 5000);
   }
 
   // Event callback for Spotify SDK script
@@ -255,6 +258,9 @@ export class RadioPageComponent implements OnInit {
     });
   }
 
+  /**
+   * Get the current station and set currentStation and currentURI
+   */
   setStationData(): void {
     if(this.stationNum > 0) {
       this.radioService.getStation(this.stationNum).subscribe(data => {

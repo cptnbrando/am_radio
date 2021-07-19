@@ -12,6 +12,9 @@ import com.wrapper.spotify.model_objects.specification.AudioFeatures;
 import com.wrapper.spotify.model_objects.specification.PlaylistSimplified;
 import com.wrapper.spotify.model_objects.specification.PlaylistTrack;
 import com.wrapper.spotify.model_objects.specification.User;
+import com.wrapper.spotify.requests.data.player.AddItemToUsersPlaybackQueueRequest;
+import com.wrapper.spotify.requests.data.player.GetUsersCurrentlyPlayingTrackRequest;
+import com.wrapper.spotify.requests.data.player.SkipUsersPlaybackToNextTrackRequest;
 import org.apache.hc.core5.http.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -153,26 +156,32 @@ public class SpotifyPlayerController {
     @PutMapping(value = "/playTrack")
     public boolean playTrack(@RequestParam(name = "trackURI") String trackURI) throws SpotifyWebApiException {
         try {
+            AddItemToUsersPlaybackQueueRequest queue = this.spotifyApi.addItemToUsersPlaybackQueue(trackURI).build();
+            SkipUsersPlaybackToNextTrackRequest skip = this.spotifyApi.skipUsersPlaybackToNextTrack().build();
+            GetUsersCurrentlyPlayingTrackRequest now = this.spotifyApi.getUsersCurrentlyPlayingTrack().build();
             // Add the track to the queue and wait a second for it to go through
-            this.spotifyApi.addItemToUsersPlaybackQueue(trackURI).build().execute();
-            Thread.sleep(1500);
+            queue.execute();
+            Thread.sleep(1000);
 
             // Skip to the next track and get the currentPlayingTrack to check if it was successful
-            this.spotifyApi.skipUsersPlaybackToNextTrack().build().execute();
-            IPlaylistItem current = this.spotifyApi.getUsersCurrentlyPlayingTrack().build().execute().getItem();
+            skip.execute();
+            Thread.sleep(1000);
+            IPlaylistItem current = now.execute().getItem();
 
             // Loop until the queue and current playing track is right
             int count = 0;
             int bigCount = 0;
             while(!current.getUri().equals(trackURI)) {
-                this.spotifyApi.skipUsersPlaybackToNextTrack().build().execute();
-                current = this.spotifyApi.getUsersCurrentlyPlayingTrack().build().execute().getItem();
+                // Skip to the next track and get the new current track
+                skip.execute();
+                Thread.sleep(1000);
+                current = now.execute().getItem();
 
                 // If this has happened more than 5 times, maybe this function messed up
                 // and it needs to be queued again
                 count++;
                 if(count > 5) {
-                    this.spotifyApi.addItemToUsersPlaybackQueue(trackURI).build().execute();
+                    queue.execute();
                     Thread.sleep(1200);
                     count = 0;
                     bigCount++;

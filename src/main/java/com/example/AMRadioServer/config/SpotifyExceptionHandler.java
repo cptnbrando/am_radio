@@ -79,6 +79,18 @@ public class SpotifyExceptionHandler {
             return null;
         }
 
+        // Catches rate limit
+        if(e.getMessage().equals("API rate limit exceeded")) {
+            try {
+                Thread.sleep(5000);
+                return null;
+            } catch (InterruptedException interruptedException) {
+                System.out.println("SpotifyExceptionHandler InterruptedException RateHandler:");
+                interruptedException.printStackTrace();
+                return null;
+            }
+        }
+
         System.out.println(request.getRequestURL());
         System.out.println("SpotifyExceptionHandler: " + e.getMessage());
         return null;

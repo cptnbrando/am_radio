@@ -27,5 +27,8 @@ export class RadioService {
   leaveStation(num: number): Observable<any>{
     return this.httpCli.get<any>(`${this.serverURL}/${num}/leave`);
   }
-  
+
+  sync(num: number): Observable<any>{
+    return this.httpCli.get<any>(`${this.serverURL}/${num}/sync`);
+  }
 }

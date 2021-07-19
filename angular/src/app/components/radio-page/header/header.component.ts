@@ -1,6 +1,6 @@
-///  <reference types="@types/spotify-web-playback-sdk"/>
 import { Component, EventEmitter, HostListener, Input, OnChanges, OnInit, Output } from '@angular/core';
 import { AppComponent } from 'src/app/app.component';
+import { RadioService } from 'src/app/services/radio.service';
 
 @Component({
   selector: 'app-header',
@@ -25,7 +25,7 @@ export class HeaderComponent implements OnInit, OnChanges {
   // Number key for key press
   _numberKey: number = -1;
 
-  constructor() { }
+  constructor(private radioService: RadioService) { }
 
   ngOnInit(): void {
   }
@@ -121,6 +121,9 @@ export class HeaderComponent implements OnInit, OnChanges {
 
   // Logout from am_radio
   logout(): any {
+    if(this.stationNum > 0) {
+      this.radioService.leaveStation(this.stationNum).subscribe();
+    }
     localStorage.clear();
     window.location.replace(AppComponent.webURL);
   }

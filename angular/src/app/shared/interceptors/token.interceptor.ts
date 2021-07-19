@@ -8,8 +8,8 @@ export class TokenInterceptor implements HttpInterceptor
   
   constructor() { }
   
-  intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> 
-  {
+  intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    console.log("intercepted", request.url);
     // We have to clone the request because it is immutable
     request = request.clone({
       setHeaders: {

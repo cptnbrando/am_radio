@@ -16,6 +16,10 @@
 
 #header {
   border-bottom: solid;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
 
   h2 {
     margin-left: 10px;
@@ -36,17 +40,17 @@
     flex: 1;
   }
 
+  div:nth-child(2) {
+    display: flex;
+    justify-content: baseline;
+  }
+
   h4:nth-child(3) {
     display: flex;
     flex: 1;
     justify-content: flex-end;
   }
 
-  div:nth-child(2) {
-    display: flex;
-    flex: 1;
-    justify-content: space-evenly;
-  }
 }
 
 a {
@@ -63,7 +67,6 @@ a {
 
 #appWindow {
   display: flex;
-  // margin-right: 15px;
   border: solid;
   border-color: yellow;
 
@@ -74,14 +77,14 @@ a {
   #overlay {
     display: flex;
     position: absolute;
-    top: 48%;
+    width: 100%;
     #arrows {
       display: flex;
       flex: 1;
-      justify-content: space-between;
+      justify-content: flex-end;
       align-items: center;
-      margin-left: 25px;
-      margin-right: 25px;
+      margin-top: 5px;
+      margin-right: 20px;
     }
   }
 
@@ -91,14 +94,15 @@ a {
     justify-content: center;
     padding-left: 150px;
     padding-right: 150px;
-    margin-left: 35px;
+    padding-top: 90px;
+    margin-bottom: 50px;
 
     .page {
       margin: 15px;
       align-self: center;
       position: absolute;
       height: 60%;
-      width: 65%;
+      width: 70%;
       overflow-y: auto;
       overflow-x: hidden;
     }
@@ -110,10 +114,11 @@ a {
       justify-content: space-around;
       justify-self: center;
       align-self: center;
+      text-align: center;
     }
 
     #aboutPage {
-      padding: 25px;
+      padding: 15px;
     }
   }
 
@@ -138,4 +143,8 @@ a {
       top: 1px;
     }
   }
+}
+
+.icon {
+  padding-right: 25px;
 }

@@ -1,5 +1,6 @@
 import { Component, EventEmitter, HostListener, Input, OnInit, Output } from '@angular/core';
 import { faAngleLeft, faAngleRight, faPause, faPlay, faRandom, faRecycle, faSync, faVolumeDown, faVolumeMute, faVolumeOff, faVolumeUp } from '@fortawesome/free-solid-svg-icons';
+import { RadioService } from 'src/app/services/radio.service';
 import { SpotifyPlayerService } from '../../../services/spotify-player.service';
 
 @Component({
@@ -50,7 +51,7 @@ export class PlayerComponent implements OnInit {
   @Input() isLoading: boolean = true;
   @Output() toggleLoadingEvent = new EventEmitter<boolean>();
 
-  constructor(private playerService: SpotifyPlayerService) {
+  constructor(private playerService: SpotifyPlayerService, private radioService: RadioService) {
 
   }
 
@@ -101,15 +102,22 @@ export class PlayerComponent implements OnInit {
   // Event for clicking play button, toggles play
   togglePlay() {
     if(!this.isLoading) {
-      // this.toggleLoadingEvent.emit(true);
-  
       if(this.isPlaying) {
         // The player is playing, so we want to pause it!
         this.playerService.pause().subscribe();
       }
       else {
-        // The player is not playing, so we want to play it!
-        this.playerService.play().subscribe();
+        // Play the player if it's on 000
+        // Sync play it if it's on a playing station
+        if(this.stationNum > 0 && this.currentStation) {
+          this.toggleLoadingEvent.emit(true);
+          this.radioService.sync(this.stationNum).subscribe(data => {
+            this.toggleLoadingEvent.emit(false);
+          });
+        }
+        else {
+          this.playerService.play().subscribe();
+        }
       }
     }
   }
