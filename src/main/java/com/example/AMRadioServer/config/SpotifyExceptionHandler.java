@@ -28,20 +28,27 @@ public class SpotifyExceptionHandler {
      * @return a valid access token
      */
     private void newTokens() throws SpotifyWebApiException {
+//        System.out.println("Begin newTokens()");
         String clientID = spotifyApi.getClientId();
         String clientSecret = spotifyApi.getClientSecret();
         String refreshToken = spotifyApi.getRefreshToken();
+
+//        System.out.println("Gotten fields newTokens()");
 
         if(refreshToken == null || clientID == null || clientSecret == null) {
             throw new SpotifyWebApiException("No refresh token found");
         }
 
+//        System.out.println("In newTokens()");
+
         try {
+            System.out.println("Trying new tokens");
             AuthorizationCodeCredentials auth = spotifyApi.authorizationCodeRefresh(clientID, clientSecret, refreshToken).build().execute();
+            Thread.sleep(3000);
             this.spotifyApi.setAccessToken(auth.getAccessToken());
             this.spotifyApi.setRefreshToken(auth.getRefreshToken());
         }
-        catch(ParseException | IOException | SpotifyWebApiException e) {
+        catch(ParseException | IOException | SpotifyWebApiException | InterruptedException e) {
             System.out.println("Exception in newTokens");
             System.out.println(e.getMessage());
             throw new SpotifyWebApiException("No refresh token found");
@@ -65,11 +72,14 @@ public class SpotifyExceptionHandler {
         }
 
         // Catches invalid access tokens
-        if(e.getMessage().equals("Invalid access token") || e.getMessage().equals("The access token expired")) {
+        if(e.getMessage().equals("The access token expired")) {
             try {
+//                System.out.println("Attempting to get new tokens");
                 this.newTokens();
                 return null;
             } catch (Exception g) {
+                System.out.println("Caught in the access token expired");
+                System.out.println(g.getMessage());
                 return "redirect:" + SpotifyConfiguration.url;
             }
         }

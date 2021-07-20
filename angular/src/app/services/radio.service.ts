@@ -28,6 +28,10 @@ export class RadioService {
     return this.httpCli.get<any>(`${this.serverURL}/${num}/leave`);
   }
 
+  deleteStation(num: number, user: any): Observable<any>{
+    return this.httpCli.put<any>(`${this.serverURL}/${num}/delete`, user);
+  }
+
   sync(num: number): Observable<any>{
     return this.httpCli.get<any>(`${this.serverURL}/${num}/sync`);
   }

@@ -1,4 +1,4 @@
-<app-seeker></app-seeker>
+<app-seeker [currentlyPlaying]="currentlyPlaying" [isPlaying]="isPlaying" [position]="position" [isLoading]="isLoading"></app-seeker>
 <div id="player">
     <div id="currentDiv" class="playerItem row">
         <div id="currentImage" class="album column clickable" (click)="toggleBar(0)">

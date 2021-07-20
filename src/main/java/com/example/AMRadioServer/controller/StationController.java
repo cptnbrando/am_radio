@@ -101,6 +101,32 @@ public class StationController extends SpotifyPlayerController {
     }
 
     /**
+     * Delete a station if the logged in user owns it
+     *
+     * @param stationID the station to delete
+     * @param user the user that owns it
+     * @return ResponseMessage detailing success or not
+     */
+    @PutMapping(value = "/{stationID}/delete")
+    public ResponseMessage deleteStation(@PathVariable("stationID") int stationID, @RequestBody User user) {
+        Station station = this.stationService.getStation(stationID);
+        // If no station found
+        if(station == null) {
+            return new ResponseMessage("No station found");
+        }
+
+        User found = station.getCreator();
+        // If the user given does not match the owner
+        if(!user.getId().equals(found.getId())) {
+            return new ResponseMessage("Bad user");
+        }
+
+        // If it's good, delete the station
+        this.stationService.deleteStation(station);
+        return new ResponseMessage("Station deleted");
+    }
+
+    /**
      * Plays and seeks the currently playing Station track to the synced value
      * @param stationID Station to sync to
      */

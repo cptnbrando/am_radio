@@ -1,4 +1,6 @@
-<span class="seeker-time">0:00</span>
-<mat-slider min="0" max="100" step="1" [(ngModel)]="position" (change)="onChange()"></mat-slider>
-<span class="seeker-time">10:00</span>
+<div id="seekerDiv">
+    <span class="seeker-time">{{_position | async}}</span>
+    <mat-slider min="0" max="100" step="1" thumbLabel [displayWith]="formatLabel.bind(this)" [(ngModel)]="sliderPos" (input)="onSliderMove()" (change)="onSliderChange()"></mat-slider>
+    <span class="seeker-time" id="duration">{{_duration}}</span>
+</div>
 

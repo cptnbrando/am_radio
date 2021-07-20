@@ -269,4 +269,13 @@ public class StationService {
         this.allStations.put(station.getStationID(), station);
         this.stationRepo.save(station);
     }
+
+    /**
+     * Delete a station for the db and hashmap
+     * @param station Station to be deleted
+     */
+    public void deleteStation(Station station) {
+        this.stationRepo.delete(station);
+        this.allStations.remove(station.getStationID());
+    }
 }

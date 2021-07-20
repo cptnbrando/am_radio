@@ -1,0 +1,19 @@
+div {
+    background-color: white;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding-left: 25px;
+    padding-right: 25px;
+
+    mat-slider {
+        flex: 10;
+        margin-left: 10px;
+        margin-right: 10px;
+    }
+
+    .seeker-time {
+        justify-content: center;
+        flex: .3;
+    }
+}

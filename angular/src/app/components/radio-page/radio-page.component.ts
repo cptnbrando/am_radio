@@ -248,9 +248,11 @@ export class RadioPageComponent implements OnInit {
 
   // This will get the current player and set the data to the UI
   setPlayerData(): void {
+    console.log("setPlayerData!");
     this.playerService.getPlayer().subscribe(data => {
       if(data) {
         // Set the data
+        this.position = data.progress_ms;
         this.currentlyPlaying = data.item;
         this.currentURI = data.item.uri;
         this.currentDevice = data.device;
