@@ -17,7 +17,7 @@ export class SeekerComponent implements OnInit, OnChanges {
   });
   sliderPos: number = 0;
 
-  public duration: number = 0;
+  duration: number = 0;
   _duration: string = "0:00";
   remaining: number = 0;
   _remaining: string = "-0:00";
@@ -26,6 +26,10 @@ export class SeekerComponent implements OnInit, OnChanges {
   @Input() currentlyPlaying: any = {};
 
   @Input() isLoading: boolean = true;
+
+  @Input() currentStation: any = {};
+  @Input() stationNum: number = 0;
+  sliderDisabled: boolean = false;
 
   constructor(private playerService: SpotifyPlayerService) {
   }
@@ -43,7 +47,12 @@ export class SeekerComponent implements OnInit, OnChanges {
       // If the track has changed and nothing else has, start the timer at 0
       if(!changes.isPlaying && this.isPlaying) {
         this.resetPosition(true);
-        this.updatePosition(0);
+        let seekValue = 0;
+        if(changes.position) {
+          seekValue = changes.position.currentValue;
+        }
+
+        this.updatePosition(seekValue);
       }
     }
     // Pause the timer
@@ -53,6 +62,15 @@ export class SeekerComponent implements OnInit, OnChanges {
       }
       else if(changes.isPlaying.currentValue === true && changes.isPlaying.previousValue === false) {
         this.updatePosition(this.position);
+      }
+    }
+    // Disable the seeker on a station
+    if(changes.currentStation) {
+      if(changes.currentStation.currentValue.stationID === 0) {
+        this.sliderDisabled = false;
+      }
+      else {
+        this.sliderDisabled = true;
       }
     }
   }
@@ -74,7 +92,7 @@ export class SeekerComponent implements OnInit, OnChanges {
       this.playerService.seek(newPos).subscribe();
       this.resetPosition(false);
       // this.updatePosition(newPos);
-      setTimeout(() => {this.updatePosition(newPos + 1000), 100});
+      this.updatePosition(newPos - 1000)
     }
   }
 
@@ -101,8 +119,8 @@ export class SeekerComponent implements OnInit, OnChanges {
     }
  
     this.position = position;
-    let delay = 2800;
-    if(position < 2800) delay -= position;
+    let delay = 2000;
+    if(position < 2000) delay -= position;
     else delay = 600;
     this._position = new Observable<string>(observer => {
       this.positionObserver = timer(delay, 1000).subscribe(() => {
