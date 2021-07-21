@@ -8,6 +8,7 @@ import com.wrapper.spotify.requests.authorization.authorization_code.Authorizati
 import org.apache.hc.core5.http.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import javax.servlet.http.HttpServletRequest;
@@ -17,8 +18,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 @ControllerAdvice
+@CrossOrigin(originPatterns = "*", allowCredentials = "true")
 public class SpotifyExceptionHandler {
-
     private final SpotifyApi spotifyApi;
 
     @Autowired
@@ -48,12 +49,16 @@ public class SpotifyExceptionHandler {
         try {
             System.out.println("Trying new tokens");
             final AuthorizationCodeRefreshRequest authRequest = spotifyApi.authorizationCodeRefresh(clientID, clientSecret, refreshToken).build();
-            final Future<AuthorizationCodeCredentials> authFuture = authRequest.executeAsync();
-            final AuthorizationCodeCredentials auth = authFuture.get();
+            AuthorizationCodeCredentials auth = authRequest.execute();
+            System.out.println("Built auth refresh request");
+            System.out.println(auth);
+            System.out.println(auth.getAccessToken());
+//            final Future<AuthorizationCodeCredentials> authFuture = authRequest.executeAsync();
+//            final AuthorizationCodeCredentials auth = authFuture.get();
             this.spotifyApi.setAccessToken(auth.getAccessToken());
             this.spotifyApi.setRefreshToken(auth.getRefreshToken());
         }
-        catch(InterruptedException | ExecutionException e) {
+        catch(IOException | ParseException e) {
             System.out.println("Exception in newTokens");
             System.out.println(e.getMessage());
             throw new SpotifyWebApiException("No refresh token found");

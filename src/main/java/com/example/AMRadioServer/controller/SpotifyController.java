@@ -5,10 +5,8 @@ import com.example.AMRadioServer.model.ResponseMessage;
 import com.wrapper.spotify.SpotifyApi;
 import com.wrapper.spotify.exceptions.SpotifyWebApiException;
 import com.wrapper.spotify.model_objects.credentials.AuthorizationCodeCredentials;
-import com.wrapper.spotify.model_objects.specification.Paging;
-import com.wrapper.spotify.model_objects.specification.PlaylistSimplified;
-import com.wrapper.spotify.model_objects.specification.PlaylistTrack;
-import com.wrapper.spotify.model_objects.specification.User;
+import com.wrapper.spotify.model_objects.miscellaneous.AudioAnalysis;
+import com.wrapper.spotify.model_objects.specification.*;
 import com.wrapper.spotify.requests.authorization.authorization_code.AuthorizationCodeRequest;
 import com.wrapper.spotify.requests.authorization.authorization_code.AuthorizationCodeUriRequest;
 import org.apache.hc.core5.http.ParseException;
@@ -146,6 +144,42 @@ public class SpotifyController {
         else {
             // If the playlists can be good, then the token is good!
             return new ResponseMessage(spotifyApi.getAccessToken());
+        }
+    }
+
+    /**
+     * Get the audio features for a track
+     * @param trackID the track
+     * @return the audio features array
+     * @throws SpotifyWebApiException if it fails
+     */
+    @GetMapping(value = "/getAudioFeatures")
+    public AudioFeatures getAudioFeatures(@RequestParam String trackID) throws SpotifyWebApiException {
+        try {
+            return this.spotifyApi.getAudioFeaturesForTrack(trackID).build().execute();
+        } catch (IOException | ParseException e)
+        {
+            System.out.println("Exception caught in spotify/getAudioFeatures");
+            System.out.println(e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Get the audio analysis for a track
+     * @param trackID the track
+     * @return audio analysis array
+     * @throws SpotifyWebApiException if it fails
+     */
+    @GetMapping(value = "/getAudioAnalysis")
+    public AudioAnalysis getAudioAnalysis(@RequestParam String trackID) throws SpotifyWebApiException {
+        try {
+            return this.spotifyApi.getAudioAnalysisForTrack(trackID).build().execute();
+        } catch (IOException | ParseException e)
+        {
+            System.out.println("Exception caught in spotify/getAudioAnalysis");
+            System.out.println(e.getMessage());
+            return null;
         }
     }
 }

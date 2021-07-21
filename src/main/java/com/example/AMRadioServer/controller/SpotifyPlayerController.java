@@ -3,8 +3,6 @@ package com.example.AMRadioServer.controller;
 import com.google.gson.JsonArray;
 import com.wrapper.spotify.SpotifyApi;
 import com.wrapper.spotify.exceptions.SpotifyWebApiException;
-import com.wrapper.spotify.model_objects.IPlaylistItem;
-import com.wrapper.spotify.model_objects.miscellaneous.AudioAnalysis;
 import com.wrapper.spotify.model_objects.miscellaneous.CurrentlyPlaying;
 import com.wrapper.spotify.model_objects.miscellaneous.CurrentlyPlayingContext;
 import com.wrapper.spotify.model_objects.miscellaneous.Device;
@@ -463,31 +461,6 @@ public class SpotifyPlayerController {
             return false;
         }
     }
-
-    @GetMapping(value = "/getAudioFeatures")
-    public AudioFeatures getAudioFeatures(@RequestParam String trackID) throws SpotifyWebApiException {
-        try {
-            return this.spotifyApi.getAudioFeaturesForTrack(trackID).build().execute();
-        } catch (IOException | ParseException e)
-        {
-            System.out.println("Exception caught in player/getAudioFeatures");
-            System.out.println(e.getMessage());
-            return null;
-        }
-    }
-
-    @GetMapping(value = "/getAudioAnalysis")
-    public AudioAnalysis getAudioAnalysis(@RequestParam String trackID) throws SpotifyWebApiException {
-        try {
-            return this.spotifyApi.getAudioAnalysisForTrack(trackID).build().execute();
-        } catch (IOException | ParseException e)
-        {
-            System.out.println("Exception caught in player/getAudioAnalysis");
-            System.out.println(e.getMessage());
-            return null;
-        }
-    }
-
 
     /**
      * Get all currently available devices for the user

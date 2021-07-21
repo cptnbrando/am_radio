@@ -66,4 +66,12 @@ export class SpotifyService {
   getRecentlyPlayedTracks(): Observable<any> {
     return this.httpCli.get<any>(this.serverURL + "/getRecentlyPlayedTracks");
   }
+
+  getAudioFeatures(trackID: string): Observable<any> {
+    return this.httpCli.get<any>(`${this.serverURL}/getAudioFeatures?trackID=${trackID}`);
+  }
+
+  getAudioAnalysis(trackID: string): Observable<any> {
+    return this.httpCli.get<any>(`${this.serverURL}/getAudioAnalysis?trackID=${trackID}`);
+  }
 }

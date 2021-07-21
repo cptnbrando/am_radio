@@ -38,7 +38,7 @@ export class SeekerComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: any): void {
-    console.log(changes);
+    // console.log(changes);
     // Update the duration and begin the position timer
     if(changes.currentlyPlaying) {
       // Set duration
@@ -121,8 +121,8 @@ export class SeekerComponent implements OnInit, OnChanges {
   updatePosition(position: number): void {
     this.position = position;
     let delay = 2000;
-    if(position < 2000) delay -= position;
-    else delay = 600;
+    if(position < 1000) delay = 1000 - position;
+    else delay = 1000;
     this._position = new Observable<string>(observer => {
       this.positionObserver = timer(delay, 1000).subscribe(() => {
         this.position += 1000;
