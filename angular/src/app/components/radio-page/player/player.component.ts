@@ -51,6 +51,8 @@ export class PlayerComponent implements OnInit {
   @Input() isLoading: boolean = true;
   @Output() toggleLoadingEvent = new EventEmitter<boolean>();
 
+  @Output() setPlayerEvent = new EventEmitter<boolean>();
+
   constructor(private playerService: SpotifyPlayerService, private radioService: RadioService) {
 
   }
@@ -110,9 +112,18 @@ export class PlayerComponent implements OnInit {
         // Play the player if it's on 000
         // Sync play it if it's on a playing station
         if(this.stationNum > 0 && this.currentStation) {
+          // Start loading and change volume to 0
           this.toggleLoadingEvent.emit(true);
+          let currentVol = this.volume;
+          this.playerService.volume(0).subscribe(data => {
+            this.volume = 0;
+          });
           this.radioService.sync(this.stationNum).subscribe(data => {
-            this.toggleLoadingEvent.emit(false);
+            this.playerService.volume(currentVol).subscribe(data => {
+              this.volume = currentVol;
+              this.toggleLoadingEvent.emit(false);
+              this.setPlayerEvent.emit(true);
+            });
           });
         }
         else {

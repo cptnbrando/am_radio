@@ -8,10 +8,7 @@ import com.wrapper.spotify.model_objects.miscellaneous.AudioAnalysis;
 import com.wrapper.spotify.model_objects.miscellaneous.CurrentlyPlaying;
 import com.wrapper.spotify.model_objects.miscellaneous.CurrentlyPlayingContext;
 import com.wrapper.spotify.model_objects.miscellaneous.Device;
-import com.wrapper.spotify.model_objects.specification.AudioFeatures;
-import com.wrapper.spotify.model_objects.specification.PlaylistSimplified;
-import com.wrapper.spotify.model_objects.specification.PlaylistTrack;
-import com.wrapper.spotify.model_objects.specification.User;
+import com.wrapper.spotify.model_objects.specification.*;
 import com.wrapper.spotify.requests.data.player.AddItemToUsersPlaybackQueueRequest;
 import com.wrapper.spotify.requests.data.player.GetUsersCurrentlyPlayingTrackRequest;
 import com.wrapper.spotify.requests.data.player.SkipUsersPlaybackToNextTrackRequest;
@@ -21,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.Random;
+import java.util.concurrent.*;
 
 @RestController
 @CrossOrigin(originPatterns = "*", allowCredentials = "true")
@@ -115,13 +113,13 @@ public class SpotifyPlayerController {
      * @param trackURI URI of track to queue
      */
     @PutMapping(value = "/addToQueue")
-    public void addToQueue(@RequestParam(name = "trackURI") String trackURI) {
+    public void addToQueue(@RequestParam(name = "trackURI") String trackURI) throws SpotifyWebApiException {
         try {
-            this.spotifyApi.addItemToUsersPlaybackQueue(trackURI).build().execute();
+            this.spotifyApi.addItemToUsersPlaybackQueue(trackURI).build().executeAsync().join();
             this.shuffle(false);
             this.repeat("off");
         }
-        catch (IOException | SpotifyWebApiException | ParseException e)
+        catch (CancellationException | CompletionException e)
         {
             System.out.println("Exception in player/addToQueue");
             System.out.println(e.getMessage());
@@ -155,50 +153,86 @@ public class SpotifyPlayerController {
      */
     @PutMapping(value = "/playTrack")
     public boolean playTrack(@RequestParam(name = "trackURI") String trackURI) throws SpotifyWebApiException {
+//        System.out.println("-----PLAYTRACK()-----");
+//        System.out.println("Trying to play: " + trackURI);
         try {
             AddItemToUsersPlaybackQueueRequest queue = this.spotifyApi.addItemToUsersPlaybackQueue(trackURI).build();
             SkipUsersPlaybackToNextTrackRequest skip = this.spotifyApi.skipUsersPlaybackToNextTrack().build();
             GetUsersCurrentlyPlayingTrackRequest now = this.spotifyApi.getUsersCurrentlyPlayingTrack().build();
-            // Add the track to the queue and wait a second for it to go through
-            queue.execute();
-            Thread.sleep(1000);
+//            try {
+//                this.spotifyApi.startResumeUsersPlayback().build().execute();
+//            } catch(IOException | ParseException ignored) {
+//            }
 
-            // Skip to the next track and get the currentPlayingTrack to check if it was successful
-            skip.execute();
-            Thread.sleep(1000);
-            IPlaylistItem current = now.execute().getItem();
+//            System.out.println("init current" + now.executeAsync().get().getItem().getUri());
+            // Use Future to make the async
+            // Add the track to the queue
+            String queueReturn = queue.executeAsync().get();
+//            System.out.println("1st queue: " + trackURI + " : " + queueReturn);
 
+            // Delay...
+            Thread.sleep(1300);
+
+            // Skip to the next track
+            String skipReturn = skip.executeAsync().get();
+//            System.out.println("1st skip" + " : " + skipReturn);
+
+            // Get the CurrentlyPlaying track to check if it was successful
+            CurrentlyPlaying current = now.executeAsync().get();
+//            System.out.println("1st current");
+//            System.out.println(current.getItem().getUri());
+
+            // We check current again in case it works and there's a dumb unpredictable delay
+            if(!current.getItem().getUri().equals(trackURI)) {
+                Thread.sleep(1000);
+                current = now.executeAsync().get();
+//                System.out.println("1st loop current");
+//                System.out.println(current.getItem().getUri());
+            }
+
+            // We need to do this because there's nothing in the Spotify API to clear/adjust the queue :(
             // Loop until the queue and current playing track is right
             int count = 0;
             int bigCount = 0;
-            while(!current.getUri().equals(trackURI)) {
+            while(!current.getItem().getUri().equals(trackURI)) {
                 // Skip to the next track and get the new current track
-                skip.execute();
+                skip.executeAsync().get();
+//                System.out.println("Loop skip");
+
+                // Delay...
                 Thread.sleep(1000);
-                current = now.execute().getItem();
+
+                current = now.executeAsync().get();
+
+//                System.out.println("Loop current");
+//                System.out.println(current.getItem().getUri());
+
+                if(current.getItem().getUri().equals(trackURI)) {
+                    return true;
+                }
 
                 // If this has happened more than 5 times, maybe this function messed up
                 // and it needs to be queued again
                 count++;
-                if(count > 5) {
-                    queue.execute();
-                    Thread.sleep(1200);
+                if(count > 3) {
+                    queueReturn = queue.executeAsync().get();
                     count = 0;
                     bigCount++;
+                    // Delay...
+                    Thread.sleep(1000);
                 }
-
                 // If this is hit, then it's really struggling to play the track
                 // So we give up lol
-                if(bigCount > 3) {
+                if(bigCount > 2) {
+                    System.out.println("Giving up in player/playTrack");
                     return false;
                 }
             }
-
             return true;
         }
-        catch (IOException | ParseException | NullPointerException | InterruptedException e)
+        catch (NullPointerException | InterruptedException | ExecutionException e)
         {
-            System.out.println("Exception caught in player/pause");
+            System.out.println("Exception caught in player/playTrack");
             System.out.println(e.getMessage());
             return false;
         }
@@ -359,10 +393,10 @@ public class SpotifyPlayerController {
     @PutMapping(value = "/seek")
     public boolean seek(@RequestParam int time) throws SpotifyWebApiException {
         try {
-            this.spotifyApi.seekToPositionInCurrentlyPlayingTrack(time).build().execute();
+            this.spotifyApi.seekToPositionInCurrentlyPlayingTrack(time).build().executeAsync().join();
             return true;
         }
-        catch (IOException | ParseException e) {
+        catch (CancellationException | CompletionException e) {
             System.out.println("Exception caught in player/seek");
             System.out.println(e.getMessage());
             return false;

@@ -68,14 +68,19 @@ public class StationController extends SpotifyPlayerController {
         // If the station's not playing, start it
         if(!station.isPlaying()) {
             this.stationService.start(stationID);
-
-            // Wait a second for the fields to get right
-            Thread.sleep(1000);
         }
+
+        // Wait a second for the fields to get right, then get the station again
+        Thread.sleep(1000);
+        station = this.stationService.getStation(stationID, false);
+        System.out.println("Station current is: " + station.getCurrentURI());
 
         // Play the current track and seek it to the right time if the station is playing
         // System.currentTime - station.getPlayTime
         if(station.isPlaying() && super.playTrack(station.getCurrentURI())) {
+            System.out.println("Playing good current, now seek!");
+            System.out.println(System.currentTimeMillis());
+            System.out.println(station.getPlayTime());
             super.seek((int) (System.currentTimeMillis() - station.getPlayTime()));
         }
 
@@ -137,11 +142,11 @@ public class StationController extends SpotifyPlayerController {
 
         // Play the currently playing track
         if(this.playTrack(station.getCurrentURI())) {
-            // Queue up the next track
-            this.addToQueue(station.getNextURI());
-
             // Seek current to the right time
             this.seek((int) (System.currentTimeMillis() - station.getPlayTime()));
+
+            // Queue up the next track
+            this.addToQueue(station.getNextURI());
         }
     }
 }

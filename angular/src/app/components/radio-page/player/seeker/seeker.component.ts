@@ -38,7 +38,7 @@ export class SeekerComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: any): void {
-    // console.log(changes);
+    console.log(changes);
     // Update the duration and begin the position timer
     if(changes.currentlyPlaying) {
       // Set duration
@@ -48,15 +48,20 @@ export class SeekerComponent implements OnInit, OnChanges {
       if(!changes.isPlaying && this.isPlaying) {
         this.resetPosition(true);
         let seekValue = 0;
+        // If the track has changed and the position has also changed, start it there
         if(changes.position) {
           seekValue = changes.position.currentValue;
         }
-
         this.updatePosition(seekValue);
       }
     }
+    // If changes are just the position, start it at the position
+    else if(changes.position) {
+      this.resetPosition(false);
+      this.updatePosition(changes.position.currentValue);
+    }
     // Pause the timer
-    if(changes.isPlaying) {
+    if(changes.isPlaying && !this.isLoading) {
       if(changes.isPlaying.currentValue === false && changes.isPlaying.previousValue === true) {
         this.resetPosition(false);
       }
@@ -66,6 +71,7 @@ export class SeekerComponent implements OnInit, OnChanges {
     }
     // Disable the seeker on a station
     if(changes.currentStation) {
+      this.resetPosition(false);
       if(changes.currentStation.currentValue.stationID === 0) {
         this.sliderDisabled = false;
       }
@@ -91,7 +97,6 @@ export class SeekerComponent implements OnInit, OnChanges {
       newPos = Math.round(newPos);
       this.playerService.seek(newPos).subscribe();
       this.resetPosition(false);
-      // this.updatePosition(newPos);
       this.updatePosition(newPos - 1000)
     }
   }
@@ -114,10 +119,6 @@ export class SeekerComponent implements OnInit, OnChanges {
    * @param position the starting position
    */
   updatePosition(position: number): void {
-    if(this.isLoading) {
-      setTimeout(() => {this.resetPosition(false), 2000})
-    }
- 
     this.position = position;
     let delay = 2000;
     if(position < 2000) delay -= position;

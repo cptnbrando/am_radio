@@ -307,6 +307,7 @@ export class RadioPageComponent implements OnInit {
 
     // This shouldn't get here if we're at 000...
     if(stationNum === 0) {
+      this.toggleLoading(false);
       return;
     }
 
