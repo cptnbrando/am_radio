@@ -49,7 +49,7 @@ public class SpotifyExceptionHandler {
         try {
             System.out.println("Trying new tokens");
             final AuthorizationCodeRefreshRequest authRequest = spotifyApi.authorizationCodeRefresh(clientID, clientSecret, refreshToken).build();
-            AuthorizationCodeCredentials auth = authRequest.execute();
+            AuthorizationCodeCredentials auth = authRequest.executeAsync().get();
             System.out.println("Built auth refresh request");
             System.out.println(auth);
             System.out.println(auth.getAccessToken());
@@ -58,7 +58,7 @@ public class SpotifyExceptionHandler {
             this.spotifyApi.setAccessToken(auth.getAccessToken());
             this.spotifyApi.setRefreshToken(auth.getRefreshToken());
         }
-        catch(IOException | ParseException e) {
+        catch(InterruptedException | ExecutionException e) {
             System.out.println("Exception in newTokens");
             System.out.println(e.getMessage());
             throw new SpotifyWebApiException("No refresh token found");

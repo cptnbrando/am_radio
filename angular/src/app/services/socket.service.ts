@@ -1,5 +1,5 @@
-import * as SockJS from 'sockjs-client';
-import * as Stomp from 'stompjs';
+import Stomp from "stompjs";
+import SockJS from "sockjs-client";
 import { Injectable } from '@angular/core';
 import { AppComponent } from '../app.component';
 

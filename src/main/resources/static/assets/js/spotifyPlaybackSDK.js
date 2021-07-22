@@ -37,6 +37,10 @@ window.onSpotifyWebPlaybackSDKReady = () => {
     if(typeof track_window === 'undefined') {
       track_window: {current_track};
     }
+
+    if(!duration) {
+      duration = 0;
+    }
     
     // Detects for playback changes
     player.getCurrentState().then(data => {
