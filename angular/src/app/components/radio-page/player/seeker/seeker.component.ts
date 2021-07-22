@@ -13,14 +13,14 @@ export class SeekerComponent implements OnInit, OnChanges {
   @Input() position: number = 0;
   positionObserver: Subscriber<string> | any;
   _position: Observable<string> = new Observable<string>(observer => {
-    this.positionObserver = observer.next("0:00");
+    this.positionObserver = observer.next("00:00");
   });
   sliderPos: number = 0;
 
   duration: number = 0;
-  _duration: string = "0:00";
+  _duration: string = "00:00";
   remaining: number = 0;
-  _remaining: string = "-0:00";
+  _remaining: string = "-00:00";
 
   @Input() isPlaying: boolean = false;
   @Input() currentlyPlaying: any = {};
@@ -31,6 +31,9 @@ export class SeekerComponent implements OnInit, OnChanges {
   @Input() stationNum: number = 0;
   sliderDisabled: boolean = false;
 
+  isSeeking: boolean = false;
+  seekValue: number = 0;
+
   constructor(private playerService: SpotifyPlayerService) {
   }
 
@@ -38,7 +41,6 @@ export class SeekerComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: any): void {
-    // console.log(changes);
     // Update the duration and begin the position timer
     if(changes.currentlyPlaying) {
       // Set duration
@@ -47,18 +49,13 @@ export class SeekerComponent implements OnInit, OnChanges {
       // If the track has changed and nothing else has, start the timer at 0
       if(!changes.isPlaying && this.isPlaying) {
         this.resetPosition(true);
-        let seekValue = 0;
-        // If the track has changed and the position has also changed, start it there
-        if(changes.position) {
-          seekValue = changes.position.currentValue;
-        }
-        this.updatePosition(seekValue);
+        this.updatePosition();
       }
     }
     // If changes are just the position, start it at the position
     else if(changes.position) {
       this.resetPosition(false);
-      this.updatePosition(changes.position.currentValue);
+      this.updatePosition();
     }
     // Pause the timer
     if(changes.isPlaying && !this.isLoading) {
@@ -66,7 +63,7 @@ export class SeekerComponent implements OnInit, OnChanges {
         this.resetPosition(false);
       }
       else if(changes.isPlaying.currentValue === true && changes.isPlaying.previousValue === false) {
-        this.updatePosition(this.position);
+        this.updatePosition();
       }
     }
     // Disable the seeker on a station
@@ -81,10 +78,14 @@ export class SeekerComponent implements OnInit, OnChanges {
     }
   }
 
+  /**
+   * When the slider's moving, stop the timer updates and set isSeeking to true
+   */
   onSliderMove(): void {
     if(!this.isLoading) {
       this.resetPosition(false);
     }
+    this.isSeeking = true;
   }
 
   /**
@@ -95,9 +96,14 @@ export class SeekerComponent implements OnInit, OnChanges {
       // Advanced algebra right here
       let newPos = (this.sliderPos / 100) * this.duration;
       newPos = Math.round(newPos);
-      this.playerService.seek(newPos).subscribe();
+      this.seekValue = newPos;
+      this.playerService.seek(newPos).subscribe(data => {
+        setTimeout(() => {
+          this.isSeeking = false;
+        }, 600);
+      });
       this.resetPosition(false);
-      this.updatePosition(newPos - 1000)
+      this.updatePosition();
     }
   }
 
@@ -107,32 +113,27 @@ export class SeekerComponent implements OnInit, OnChanges {
    * @returns format time for slider pos
    */
   formatLabel(value: number)  {
-    if(!this.duration) return "0:00";
+    if(!this.duration) return "00:00";
     value = Math.round((value / 100) * this.duration);
     return this.formatTime(value);
   }
 
   /**
-   * Uses rxjs timer to update _position every second
-   * First one has a 3.5 second delay adjusted on position if it's the beginning of the song
-   * (because Spotify has a weird 1-4 second delay when a song starts)
+   * Uses window player to get the current position every .5 seconds
    * @param position the starting position
    */
-  updatePosition(position: number): void {
-    this.position = position;
-    let delay = 2000;
-    if(position < 1000) delay = 1000 - position;
-    else delay = 1000;
+  updatePosition(): void {
     this._position = new Observable<string>(observer => {
-      this.positionObserver = timer(delay, 1000).subscribe(() => {
-        this.position += 1000;
-        this.position = Math.round((this.position) / 1000) * 1000;
+      this.positionObserver = timer(500, 500).subscribe(() => {
+        if(!this.isSeeking) {
+          (<any>window).spotifyPlayer.getCurrentState().then((data: any) => {
+            this.position = data.position;
+          });
+        } else {
+          this.position = this.seekValue;
+        }
         observer.next(this.formatTime(this.position));
         this.sliderPos = (this.position / this.duration) * 100;
-
-        // reset the timer if the position is over it
-        // This shouldn't be called if the song changes, only if it repeats
-        if(this.position > this.duration  + 10000) this.position = 10000;
       });
     });
     
@@ -146,7 +147,7 @@ export class SeekerComponent implements OnInit, OnChanges {
     this.positionObserver?.unsubscribe();
     if(reset) {
       this._position = new Observable<string>(observer => {
-        this.positionObserver = observer.next("0:00");
+        this.positionObserver = observer.next("00:00");
       });
       this.position = 0;
     }
@@ -158,7 +159,7 @@ export class SeekerComponent implements OnInit, OnChanges {
    */
   formatTime(miliseconds: number): string {
     if(!miliseconds) {
-      return `0:00`;
+      return `00:00`;
     }
 
     let seconds: number | string = Math.floor((miliseconds / 1000) % 60);

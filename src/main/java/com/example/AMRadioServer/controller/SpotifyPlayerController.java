@@ -180,6 +180,9 @@ public class SpotifyPlayerController {
                 Thread.sleep(1000);
                 current = now.executeAsync().get();
                 System.out.println("1st loop current: " + current.getItem().getUri());
+                if(current.getItem().getUri().equals(trackURI)) {
+                    return true;
+                }
             }
 
             // We need to do this because there's nothing in the Spotify API to clear/adjust the queue :(
@@ -192,7 +195,7 @@ public class SpotifyPlayerController {
                 System.out.println("Loop skip");
 
                 // Delay...
-                Thread.sleep(1000);
+//                Thread.sleep(1000);
 
                 current = now.executeAsync().get();
 
@@ -207,6 +210,7 @@ public class SpotifyPlayerController {
                 count++;
                 if(count > 3) {
                     queueReturn = queue.executeAsync().get();
+                    System.out.println("Loop queue add: " + queueReturn);
                     count = 0;
                     bigCount++;
                     // Delay...
@@ -236,18 +240,16 @@ public class SpotifyPlayerController {
      * @return the current device playing
      */
     @PutMapping(value = "/playOn")
-    public Device playOn(@RequestParam String deviceID) {
+    public Device playOn(@RequestParam String deviceID) throws SpotifyWebApiException {
         //Create a JSONArray and add the ID
         JsonArray deviceArray = new JsonArray();
         deviceArray.add(deviceID);
 
         try {
-            this.spotifyApi.transferUsersPlayback(deviceArray).build().execute();
-            System.out.println("Playback transferred!");
+            this.spotifyApi.transferUsersPlayback(deviceArray).build().executeAsync().get();
             return this.getCurrentDevice();
         }
-        catch (IOException | SpotifyWebApiException | ParseException e)
-        {
+        catch (ExecutionException | InterruptedException e) {
             System.out.println("Exception in player/playOn");
             System.out.println(e.getMessage());
             return null;
@@ -286,7 +288,7 @@ public class SpotifyPlayerController {
     public Device setAMRadio() throws SpotifyWebApiException {
         try {
             // First get all the devices and find am_radio
-            Device[] myDevices = this.spotifyApi.getUsersAvailableDevices().build().execute();
+            Device[] myDevices = this.spotifyApi.getUsersAvailableDevices().build().executeAsync().get();
             for(Device device: myDevices) {
                 if(device.getName().equals("am_radio")) {
                     //Create a JSONArray and add the ID, then transfer playback
@@ -296,7 +298,7 @@ public class SpotifyPlayerController {
                     return device;
                 }
             }
-        } catch (IOException | ParseException e) {
+        } catch (IOException | ParseException | ExecutionException | InterruptedException e) {
             System.out.println("Exception caught in getAMRadio");
             System.out.println(e.getMessage());
             return null;
@@ -315,9 +317,9 @@ public class SpotifyPlayerController {
             // and skip to the next track
             PlaylistSimplified[] lists = this.spotifyApi.getListOfCurrentUsersPlaylists().limit(25).build().execute().getItems();
             // toggle shuffle
-            this.spotifyApi.toggleShuffleForUsersPlayback(true).build().execute();
+            this.spotifyApi.toggleShuffleForUsersPlayback(true).build().executeAsync().get();
             // toggle context repeat
-            this.spotifyApi.setRepeatModeOnUsersPlayback("context").build().execute();
+            this.spotifyApi.setRepeatModeOnUsersPlayback("context").build().executeAsync().get();
 
             // Get a random playlist and play a random track from it (so the queue gets reset)
             PlaylistSimplified randomPlaylist = lists[new Random().nextInt((lists.length))];
@@ -329,7 +331,7 @@ public class SpotifyPlayerController {
             }
             return randomPlaylist;
         }
-        catch (IOException | ParseException e)
+        catch (IOException | ParseException | InterruptedException | ExecutionException e)
         {
             System.out.println("Exception caught in player/seek");
             System.out.println(e.getMessage());
@@ -383,10 +385,10 @@ public class SpotifyPlayerController {
     @PutMapping(value = "/seek")
     public boolean seek(@RequestParam int time) throws SpotifyWebApiException {
         try {
-            this.spotifyApi.seekToPositionInCurrentlyPlayingTrack(time).build().executeAsync().join();
+            this.spotifyApi.seekToPositionInCurrentlyPlayingTrack(time).build().executeAsync().get();
             return true;
         }
-        catch (CancellationException | CompletionException e) {
+        catch (InterruptedException | ExecutionException e) {
             System.out.println("Exception caught in player/seek");
             System.out.println(e.getMessage());
             return false;
@@ -402,11 +404,10 @@ public class SpotifyPlayerController {
     @PutMapping(value = "/shuffle")
     public boolean shuffle(@RequestParam boolean activate) throws SpotifyWebApiException {
         try {
-            this.spotifyApi.toggleShuffleForUsersPlayback(activate).build().execute();
+            this.spotifyApi.toggleShuffleForUsersPlayback(activate).build().executeAsync().get();
             return true;
         }
-        catch (IOException | ParseException e)
-        {
+        catch (InterruptedException | ExecutionException e) {
             System.out.println("Exception caught in player/shuffle");
             System.out.println(e.getMessage());
             return false;
@@ -422,11 +423,10 @@ public class SpotifyPlayerController {
     @PutMapping(value = "/repeat")
     public boolean repeat(@RequestParam String type) throws SpotifyWebApiException {
         try {
-            this.spotifyApi.setRepeatModeOnUsersPlayback(type).build().execute();
+            this.spotifyApi.setRepeatModeOnUsersPlayback(type).build().executeAsync().get();
             return true;
         }
-        catch (IOException | ParseException e)
-        {
+        catch (InterruptedException | ExecutionException e) {
             System.out.println("Exception caught in player/repeat");
             System.out.println(e.getMessage());
             return false;
@@ -446,8 +446,7 @@ public class SpotifyPlayerController {
             this.spotifyApi.setVolumeForUsersPlayback(percent).build().execute();
             return true;
         }
-        catch (IOException | ParseException e)
-        {
+        catch (IOException | ParseException e) {
             System.out.println("Exception in player/volume");
             System.out.println(e.getMessage());
             return false;
@@ -462,8 +461,8 @@ public class SpotifyPlayerController {
     @GetMapping(value = "/getDevices")
     public Device[] getDevices() throws SpotifyWebApiException {
         try {
-            return this.spotifyApi.getUsersAvailableDevices().build().execute();
-        } catch (IOException | ParseException e) {
+            return this.spotifyApi.getUsersAvailableDevices().build().executeAsync().get();
+        } catch (InterruptedException | ExecutionException e) {
             System.out.println("Exception caught in player/getDevices");
             System.out.println(e.getMessage());
             return null;

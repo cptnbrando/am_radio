@@ -33,28 +33,18 @@ public class SpotifyExceptionHandler {
      * @return a valid access token
      */
     private void newTokens() throws SpotifyWebApiException {
-//        System.out.println("Begin newTokens()");
         String clientID = spotifyApi.getClientId();
         String clientSecret = spotifyApi.getClientSecret();
         String refreshToken = spotifyApi.getRefreshToken();
-
-        System.out.println("Gotten fields newTokens()");
 
         if(refreshToken == null || clientID == null || clientSecret == null) {
             throw new SpotifyWebApiException("No refresh token found");
         }
 
-//        System.out.println("In newTokens()");
-
+        // TODO: this sets it for this api, but the new access token needs to go to the player too...
         try {
-            System.out.println("Trying new tokens");
             final AuthorizationCodeRefreshRequest authRequest = spotifyApi.authorizationCodeRefresh(clientID, clientSecret, refreshToken).build();
             AuthorizationCodeCredentials auth = authRequest.executeAsync().get();
-            System.out.println("Built auth refresh request");
-            System.out.println(auth);
-            System.out.println(auth.getAccessToken());
-//            final Future<AuthorizationCodeCredentials> authFuture = authRequest.executeAsync();
-//            final AuthorizationCodeCredentials auth = authFuture.get();
             this.spotifyApi.setAccessToken(auth.getAccessToken());
             this.spotifyApi.setRefreshToken(auth.getRefreshToken());
         }
