@@ -10,33 +10,50 @@ export class Sketch {
     private beat!: Beat;
     public beatIndex: number = 0;
     private bar!: Bar;
-    private barIndex: number = 0;
+    public barIndex: number = 0;
     private section!: Section;
-    private sectionIndex: number = 0;
+    public sectionIndex: number = 0;
     private segment!: Segment;
-    private segmentIndex: number = 0;
+    public segmentIndex: number = 0;
     private tatum!: Tatum;
-    private tatumIndex: number = 0;
+    public tatumIndex: number = 0;
 
     constructor(position: number, analysis: Analysis) {
         this.position = position; 
         this.analysis = analysis;
-        // this.beat = this.find(analysis.beats, position);
-        // this.bar = this.find(analysis.bars, position);
-        // this.tatum = this.find(analysis.tatums, position);
-        // this.section = this.find(analysis.sections, position);
-        // this.segment = this.find(analysis.segments, position);
     }
 
-    setValues(analysis: Analysis, position: number): any {
+    /**
+     * Parse through the analysis array and find which beat/bar/section/segment/tatum we are given a position
+     * @param indexArray [beatIndex, barIndex, sectionIndex, segmentIndex, tatumIndex] for faster array parsing
+     * @returns promise that resolves when all values are
+     */
+    setValues(indexArray: Array<number>, sectionMeasures: Array<Bar>, segmentMeasures: Array<Bar>): any {
         return new Promise((resolve) => {
-            this.position = position;
-            this.find(analysis.beats, position).then(data => {
-                this.beat = data;
+            // Find the beat
+            this.find(this.analysis.beats, indexArray[0]).then(data => {
+                this.beat = data[0];
+                this.beatIndex = data[1];
             });
-
-            this.find(analysis.bars, position).then(data => {
-                this.bar = data;
+            // Find the bar
+            this.find(this.analysis.bars, indexArray[1]).then(data => {
+                this.bar = data[0];
+                this.barIndex = data[1];
+            });
+            // Find the tatum
+            this.find(this.analysis.tatums, indexArray[4]).then(data => {
+                this.tatum = data[0];
+                this.tatumIndex = data[1];
+            });
+            // Find the section
+            this.find(sectionMeasures, indexArray[2]).then(data => {
+                this.sectionIndex = data[1];
+                this.section = this.analysis.sections[data[1]];
+            });
+            // Find the segment
+            this.find(segmentMeasures, indexArray[2]).then(data => {
+                this.segmentIndex = data[1];
+                this.segment = this.analysis.segments[data[1]];
             });
 
             // this.bar = this.find(analysis.bars, position);
@@ -47,6 +64,11 @@ export class Sketch {
         });
     }
 
+    /**
+     * Paint our sketch, takes a position to be more accurate
+     * @param ctx context to draw with
+     * @param position the current position
+     */
     paint(ctx: CanvasRenderingContext2D, position: number): void {
         ctx.beginPath();
         ctx.strokeStyle = "white";
@@ -54,10 +76,19 @@ export class Sketch {
         ctx.lineWidth = 6;
         let circleX = ctx.canvas.width / 2;
         let circleY = ctx.canvas.height / 2;
-        let radius = Math.abs(this.getBeatConfidence(position) * 1000);
+        let confidence = this.getConfidence(position, this.beat);
+        let radius = Math.abs(confidence * 750);
         ctx.arc(circleX, circleY, radius, 0, 2 * Math.PI);
         ctx.stroke();
         ctx.closePath();
+
+        // ctx.beginPath();
+        // ctx.strokeStyle = "yellow";
+        // ctx.fillStyle = "yellow";
+        // ctx.lineWidth = 2;
+        // ctx.rect(this.getConfidence(position, this.bar) * 500, 100, 10, this.getConfidence(position, this.bar) * 100);
+        // ctx.stroke();
+        // ctx.closePath();
     }
 
     /**
@@ -85,11 +116,17 @@ export class Sketch {
      * @param position the current position
      * @returns an interpolated confidence value for the current beat
      */
-    getBeatConfidence(position: number): number {
+    getConfidence(position: number, type: Beat | Bar | Tatum): number {
         // Confidence is always between 0 and 1
-        const confidence_d3 = d3.interpolateNumber(.1, this.beat.confidence);
-        let difference = parseFloat((position / 1000).toFixed(3)) - this.beat.start;
-        return confidence_d3(difference / this.beat.duration);
+        let confidence_d3 = d3.interpolateNumber(.01, type.confidence);
+        let difference = parseFloat((position / 1000).toFixed(3)) - type.start;
+        // We use the next beat in case the posiition is past
+        if(difference < 0) {
+            type = this.analysis.beats[this.beatIndex + 1];
+            difference = parseFloat((position / 1000).toFixed(3)) - type.start;
+            confidence_d3 = d3.interpolateNumber(.01, type.confidence);
+        }
+        return confidence_d3(difference / type.duration);
     }
 
     /**
@@ -98,29 +135,25 @@ export class Sketch {
      * @param position The current position
      * @returns Promise for a found beat / bar / tatum
      */
-    find(patterns: Array<Beat | Bar | Tatum>, position: number, start?: number): Promise<Beat | Bar | Tatum>  {
+    find(patterns: Array<Beat | Bar | Tatum>, start?: number): Promise<[(Beat | Bar | Tatum), number]>  {
         return new Promise((resolve) => {
-            let roundedPos: number = parseFloat((position / 1000).toFixed(3));
+            let roundedPos: number = parseFloat((this.position / 1000).toFixed(3));
             let count = (start) ? start : 0;
+            let foundIndex = 0;
             // MASSIVE SHOUTOUT TO THIS ON GOD https://stackoverflow.com/questions/8584902/get-the-closest-number-out-of-an-array
             // also this https://stackoverflow.com/questions/36144406/how-to-early-break-reduce-method
             let robertPATTERNson = patterns.slice(count).reduce((lastPattern, currentPattern, index, arrayCopy) => {
+                // Shortcut! If we're past the position, exit out because we've found our value
+                if(currentPattern.start > roundedPos) {
+                    foundIndex = index - 1;
+                    arrayCopy.splice(0);
+                    return lastPattern;
+                }
                 return (Math.abs(currentPattern.start - roundedPos) < Math.abs(lastPattern.start - roundedPos) ? currentPattern : lastPattern);
             });
 
-            resolve(robertPATTERNson);
+            // We return the pattern found and it's index in the array
+            resolve([robertPATTERNson, foundIndex]);
         });
-    }
-
-    /**
-     * Whether or not the given object is of type Segment / Section
-     * @param data object to verify type
-     * @returns true if it's a Section / Segment, false if not
-     */
-    isSectionOrSegment(data: any): data is Section | Segment {
-        if((data as Section).measure || (data as Segment).measure) {
-            return true;
-        }
-        return false;
     }
 }

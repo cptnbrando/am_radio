@@ -78,4 +78,7 @@ window.onSpotifyWebPlaybackSDKReady = () => {
       console.log('The Web Playback SDK successfully connected to Spotify!');
     }
   });
+
+  // Add player to Window
+  window.spotifyPlayer = player;
 };

@@ -18,6 +18,15 @@ export class VisualizerComponent implements OnInit, OnChanges {
   analysis!: Analysis;
   features!: any;
 
+  // Keeping track of track progress for faster array parsing
+  beatIndex: number = 0;
+  barIndex: number = 0;
+  sectionIndex: number = 0;
+  sectionMeasures: Array<Bar> = [];
+  segmentIndex: number = 0;
+  segmentMeasures: Array<Bar> = [];
+  tatumIndex: number = 0;
+
   @ViewChild("visualizer", { static: true })
   canvas!: ElementRef<HTMLCanvasElement>;
   ctx!: CanvasRenderingContext2D;
@@ -34,21 +43,36 @@ export class VisualizerComponent implements OnInit, OnChanges {
     this.initCanvas();
   }
 
+  // Start and stop the visualizer based on changes to input values
   ngOnChanges(changes: any): void {
     console.log(changes);
-    if(changes.currentlyPlaying?.currentValue.name != "Nothing Playing" && changes.currentlyPlaying?.currentValue.id != changes.currentlyPlaying?.previousValue.id) {
-      this.setAudioData(changes.currentlyPlaying?.currentValue.id).then(() => {
-        if(this.isPlaying) {
-          this.beginVisualizer();
-        }
-      });
-    }
-
-    if(changes.isPlaying?.currentValue === false && !this.isLoading) {
+    // We never want the visualizer to be playing when nothing's playing
+    if(this.currentlyPlaying.name != "Nothing Playing") {
+      // If there's a new track playing, get and set the new analysis/features data
+      if(changes.currentlyPlaying?.currentValue.id != changes.currentlyPlaying?.previousValue.id) {
+        this.setAudioData(changes.currentlyPlaying?.currentValue.id).then(() => {
+          // If it's playing, start the visualizer
+          if(this.isPlaying) {
+            this.beginVisualizer();
+          }
+        });
+      }
+      // If isPlaying is changed to false, meaning the player was paused, stop the visualizer. Start it on true
+      if(changes.isPlaying?.currentValue === false && !this.isLoading) {
+        this.stopVisualizer();
+      }
+      else if(changes.isPlaying?.currentValue === true && !this.isLoading) {
+        this.beginVisualizer();
+      }
+      // If isLoading is changed to true, stop the visualizer. Start it if it's false
+      if(changes.isLoading?.currentValue === true) {
+        this.stopVisualizer();
+      }
+      else if(changes.isLoading?.currentValue === false) {
+        this.beginVisualizer();
+      }
+    } else {
       this.stopVisualizer();
-    }
-    else if(changes.isPlaying?.currentValue === true && !this.isLoading) {
-      this.beginVisualizer();
     }
   }
   
@@ -91,16 +115,21 @@ export class VisualizerComponent implements OnInit, OnChanges {
       data = this.editAudioObject(data);
     });
 
+    this.sectionMeasures = [];
     analysis.sections.map((data: Section) => {
       data.measure = this.editAudioObject(data.measure);
+      this.sectionMeasures.push(data.measure);
     });
+    // this.sectionMeasures = sectionMs;
 
+    this.segmentMeasures = [];
     analysis.segments.map((data: Segment) => {
       data.loudnessEnd = parseFloat(data.loudnessEnd.toFixed(3));
       data.loudnessMax = parseFloat(data.loudnessMax.toFixed(3));
       data.loudnessMaxTime = parseFloat(data.loudnessMaxTime.toFixed(3));
       data.loudnessStart = parseFloat(data.loudnessStart.toFixed(3));
       data.measure = this.editAudioObject(data.measure);
+      this.segmentMeasures.push(data.measure);
     });
 
     analysis.tatums.map((data: Tatum) => {
@@ -137,13 +166,9 @@ export class VisualizerComponent implements OnInit, OnChanges {
     if(this.frameKeep > 10) {
       this.ctx.clearRect(0, 0, this.ctx.canvas.clientWidth, this.ctx.canvas.clientHeight);
       this.frameKeep = 0;
+      this.drawPosition();
     }
     this.drawFrame();
-    this.ctx.beginPath();
-    this.ctx.strokeStyle = "white";
-    this.ctx.fillStyle = "white";
-    this.ctx.fillText(String((this.position / 1000).toFixed(0)), 0, 100);
-    this.ctx.closePath();
     this.animationLoopID = window.requestAnimationFrame(this.render.bind(this));
   }
 
@@ -153,20 +178,41 @@ export class VisualizerComponent implements OnInit, OnChanges {
    */
   drawFrame(): void {
     // We can get the exact current position every frame from the spotify sdk web player
+    let startTime = performance.now();
     (<any>window).spotifyPlayer.getCurrentState().then((data: any) => {
       this.position = data.position;
       let sketch = new Sketch(data.position, this.analysis);
-      sketch.setValues(this.analysis, this.position).then(() => {
-        sketch.paint(this.ctx, this.position);
+      let indexArray = [this.beatIndex, this.barIndex, this.sectionIndex, this.segmentIndex, this.tatumIndex];
+      sketch.setValues(indexArray, this.sectionMeasures, this.segmentMeasures).then(() => {
+        let timeTaken = performance.now() - startTime;
+        // We measure the time it takes to offset any slow measurements (2-3 ms delay to get position from player :/)
+        // Store the indexes so that subsequent array parsing can start right next to when the last one ended
+        this.beatIndex = sketch.beatIndex;
+        this.barIndex = sketch.barIndex;
+        this.tatumIndex = sketch.tatumIndex;
+        this.sectionIndex = sketch.sectionIndex;
+        this.segmentIndex = sketch.segmentIndex;
+        sketch.paint(this.ctx, this.position + timeTaken);
       });
     });
+  }
+
+  /**
+   * Draws the track position in the top left corner
+   */
+  drawPosition(): void {
+    this.ctx.beginPath();
+    this.ctx.strokeStyle = "white";
+    this.ctx.fillStyle = "white";
+    this.ctx.fillText(String((this.position / 1000).toFixed(0)), 0, 100);
+    this.ctx.closePath();
   }
 
   /**
    * Start the visualizer with requestAnimationFrame
    */
   beginVisualizer(): void {
-    if(!this.isAnimating) {
+    if(!this.isAnimating && this.analysis && this.features) {
       window.requestAnimationFrame(this.render.bind(this));
       this.isAnimating = true;
     }
