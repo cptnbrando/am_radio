@@ -151,35 +151,28 @@ public class SpotifyPlayerController {
      */
     @PutMapping(value = "/playTrack")
     public boolean playTrack(@RequestParam(name = "trackURI") String trackURI) throws SpotifyWebApiException {
-        System.out.println("-----PLAYTRACK()-----");
-        System.out.println("Trying to play: " + trackURI);
         try {
             AddItemToUsersPlaybackQueueRequest queue = this.spotifyApi.addItemToUsersPlaybackQueue(trackURI).build();
             SkipUsersPlaybackToNextTrackRequest skip = this.spotifyApi.skipUsersPlaybackToNextTrack().build();
             GetUsersCurrentlyPlayingTrackRequest now = this.spotifyApi.getUsersCurrentlyPlayingTrack().build();
 
-            System.out.println("init current: " + now.executeAsync().get().getItem().getUri());
             // Use Future to make the async
             // Add the track to the queue
             String queueReturn = queue.executeAsync().get();
-            System.out.println("1st queue: " + trackURI + " : " + queueReturn);
 
             // Delay...
             Thread.sleep(1300);
 
             // Skip to the next track
             String skipReturn = skip.executeAsync().get();
-            System.out.println("1st skip: " + skipReturn);
 
             // Get the CurrentlyPlaying track to check if it was successful
             CurrentlyPlaying current = now.executeAsync().get();
-            System.out.println("1st current: " + current.getItem().getUri());
 
             // We check current again in case it works and there's a dumb unpredictable delay
             if(!current.getItem().getUri().equals(trackURI)) {
                 Thread.sleep(1000);
                 current = now.executeAsync().get();
-                System.out.println("1st loop current: " + current.getItem().getUri());
                 if(current.getItem().getUri().equals(trackURI)) {
                     return true;
                 }
@@ -192,14 +185,8 @@ public class SpotifyPlayerController {
             while(!current.getItem().getUri().equals(trackURI)) {
                 // Skip to the next track and get the new current track
                 skip.executeAsync().get();
-                System.out.println("Loop skip");
-
-                // Delay...
-//                Thread.sleep(1000);
 
                 current = now.executeAsync().get();
-
-                System.out.println("Loop current: " + current.getItem().getUri());
 
                 if(current.getItem().getUri().equals(trackURI)) {
                     return true;
@@ -210,7 +197,6 @@ public class SpotifyPlayerController {
                 count++;
                 if(count > 3) {
                     queueReturn = queue.executeAsync().get();
-                    System.out.println("Loop queue add: " + queueReturn);
                     count = 0;
                     bigCount++;
                     // Delay...

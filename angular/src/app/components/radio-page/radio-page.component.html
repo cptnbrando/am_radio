@@ -1,21 +1,23 @@
 <div id="overlay">
-  <app-header [showControls]="showControls" (toggleBarEvent)="toggleBar($event)" [stationNum]="stationNum"
-    (changeStationEvent)="changeStation($event)" [isLoading]="isLoading" (toggleLoadingEvent)="toggleLoading($event)">
+  <app-header (click)="toggleNav(3)" [showControls]=" showControls" (toggleBarEvent)="toggleBar($event)"
+    [stationNum]="stationNum" (changeStationEvent)="changeStation($event)" [isLoading]="isLoading" 
+    (toggleLoadingEvent)="toggleLoading($event)">
   </app-header>
 
   <div id="settingsBars">
     <app-playlist-bar class="side setting" [showPlaylistBar]="showPlaylistBar" [selectedPlaylist]="selectedPlaylist"
       [selectedPlaylistTracks]="selectedPlaylistTracks" [userPlaylists]="userPlaylists"
       (changePlaylistEvent)="changePlaylist($event)" (playPlaylistEvent)="playPlaylist()"
-      (playTrackEvent)="playTrack($event)" (toggleLoadingEvent)="toggleLoading($event)"></app-playlist-bar>
-    <app-controls class="mid setting" [showControls]="showControls" [isLoading]="isLoading"></app-controls>
+      (playTrackEvent)="playTrack($event)" (toggleLoadingEvent)="toggleLoading($event)" (click)="toggleNav(0)"></app-playlist-bar>
+    <app-controls class="mid setting" [showControls]="showControls" [isLoading]="isLoading" (click)="toggleNav(1)">
+    </app-controls>
     <app-station-bar class="side setting" [stationNum]="stationNum" [showStationBar]="showStationBar"
       [currentStation]="currentStation" [selectedPlaylist]="selectedPlaylist"
       (createdStation)="onCreatedStation($event)"
-      [isLoading]="isLoading" (toggleLoadingEvent)="toggleLoading($event)"></app-station-bar>
+      [isLoading]="isLoading" (toggleLoadingEvent)="toggleLoading($event)" (click)="toggleNav(2)"></app-station-bar>
   </div>
 
-  <app-player id="appPlayer" [stationNum]="stationNum" [currentDevice]="currentDevice"
+  <app-player (click)="toggleNav(3)" id="appPlayer" [stationNum]="stationNum" [currentDevice]="currentDevice"
     [showPlaylistBar]="showPlaylistBar" [showStationBar]="showStationBar" [showControls]="showControls" (toggleBarEvent)="toggleBar($event)" [currentlyPlaying]="currentlyPlaying" [isPlaying]="isPlaying" [position]="position" [user]="user"
     [currentStation]="currentStation" [repeat]="repeat" [shuffle]="shuffle" [playingPlaylist]="playingPlaylist"
     (toggleLoadingEvent)="toggleLoading($event)" [isLoading]="isLoading" (volumeEvent)="changeVolume($event)"

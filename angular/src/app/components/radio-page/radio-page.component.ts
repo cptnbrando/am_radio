@@ -64,6 +64,7 @@ export class RadioPageComponent implements OnInit {
   // This is the canvas element
   // We update attributes of it to display changes to the player
   canvas: any;
+  showNav: boolean = true;
 
   public static accessToken: string = "";
 
@@ -173,11 +174,11 @@ export class RadioPageComponent implements OnInit {
         this.playingPlaylist = data;
         this.currentStation.stationName = data.name;
         this.changePlaylist(data);
-        this.changeVolume(currentVol);
       }
       
       // open controls panel, change volume back, and toggle loading
       this.toggleBar(2);
+      this.changeVolume(currentVol);
       this.toggleLoading(false);
     });
   }
@@ -445,6 +446,43 @@ export class RadioPageComponent implements OnInit {
   // Set the isLoading icon to spin or not
   toggleLoading(start: boolean): void {
     this.isLoading = start;
+  }
+
+  /**
+   * Toggle fullscreen for visualizer
+   * @param bar 0 for playlistBar, 1 for controlsBar, 2 for stationBar, 3 for header/player
+   * @returns nothing lol
+   */
+  toggleNav(bar: number): void {
+    if(this.isLoading) return;
+    if(this.showNav) {
+      switch(bar) {
+        case 0:
+          if(this.showPlaylistBar) return;
+          break;
+        case 1:
+          if(this.showControls) return;
+          break;
+        case 2:
+          if(this.showStationBar) return;
+          break;
+        case 3:
+          return;
+      }
+    }
+
+    let overlay = Array.from(document.getElementsByClassName("disappear") as HTMLCollectionOf<HTMLElement>);
+    if(this.showNav) {
+      overlay.forEach(element => {
+        element.style.visibility = "hidden"
+      });
+    } else {
+      overlay.forEach(element => {
+        element.style.visibility = "visible"
+      });
+    }
+    this.showNav = !this.showNav;
+    console.log(overlay);
   }
 
   @HostListener('window:unload', [ '$event' ])

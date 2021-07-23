@@ -2,6 +2,7 @@ import { ElementRef, Input, OnChanges, ViewChild } from '@angular/core';
 import { Component, OnInit } from '@angular/core';
 import { SpotifyService } from 'src/app/services/spotify.service';
 import { Sketch } from 'src/app/shared/models/sketch.model';
+import { Testing123 } from 'src/app/shared/models/sketches/testing123.sketch';
 import { Analysis, Bar, Beat, Section, Segment, Tatum } from 'src/app/shared/models/track.model';
 
 @Component({
@@ -34,6 +35,9 @@ export class VisualizerComponent implements OnInit, OnChanges {
   position: number;
   animationLoopID: any;
   isAnimating: boolean = false;
+
+  selectedSketch!: Sketch;
+  currentSketch!: Sketch;
 
   constructor(private spotifyService: SpotifyService) {
     this.position = 0;
@@ -166,7 +170,7 @@ export class VisualizerComponent implements OnInit, OnChanges {
     if(this.frameKeep > 10) {
       this.ctx.clearRect(0, 0, this.ctx.canvas.clientWidth, this.ctx.canvas.clientHeight);
       this.frameKeep = 0;
-      this.drawPosition();
+      this.drawInfo();
     }
     this.drawFrame();
     this.animationLoopID = window.requestAnimationFrame(this.render.bind(this));
@@ -181,7 +185,8 @@ export class VisualizerComponent implements OnInit, OnChanges {
     let startTime = performance.now();
     (<any>window).spotifyPlayer.getCurrentState().then((data: any) => {
       this.position = data.position;
-      let sketch = new Sketch(data.position, this.analysis);
+      let sketch = new Testing123(this.position, this.analysis);
+      this.currentSketch = sketch;
       let indexArray = [this.beatIndex, this.barIndex, this.sectionIndex, this.segmentIndex, this.tatumIndex];
       sketch.setValues(indexArray, this.sectionMeasures, this.segmentMeasures).then(() => {
         let timeTaken = performance.now() - startTime;
@@ -198,13 +203,19 @@ export class VisualizerComponent implements OnInit, OnChanges {
   }
 
   /**
-   * Draws the track position in the top left corner
+   * Draws the selected sketch's info
    */
-  drawPosition(): void {
+  drawInfo(): void {
     this.ctx.beginPath();
     this.ctx.strokeStyle = "white";
     this.ctx.fillStyle = "white";
-    this.ctx.fillText(String((this.position / 1000).toFixed(0)), 0, 100);
+    this.ctx.font = '15px Source Code Pro';
+    // Sketch info
+    this.ctx.fillText(`Sketch: ${this.selectedSketch.name}`, 20, 35);
+    this.ctx.fillText(`Created By: ${this.selectedSketch.creator}`, 20, 65);
+    // Track info
+    this.ctx.fillText(`Now Playing: ${this.currentlyPlaying.name}`, 20, this.ctx.canvas.height - 65);
+    this.ctx.fillText(`By: ${this.currentlyPlaying.artists[0].name}`, 20, this.ctx.canvas.height - 35);
     this.ctx.closePath();
   }
 
@@ -213,6 +224,7 @@ export class VisualizerComponent implements OnInit, OnChanges {
    */
   beginVisualizer(): void {
     if(!this.isAnimating && this.analysis && this.features) {
+      this.selectedSketch = new Testing123(this.position, this.analysis);
       window.requestAnimationFrame(this.render.bind(this));
       this.isAnimating = true;
     }

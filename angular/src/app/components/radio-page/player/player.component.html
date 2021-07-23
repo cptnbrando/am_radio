@@ -1,5 +1,6 @@
-<app-seeker [currentlyPlaying]="currentlyPlaying" [isPlaying]="isPlaying" [position]="position" [isLoading]="isLoading" [stationNum]="stationNum" [currentStation]="currentStation"></app-seeker>
-<div id="player">
+<app-seeker class="disappear" [currentlyPlaying]="currentlyPlaying" [isPlaying]="isPlaying" [position]="position"
+  [isLoading]="isLoading" [stationNum]="stationNum" [currentStation]="currentStation"></app-seeker>
+<div id="player" class="disappear">
     <div id="currentDiv" class="playerItem row">
         <div id="currentImage" class="album column clickable" (click)="toggleBar(0)">
             <img [src]="currentlyPlaying.album.images[0].url" alt="image">
