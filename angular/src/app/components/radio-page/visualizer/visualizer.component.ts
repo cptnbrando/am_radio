@@ -2,6 +2,7 @@ import { ElementRef, Input, OnChanges, ViewChild } from '@angular/core';
 import { Component, OnInit } from '@angular/core';
 import { SpotifyService } from 'src/app/services/spotify.service';
 import { Sketch } from 'src/app/shared/models/sketch.model';
+import { Adventure } from 'src/app/shared/models/sketches/adventure.sketch';
 import { Testing123 } from 'src/app/shared/models/sketches/testing123.sketch';
 import { Analysis, Bar, Beat, Section, Segment, Tatum } from 'src/app/shared/models/track.model';
 
@@ -49,7 +50,7 @@ export class VisualizerComponent implements OnInit, OnChanges {
 
   // Start and stop the visualizer based on changes to input values
   ngOnChanges(changes: any): void {
-    console.log(changes);
+    // console.log(changes);
     // We never want the visualizer to be playing when nothing's playing
     if(this.currentlyPlaying.name != "Nothing Playing") {
       // If there's a new track playing, get and set the new analysis/features data
@@ -72,7 +73,7 @@ export class VisualizerComponent implements OnInit, OnChanges {
       if(changes.isLoading?.currentValue === true) {
         this.stopVisualizer();
       }
-      else if(changes.isLoading?.currentValue === false) {
+      else if(changes.isLoading?.currentValue === false && this.isPlaying) {
         this.beginVisualizer();
       }
     } else {
@@ -88,11 +89,11 @@ export class VisualizerComponent implements OnInit, OnChanges {
   setAudioData(trackID: string): any {
     return new Promise((resolve, reject) => {
       this.spotifyService.getAudioFeatures(trackID).subscribe(data => {
-        console.log("FEATURES", data);
+        // console.log("FEATURES", data);
         this.features = data;
         this.spotifyService.getAudioAnalysis(trackID).subscribe((data: Analysis) => {
           this.analysis = this.editAnalysisData(data);
-          console.log("ANALYSIS", this.analysis);
+          // console.log("ANALYSIS", this.analysis);
           resolve(data);
         }, error => {
           reject(error);
@@ -185,7 +186,7 @@ export class VisualizerComponent implements OnInit, OnChanges {
     let startTime = performance.now();
     (<any>window).spotifyPlayer.getCurrentState().then((data: any) => {
       this.position = data.position;
-      let sketch = new Testing123(this.position, this.analysis);
+      let sketch = new Adventure(this.position, this.analysis);
       this.currentSketch = sketch;
       let indexArray = [this.beatIndex, this.barIndex, this.sectionIndex, this.segmentIndex, this.tatumIndex];
       sketch.setValues(indexArray, this.sectionMeasures, this.segmentMeasures).then(() => {
@@ -224,7 +225,8 @@ export class VisualizerComponent implements OnInit, OnChanges {
    */
   beginVisualizer(): void {
     if(!this.isAnimating && this.analysis && this.features) {
-      this.selectedSketch = new Testing123(this.position, this.analysis);
+      this.selectedSketch = new Adventure(this.position, this.analysis);
+      this.frameKeep = this.selectedSketch.rate;
       window.requestAnimationFrame(this.render.bind(this));
       this.isAnimating = true;
     }

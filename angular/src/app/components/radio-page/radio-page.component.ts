@@ -123,12 +123,16 @@ export class RadioPageComponent implements OnInit {
   }
 
   // Get the user's current device and set it to the currentDevice variable
-  getCurrentDevice(): void {
-    this.playerService.getCurrentDevice().subscribe(data => {
-      if(data) {
-        this.currentDevice = data;
-        this.isPlaying = this.currentDevice.is_playing;
-      }
+  getCurrentDevice(): Promise<any> {
+    return new Promise((resolve, reject) => {
+      this.playerService.getCurrentDevice().subscribe(data => {
+        if(data) {
+          this.currentDevice = data;
+        }
+        resolve(data);
+      }, error => {
+        reject(error);
+      });
     });
   }
 
@@ -138,23 +142,26 @@ export class RadioPageComponent implements OnInit {
     this.playerReady = event.returnValue;
 
     // get current device and playback information
-    this.getCurrentDevice();
-    
-    // Once the radio player is ready, we should prompt the user to swap to the new player
-    // ...or we could change it automatically if there's nothing playing rn
-    if(this.isPlaying) {
-      // Device toggling done via Station Bar
-      this.setPlayerData();
-    }
-    else {
+    this.setPlayerData().then(data => {
+      // Once the radio player is ready, we should prompt the user to swap to the new player
+      // ...or we could change it automatically if there's nothing playing rn
+      if((data != null && data!.is_playing === true && data!.device!.is_active)) {
+        // Device toggling done via Station Bar
+        return;
+      }
+
       // If nothing is playing, we set am_radio as the active device, then attempt to play the most recently played track
+      // Also open the controls panel
       this.playerService.setAMRadio().subscribe(data => {
         if(data) {
           this.currentDevice = data;
           this.beginAMRadio();
+          if(!this.showControls) {
+            this.toggleBar(2);
+          }
         }
       });
-    }
+    });
   }
 
   // Man... hour 5:48:50 - 5:48:54 on Fireplace 10 hours full hd is nutty
@@ -170,14 +177,13 @@ export class RadioPageComponent implements OnInit {
     // Attempt to play a random playlist on am_radio
     this.playerService.startAMRadio().subscribe(data => {
       if(data) {
-        console.log("startAMRadio success!");
+        // console.log("startAMRadio success!");
         this.playingPlaylist = data;
         this.currentStation.stationName = data.name;
         this.changePlaylist(data);
       }
       
-      // open controls panel, change volume back, and toggle loading
-      this.toggleBar(2);
+      // Change volume back, and toggle loading
       this.changeVolume(currentVol);
       this.toggleLoading(false);
     });
@@ -248,17 +254,22 @@ export class RadioPageComponent implements OnInit {
   }
 
   // This will get the current player and set the data to the UI
-  setPlayerData(): void {
-    console.log("setPlayerData!");
-    this.playerService.getPlayer().subscribe(data => {
-      if(data) {
-        // Set the data
-        this.position = data.progress_ms;
-        this.currentlyPlaying = data.item;
-        this.currentURI = data.item.uri;
-        this.currentDevice = data.device;
-      }
-    });
+  setPlayerData(): Promise<any> {
+    return new Promise((resolve, reject) => {
+      this.playerService.getPlayer().subscribe(data => {
+        if(data) {
+          // Set the data
+          this.position = data.progress_ms;
+          this.currentlyPlaying = data.item;
+          this.currentURI = data.item.uri;
+          this.currentDevice = data.device;
+          this.isPlaying = data.is_playing;
+        }
+        resolve(data);
+      }, error => {
+        reject(error);
+      });
+    })
   }
 
   /**

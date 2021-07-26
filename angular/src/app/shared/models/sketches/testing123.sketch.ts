@@ -9,6 +9,7 @@ import { Analysis, Bar, Beat, Tatum } from "../track.model";
 export class Testing123 extends Time implements Sketch {
     name: string = "testing_testing_123";
     creator: string = "Captain Brando!";
+    rate: number = 10;
     constructor(position: number, analysis: Analysis) {
         super(position, analysis);
     }

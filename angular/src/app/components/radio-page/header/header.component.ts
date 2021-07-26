@@ -124,8 +124,10 @@ export class HeaderComponent implements OnInit, OnChanges {
     if(this.stationNum > 0) {
       this.radioService.leaveStation(this.stationNum).subscribe();
     }
-    localStorage.clear();
-    window.location.replace(AppComponent.webURL);
+    setTimeout(() => {
+      localStorage.clear();
+      window.location.replace(AppComponent.webURL);
+    }, 1000);
   }
 
   // Listens for keyboard events to control the player

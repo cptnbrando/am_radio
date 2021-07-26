@@ -27,6 +27,8 @@ import { ChatComponent } from './components/radio-page/controls/chat/chat.compon
 import { AppSettingsComponent } from './components/radio-page/controls/app-settings/app-settings.component';
 import { VisualizerSettingsComponent } from './components/radio-page/controls/visualizer-settings/visualizer-settings.component';
 import { AboutComponent } from './components/radio-page/controls/about/about.component';
+import { StationsComponent } from './components/radio-page/controls/stations/stations.component';
+import { NgParticlesModule } from 'ng-particles';
 
 @NgModule({
   declarations: [
@@ -44,7 +46,8 @@ import { AboutComponent } from './components/radio-page/controls/about/about.com
     ChatComponent,
     VisualizerSettingsComponent,
     AppSettingsComponent,
-    AboutComponent
+    AboutComponent,
+    StationsComponent
   ],
   imports: [
     BrowserModule,
@@ -55,7 +58,8 @@ import { AboutComponent } from './components/radio-page/controls/about/about.com
     FormsModule,
     BrowserAnimationsModule,
     MatSliderModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    NgParticlesModule
   ],
   providers: [
     {

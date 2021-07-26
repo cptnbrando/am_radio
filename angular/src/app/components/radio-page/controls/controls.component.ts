@@ -1,4 +1,6 @@
 import { AfterViewChecked, AfterViewInit, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { AppComponent } from 'src/app/app.component';
+import { RadioService } from 'src/app/services/radio.service';
 import { SocketService } from 'src/app/services/socket.service';
 
 @Component({
@@ -11,9 +13,11 @@ export class ControlsComponent implements OnInit, AfterViewChecked {
   @Input() showControls: boolean = false;
   selected: number = 0;
 
+  @Input() stationNum: number = 0;
+
   @Input() isLoading: boolean = true;
 
-  constructor(public socketService: SocketService) { }
+  constructor(public socketService: SocketService, public radioService: RadioService) { }
 
   ngOnInit(): void {
   }
@@ -39,6 +43,17 @@ export class ControlsComponent implements OnInit, AfterViewChecked {
     let tab = document.getElementById(`tab${select}`);
     tab?.classList.add("selected");
     this.selected = select;
+  }
+
+  // Logout from am_radio
+  logout(): any {
+    if(this.stationNum > 0) {
+      this.radioService.leaveStation(this.stationNum).subscribe();
+    }
+    setTimeout(() => {
+      localStorage.clear();
+      window.location.replace(AppComponent.webURL);
+    }, 1000);
   }
 
 }

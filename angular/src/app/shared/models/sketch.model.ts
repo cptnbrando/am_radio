@@ -11,6 +11,9 @@ export interface Sketch extends Time {
     // Name of sketch creator
     creator: string;
 
+    // Framerate of sketch
+    rate: number;
+
     /**
      * Paint our sketch, takes a position to be more accurate
      * @param ctx context to draw with

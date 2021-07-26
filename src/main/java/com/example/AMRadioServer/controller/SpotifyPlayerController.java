@@ -375,8 +375,8 @@ public class SpotifyPlayerController {
             return true;
         }
         catch (InterruptedException | ExecutionException e) {
-            System.out.println("Exception caught in player/seek");
-            System.out.println(e.getMessage());
+//            System.out.println("Exception caught in player/seek");
+//            System.out.println(e.getMessage());
             return false;
         }
     }

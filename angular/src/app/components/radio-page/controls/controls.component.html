@@ -5,10 +5,12 @@
                 <div class="tabGroup">
                     <div (click)="tabClick(3)" class="clickable tab" id="tab3">Visualizer</div>
                     <div (click)="tabClick(2)" class="clickable tab" id="tab2">Chat</div>
+                    <div (click)="tabClick(4)" class="clickable tab" id="tab4">Stations</div>
                 </div>
                 <div class="tabGroup" id="tabGroup2">
                     <div (click)="tabClick(1)" class="clickable tab" id="tab1">Settings</div>
                     <div (click)="tabClick(0)" class="clickable tab" id="tab0">About</div>
+                    <div (click)="logout()" class="clickable tab" id="tab5">Logout</div>
                 </div>
             </div>
             <div id="controlsPanel">
@@ -16,6 +18,7 @@
                 <app-settings *ngIf="selected === 1"></app-settings>
                 <chat *ngIf="selected === 2" [isLoading]="isLoading"></chat>
                 <visualizer-settings *ngIf="selected === 3"></visualizer-settings>
+                <stations-panel *ngIf="selected === 4"></stations-panel>
             </div>
         </div>
     </div>
