@@ -8,7 +8,8 @@
     <app-playlist-bar class="side setting" [showPlaylistBar]="showPlaylistBar" [selectedPlaylist]="selectedPlaylist"
       [selectedPlaylistTracks]="selectedPlaylistTracks" [userPlaylists]="userPlaylists"
       (changePlaylistEvent)="changePlaylist($event)" (playPlaylistEvent)="playPlaylist()"
-      (playTrackEvent)="playTrack($event)" (toggleLoadingEvent)="toggleLoading($event)" (click)="toggleNav(0)"></app-playlist-bar>
+      (playTrackEvent)="playTrack($event)" (toggleLoadingEvent)="toggleLoading($event)" (click)="toggleNav(0)"
+      [isLoading]="isLoading"></app-playlist-bar>
     <app-controls class="mid setting" [showControls]="showControls" [isLoading]="isLoading" (click)="toggleNav(1)">
     </app-controls>
     <app-station-bar class="side setting" [stationNum]="stationNum" [showStationBar]="showStationBar"

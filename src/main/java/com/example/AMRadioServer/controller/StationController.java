@@ -136,12 +136,15 @@ public class StationController extends SpotifyPlayerController {
      * @param stationID Station to sync to
      */
     @GetMapping(value = "/{stationID}/sync")
-    public void sync(@PathVariable("stationID") int stationID) throws SpotifyWebApiException {
+    public void sync(@PathVariable("stationID") int stationID) throws SpotifyWebApiException, InterruptedException {
         // Get the station
         Station station = this.stationService.getStation(stationID);
 
         // Play the currently playing track
         if(this.playTrack(station.getCurrentURI())) {
+            // Wait a second...
+            Thread.sleep(1000);
+
             // Seek current to the right time
             this.seek((int) (System.currentTimeMillis() - station.getPlayTime()));
 

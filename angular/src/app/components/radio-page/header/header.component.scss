@@ -5,6 +5,11 @@
     border-bottom: solid;
     background-color: white;
 
+    #scrollbar {
+        flex: auto;
+        height: 60px;
+    }
+
     #loadingNumbers {
         display: flex;
         align-items: center;

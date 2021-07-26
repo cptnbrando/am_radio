@@ -16,6 +16,8 @@ export class PlaylistBarComponent implements OnInit {
   @Input() user : any;
   @Input() userPlaylists: any[] = [];
 
+  @Input() isLoading: boolean = false;
+
   @Input() selectedPlaylist: any = null;
   @Input() selectedPlaylistTracks: any = null;
   @Output() changePlaylistEvent = new EventEmitter<any>();
@@ -30,26 +32,29 @@ export class PlaylistBarComponent implements OnInit {
   ngOnInit(): void {
   }
 
-  clickPlaylist(playlist: any): void{
-    // this.toggleLoadingEvent.emit(true);
+  clickPlaylist(playlist: any): void {
     if(playlist != this.selectedPlaylist) {
       this.changePlaylistEvent.emit(playlist);
     }
   }
 
-  back(): void{
+  back(): void {
     this.changePlaylistEvent.emit(null);
     this.selectedPlaylistTracks = null;
   }
 
-  playTrack(track: any): void {
-    // this.toggleLoadingEvent.emit(true);
-    this.playTrackEvent.emit(track);
+  playTrack(event: any, track: any): void {
+    if(!this.isLoading) {
+      let element = event.srcElement || event.target;
+      element.style.borderColor = "red";
+      this.playTrackEvent.emit([track, element]);
+    }
   }
 
   playPlaylist(): void {
-    // this.toggleLoadingEvent.emit(true);
-    this.playPlaylistEvent.emit();
+    if(!this.isLoading) {
+      this.playPlaylistEvent.emit();
+    }
   }
 
 }

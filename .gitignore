@@ -49,3 +49,9 @@ gradle.properties
 
 *.keystore
 *.p12
+!**/src/main/**/resources
+src/main/resources
+!**/src/main/**/resources/static
+!**/src/main/**/resources/static/
+src/main/resources/static/
+src/main/resources/

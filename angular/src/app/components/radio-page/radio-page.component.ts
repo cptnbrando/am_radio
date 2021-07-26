@@ -383,14 +383,16 @@ export class RadioPageComponent implements OnInit {
   }
 
   // Play a track on am_radio 000
+  // track is actually an array: [track, element]
   playTrack(track: any) {
     this.toggleLoading(true);
     if(this.stationNum != 0) {
       this.changeStation(0);
     }
 
-    this.playerService.playTrack(track.track.uri).subscribe(data => {
+    this.playerService.playTrack(track[0].track.uri).subscribe(data => {
       this.toggleLoading(false);
+      track[1].style.borderColor = "white";
     });
   }
 
