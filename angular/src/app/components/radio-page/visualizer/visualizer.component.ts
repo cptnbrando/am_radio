@@ -162,18 +162,23 @@ export class VisualizerComponent implements OnInit, OnChanges {
   }
 
   frameKeep = 0;
+  frameRate = 10;
+  barKeep = 0;
 
   /**
    * Game loop to render sketches
    */
   render(): void {
     this.frameKeep++;
-    if(this.frameKeep > 10) {
+    if(this.frameKeep > this.frameRate) {
+    }
+    this.drawFrame();
+    if(this.barIndex > this.barKeep && this.barIndex != 0) {
       this.ctx.clearRect(0, 0, this.ctx.canvas.clientWidth, this.ctx.canvas.clientHeight);
       this.frameKeep = 0;
       this.drawInfo();
+      this.barKeep = this.barIndex;
     }
-    this.drawFrame();
     this.animationLoopID = window.requestAnimationFrame(this.render.bind(this));
   }
 
@@ -225,8 +230,10 @@ export class VisualizerComponent implements OnInit, OnChanges {
    */
   beginVisualizer(): void {
     if(!this.isAnimating && this.analysis && this.features) {
+      this.ctx.clearRect(0, 0, this.ctx.canvas.clientWidth, this.ctx.canvas.clientHeight);
       this.selectedSketch = new Adventure(this.position, this.analysis);
-      this.frameKeep = this.selectedSketch.rate;
+      this.frameRate = this.selectedSketch.rate;
+      this.barKeep = this.selectedSketch.barIndex;
       window.requestAnimationFrame(this.render.bind(this));
       this.isAnimating = true;
     }

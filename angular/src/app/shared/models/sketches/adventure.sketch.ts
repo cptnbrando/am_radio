@@ -6,7 +6,7 @@ import { Analysis, Bar, Beat, Tatum } from "../track.model";
 export class Adventure extends Time implements Sketch {
     name: string = "adventure...!";
     creator: string = "Captain Brando!";
-    rate: number = 5;
+    rate: number = 2;
     constructor(position: number, analysis: Analysis) {
         super(position, analysis);
     }
@@ -17,11 +17,16 @@ export class Adventure extends Time implements Sketch {
         ctx.strokeStyle = color;
         ctx.fillStyle = color;
         ctx.lineWidth = 7;
-        let circleX = this.getX(ctx, position, this.bar);
-        let circleY = ctx.canvas.height / 2;
+        let posX = this.getX(ctx, position, this.bar);
+        let posY = ctx.canvas.height / 2;
         let confidence = this.getConfidence(position, this.tatum);
-        let radius = Math.abs(confidence * 750);
-        ctx.arc(circleX, circleY, radius, 0, 2 * Math.PI);
+        ctx.moveTo(posX, posY);
+        ctx.lineTo(posX, posY - Math.abs(confidence * 750));
+        ctx.moveTo(posX, posY);
+        ctx.lineTo(posX, posY + Math.abs(confidence * 750));
+        // let radius = Math.abs(confidence * 750);
+        // ctx.arc(circleX, circleY, radius, 0, 2 * Math.PI);
+
         ctx.stroke();
         ctx.closePath();
     }
