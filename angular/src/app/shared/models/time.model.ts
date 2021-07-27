@@ -35,30 +35,36 @@ export class Time {
      */
     setValues(indexArray: Array<number>, sectionMeasures: Array<Bar>, segmentMeasures: Array<Bar>): any {
         return new Promise((resolve) => {
+            let startTime = performance.now();
+            let timeTaken = performance.now() - startTime;
             // Find the beat
-            this.find(this.analysis.beats, indexArray[0]).then(data => {
+            this.find(this.analysis.beats, this.position + timeTaken, indexArray[0]).then(data => {
                 this.beat = data[0];
-                this.beatIndex = data[1];
+                if(this.beatIndex < data[1]) this.beatIndex = data[1];
             });
+            timeTaken = performance.now() - startTime;
             // Find the bar
-            this.find(this.analysis.bars, indexArray[1]).then(data => {
+            this.find(this.analysis.bars, this.position + timeTaken, indexArray[1]).then(data => {
                 this.bar = data[0];
-                this.barIndex = data[1];
+                if(this.barIndex < data[1]) this.barIndex = data[1];
             });
+            timeTaken = performance.now() - startTime;
             // Find the tatum
-            this.find(this.analysis.tatums, indexArray[4]).then(data => {
+            this.find(this.analysis.tatums, this.position + timeTaken, indexArray[4]).then(data => {
                 this.tatum = data[0];
-                this.tatumIndex = data[1];
+                if(this.tatumIndex < data[1]) this.tatumIndex = data[1];
             });
+            timeTaken = performance.now() - startTime;
             // Find the section
-            this.find(sectionMeasures, indexArray[2]).then(data => {
-                this.sectionIndex = data[1];
+            this.find(sectionMeasures, this.position + timeTaken, indexArray[2]).then(data => {
                 this.section = this.analysis.sections[data[1]];
+                if(this.sectionIndex < data[1]) this.sectionIndex = data[1];
             });
+            timeTaken = performance.now() - startTime;
             // Find the segment
-            this.find(segmentMeasures, indexArray[2]).then(data => {
-                this.segmentIndex = data[1];
+            this.find(segmentMeasures, this.position + timeTaken, indexArray[2]).then(data => {
                 this.segment = this.analysis.segments[data[1]];
+                if(this.segmentIndex < data[1]) this.segmentIndex = data[1];
             });
             
             resolve(true);
@@ -71,11 +77,11 @@ export class Time {
      * @param position The current position
      * @returns Promise for a found beat / bar / tatum
      */
-    find(patterns: Array<Beat | Bar | Tatum>, start?: number): Promise<[(Beat | Bar | Tatum), number]>  {
+    find(patterns: Array<Beat | Bar | Tatum>, position: number, start?: number): Promise<[(Beat | Bar | Tatum), number]>  {
         return new Promise((resolve) => {
-            let roundedPos: number = parseFloat((this.position / 1000).toFixed(3));
-            let count = (start) ? start : 0;
-            let foundIndex = 0;
+            let roundedPos: number = parseFloat((position / 1000).toFixed(3));
+            let count = (start && start > 5) ? (start - 3) : 0;
+            let foundIndex = (start) ? start : 0;
             // MASSIVE SHOUTOUT TO THIS ON GOD https://stackoverflow.com/questions/8584902/get-the-closest-number-out-of-an-array
             // also this https://stackoverflow.com/questions/36144406/how-to-early-break-reduce-method
             let robertPATTERNson = patterns.slice(count).reduce((lastPattern, currentPattern, index, arrayCopy) => {
@@ -92,4 +98,22 @@ export class Time {
             resolve([robertPATTERNson, foundIndex]);
         });
     }
+
+    roundPos(pos: number): number {
+        return parseFloat((pos / 1000).toFixed(3));
+    }
+
+    // drawInfo(ctx: CanvasRenderingContext2D, selectedSketch: Sketch, currentlyPlaying: any): void {
+    //     ctx.beginPath();
+    //     ctx.strokeStyle = "white";
+    //     ctx.fillStyle = "white";
+    //     ctx.font = '15px Source Code Pro';
+    //     // Sketch info
+    //     ctx.fillText(`Sketch: ${selectedSketch.name}`, 20, 35);
+    //     ctx.fillText(`Created By: ${selectedSketch.creator}`, 20, 65);
+    //     // Track info
+    //     ctx.fillText(`Now Playing: ${currentlyPlaying.name}`, 20, ctx.canvas.height - 65);
+    //     ctx.fillText(`By: ${currentlyPlaying.artists[0].name}`, 20, ctx.canvas.height - 35);
+    //     ctx.closePath();
+    // }
 }

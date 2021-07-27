@@ -55,6 +55,7 @@ export class VisualizerComponent implements OnInit, OnChanges {
     if(this.currentlyPlaying.name != "Nothing Playing") {
       // If there's a new track playing, get and set the new analysis/features data
       if(changes.currentlyPlaying?.currentValue.id != changes.currentlyPlaying?.previousValue.id) {
+        this.stopVisualizer();
         this.setAudioData(changes.currentlyPlaying?.currentValue.id).then(() => {
           // If it's playing, start the visualizer
           if(this.isPlaying) {
@@ -161,24 +162,11 @@ export class VisualizerComponent implements OnInit, OnChanges {
     this.resizeCanvas();
   }
 
-  frameKeep = 0;
-  frameRate = 10;
-  barKeep = 0;
-
   /**
    * Game loop to render sketches
    */
   render(): void {
-    this.frameKeep++;
-    if(this.frameKeep > this.frameRate) {
-    }
     this.drawFrame();
-    if(this.barIndex > this.barKeep && this.barIndex != 0) {
-      this.ctx.clearRect(0, 0, this.ctx.canvas.clientWidth, this.ctx.canvas.clientHeight);
-      this.frameKeep = 0;
-      this.drawInfo();
-      this.barKeep = this.barIndex;
-    }
     this.animationLoopID = window.requestAnimationFrame(this.render.bind(this));
   }
 
@@ -190,20 +178,27 @@ export class VisualizerComponent implements OnInit, OnChanges {
     // We can get the exact current position every frame from the spotify sdk web player
     let startTime = performance.now();
     (<any>window).spotifyPlayer.getCurrentState().then((data: any) => {
-      this.position = data.position;
+      if(!data) {
+        this.stopVisualizer();
+        return;
+      }
+      let timeTaken = performance.now() - startTime;
+      this.position = data.position + timeTaken;
       let sketch = new Adventure(this.position, this.analysis);
       this.currentSketch = sketch;
       let indexArray = [this.beatIndex, this.barIndex, this.sectionIndex, this.segmentIndex, this.tatumIndex];
       sketch.setValues(indexArray, this.sectionMeasures, this.segmentMeasures).then(() => {
-        let timeTaken = performance.now() - startTime;
         // We measure the time it takes to offset any slow measurements (2-3 ms delay to get position from player :/)
         // Store the indexes so that subsequent array parsing can start right next to when the last one ended
-        this.beatIndex = sketch.beatIndex;
-        this.barIndex = sketch.barIndex;
-        this.tatumIndex = sketch.tatumIndex;
-        this.sectionIndex = sketch.sectionIndex;
-        this.segmentIndex = sketch.segmentIndex;
-        sketch.paint(this.ctx, this.position + timeTaken);
+        this.beatIndex = sketch.beatIndex!;
+        this.barIndex = sketch.barIndex!;
+        this.tatumIndex = sketch.tatumIndex!;
+        this.sectionIndex = sketch.sectionIndex!;
+        this.segmentIndex = sketch.segmentIndex!;
+        timeTaken = performance.now() - startTime;
+        sketch.loop(this.ctx, this.position + timeTaken).then(data => {
+          this.drawInfo();
+        });
       });
     });
   }
@@ -232,8 +227,6 @@ export class VisualizerComponent implements OnInit, OnChanges {
     if(!this.isAnimating && this.analysis && this.features) {
       this.ctx.clearRect(0, 0, this.ctx.canvas.clientWidth, this.ctx.canvas.clientHeight);
       this.selectedSketch = new Adventure(this.position, this.analysis);
-      this.frameRate = this.selectedSketch.rate;
-      this.barKeep = this.selectedSketch.barIndex;
       window.requestAnimationFrame(this.render.bind(this));
       this.isAnimating = true;
     }
@@ -244,6 +237,7 @@ export class VisualizerComponent implements OnInit, OnChanges {
    */
   stopVisualizer(): void {
     window.cancelAnimationFrame(this.animationLoopID);
+    if(this.selectedSketch && this.selectedSketch!.name) this.selectedSketch.reset();
     this.isAnimating = false;
   }
 }

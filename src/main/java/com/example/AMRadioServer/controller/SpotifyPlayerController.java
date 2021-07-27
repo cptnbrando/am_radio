@@ -273,24 +273,26 @@ public class SpotifyPlayerController {
     @GetMapping(value = "/setAMRadio")
     public Device setAMRadio() throws SpotifyWebApiException {
         try {
+            Thread.sleep(500);
             // First get all the devices and find am_radio
             Device[] myDevices = this.spotifyApi.getUsersAvailableDevices().build().executeAsync().get();
             for(Device device: myDevices) {
+                System.out.println(device.getName() + " : " + device.getId());
                 if(device.getName().equals("am_radio")) {
                     //Create a JSONArray and add the ID, then transfer playback
                     JsonArray deviceArray = new JsonArray();
                     deviceArray.add(device.getId());
-                    this.spotifyApi.transferUsersPlayback(deviceArray).build().execute();
+                    this.spotifyApi.transferUsersPlayback(deviceArray).build().executeAsync().get();
                     return device;
                 }
             }
-        } catch (IOException | ParseException | ExecutionException | InterruptedException e) {
+            Thread.sleep(500);
+            return setAMRadio();
+        } catch (InterruptedException | ExecutionException e) {
             System.out.println("Exception caught in getAMRadio");
             System.out.println(e.getMessage());
             return null;
         }
-
-        return null;
     }
 
     /**
@@ -319,7 +321,7 @@ public class SpotifyPlayerController {
         }
         catch (IOException | ParseException | InterruptedException | ExecutionException e)
         {
-            System.out.println("Exception caught in player/seek");
+            System.out.println("Exception caught in player/startAMRadio");
             System.out.println(e.getMessage());
             return null;
         }
@@ -375,8 +377,8 @@ public class SpotifyPlayerController {
             return true;
         }
         catch (InterruptedException | ExecutionException e) {
-//            System.out.println("Exception caught in player/seek");
-//            System.out.println(e.getMessage());
+            System.out.println("Exception caught in player/seek");
+            System.out.println(e.getMessage());
             return false;
         }
     }

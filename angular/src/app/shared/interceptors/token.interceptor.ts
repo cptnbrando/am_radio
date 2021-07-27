@@ -1,6 +1,7 @@
 import { HttpRequest, HttpHandler, HttpEvent, HttpInterceptor } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, throwError, timer } from 'rxjs';
+import { delay, delayWhen, retry, retryWhen, tap } from 'rxjs/operators';
 
 @Injectable()
 export class TokenInterceptor implements HttpInterceptor 
@@ -17,6 +18,9 @@ export class TokenInterceptor implements HttpInterceptor
       withCredentials: true
     });
     
-    return next.handle(request);
+    return next.handle(request).pipe(
+      retry(3),
+      delay(500)
+    );
   }
 }

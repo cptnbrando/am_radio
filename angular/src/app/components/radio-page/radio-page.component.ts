@@ -129,6 +129,7 @@ export class RadioPageComponent implements OnInit {
         if(data) {
           this.currentDevice = data;
         }
+        console.log(data);
         resolve(data);
       }, error => {
         reject(error);
@@ -145,14 +146,16 @@ export class RadioPageComponent implements OnInit {
     this.setPlayerData().then(data => {
       // Once the radio player is ready, we should prompt the user to swap to the new player
       // ...or we could change it automatically if there's nothing playing rn
-      if((data != null && data!.is_playing === true && data!.device!.is_active)) {
+      if(data != null) {
         // Device toggling done via Station Bar
+        console.log(data);
         return;
       }
 
       // If nothing is playing, we set am_radio as the active device, then attempt to play the most recently played track
       // Also open the controls panel
       this.playerService.setAMRadio().subscribe(data => {
+        console.log("setAMRadio", data);
         if(data) {
           this.currentDevice = data;
           this.beginAMRadio();
@@ -495,7 +498,6 @@ export class RadioPageComponent implements OnInit {
       });
     }
     this.showNav = !this.showNav;
-    console.log(overlay);
   }
 
   @HostListener('window:unload', [ '$event' ])

@@ -11,13 +11,20 @@ export interface Sketch extends Time {
     // Name of sketch creator
     creator: string;
 
-    // Framerate of sketch
-    rate: number;
-
     /**
      * Paint our sketch, takes a position to be more accurate
      * @param ctx context to draw with
      * @param position the current position
      */
-    paint(ctx: CanvasRenderingContext2D, position: number): void 
+    paint(ctx: CanvasRenderingContext2D, position: number): void;
+
+    /**
+     * This will be called in the render loop
+     * It should call paint and clear the canvas when it needs to
+     * @param ctx context to loop draw on
+     * @param position the current position
+     */
+    loop(ctx: CanvasRenderingContext2D, position: number): Promise<any>;
+
+    reset(): void;
 }

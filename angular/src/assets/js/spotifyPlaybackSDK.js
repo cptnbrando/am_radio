@@ -22,43 +22,47 @@ window.onSpotifyWebPlaybackSDKReady = () => {
   player.addListener('account_error', ({ message }) => { error(message); });
   player.addListener('playback_error', ({ message }) => { error(message); });
 
+  player.addListener('player_state_changed', state => { 
+    if(state) {
+      canvas.setAttribute("current", state.track_window.current_track.uri);
+      canvas.setAttribute("paused", state.paused);
+      canvas.setAttribute("duration", state.duration);
+      canvas.setAttribute("repeat", state.repeat_mode);
+      canvas.setAttribute("shuffle", state.shuffle);
+    }
+  });
+
   // Playback status updates
   // Kinda crazy, but passing data between this js file and angular is stupid weird
   // Soooo we edit DOM elements and watch for DOM changes with a dom-watcher directive
   // It's a hacky fix, but it works lol
-  player.addListener('player_state_changed', ({
-    duration=0,
-    track_window: { current_track }
-  }) => {
-    if(typeof current_track === 'undefined') {
-      current_track = {};
-    }
+  // player.addListener('player_state_changed', ({
+  //   track_window: { current_track }
+  // }) => {
+  //   if(typeof current_track === 'undefined') {
+  //     current_track = {};
+  //   }
 
-    if(typeof track_window === 'undefined') {
-      track_window: {current_track};
-    }
+  //   if(typeof track_window === 'undefined') {
+  //     track_window: {current_track};
+  //   }
 
-    if(!duration) {
-      duration = 0;
-    }
     
-    // Detects for playback changes
-    player.getCurrentState().then(data => {
-      if (!data) {
-        console.error('User is not playing music through the Web Playback SDK');
-        return;
-      }
-      canvas.setAttribute("current", current_track.uri);
-      canvas.setAttribute("paused", data.paused);
-      canvas.setAttribute("duration", duration);
-      canvas.setAttribute("repeat", data.repeat_mode);
-      canvas.setAttribute("shuffle", data.shuffle);
-    }, _error => {
-      console.log("Error on player.getCurrentState");
-    });
-  }, _error => {
-    console.log("Error on player_state_changed");
-  });
+  //   // Detects for playback changes
+  //   player.getCurrentState().then(data => {
+  //     if (!data) {
+  //       console.error('User is not playing music through the Web Playback SDK');
+  //       return;
+  //     }
+  //     canvas.setAttribute("current", current_track.uri);
+  //     canvas.setAttribute("paused", data.paused);
+  //     // canvas.setAttribute("duration", duration);
+  //     canvas.setAttribute("repeat", data.repeat_mode);
+  //     canvas.setAttribute("shuffle", data.shuffle);
+  //   }, _error => {
+  //     console.log("Error on player.getCurrentState");
+  //   });
+  // });
 
   // Ready
   player.addListener('ready', ({ device_id }) => {
