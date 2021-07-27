@@ -17,6 +17,8 @@ export class ControlsComponent implements OnInit, AfterViewChecked {
 
   @Input() isLoading: boolean = true;
 
+  @Output() presetEvent = new EventEmitter<number>();
+
   constructor(public socketService: SocketService, public radioService: RadioService) { }
 
   ngOnInit(): void {

@@ -16,6 +16,8 @@ export class VisualizerComponent implements OnInit, OnChanges {
   @Input() isLoading: boolean = true;
   @Input() isPlaying: boolean = false;
 
+  @Input() selectedPreset: number = 1;
+
   // Currently playing track analysis and feature data
   analysis!: Analysis;
   features!: any;
@@ -77,8 +79,26 @@ export class VisualizerComponent implements OnInit, OnChanges {
       else if(changes.isLoading?.currentValue === false && this.isPlaying) {
         this.beginVisualizer();
       }
+
+      if(changes.selectedPreset) {
+        this.stopVisualizer().then(() => {
+          this.beginVisualizer();
+        });
+      }
     } else {
       this.stopVisualizer();
+    }
+  }
+
+  changeVisualizer(num: number): void {
+    console.log("changeVisualizer", num);
+    switch(num) {
+      case 0:
+        this.selectedSketch = new Testing123(this.position, this.analysis);
+        break;
+      case 1:
+        this.selectedSketch = new Adventure(this.position, this.analysis);
+        break;
     }
   }
   
@@ -184,10 +204,18 @@ export class VisualizerComponent implements OnInit, OnChanges {
       }
       let timeTaken = performance.now() - startTime;
       this.position = data.position + timeTaken;
-      let sketch = new Adventure(this.position, this.analysis);
+      let sketch = new Testing123(this.position, this.analysis);
+      switch(this.selectedPreset) {
+        case 0:
+          sketch = new Testing123(this.position, this.analysis);
+          break;
+        case 1:
+          sketch = new Adventure(this.position, this.analysis);
+          break;
+      }
       this.currentSketch = sketch;
       let indexArray = [this.beatIndex, this.barIndex, this.sectionIndex, this.segmentIndex, this.tatumIndex];
-      sketch.setValues(indexArray, this.sectionMeasures, this.segmentMeasures).then(() => {
+      sketch.setValues(indexArray, this.sectionMeasures, this.segmentMeasures, this.position + sketch.offset).then(() => {
         // We measure the time it takes to offset any slow measurements (2-3 ms delay to get position from player :/)
         // Store the indexes so that subsequent array parsing can start right next to when the last one ended
         this.beatIndex = sketch.beatIndex!;
@@ -235,9 +263,12 @@ export class VisualizerComponent implements OnInit, OnChanges {
   /**
    * Stop the visualizer
    */
-  stopVisualizer(): void {
-    window.cancelAnimationFrame(this.animationLoopID);
-    if(this.selectedSketch && this.selectedSketch!.name) this.selectedSketch.reset();
-    this.isAnimating = false;
+  stopVisualizer(): Promise<any> {
+    return new Promise((resolve, reject) => {
+      window.cancelAnimationFrame(this.animationLoopID);
+      if(this.selectedSketch && this.selectedSketch!.name) this.selectedSketch.reset();
+      this.isAnimating = false;
+      resolve(this.isAnimating);
+    });
   }
 }

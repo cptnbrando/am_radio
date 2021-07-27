@@ -9,6 +9,7 @@ import { Analysis, Bar, Beat, Tatum } from "../track.model";
 export class Testing123 extends Time implements Sketch {
     name: string = "testing_testing_123";
     creator: string = "Captain Brando!";
+    offset: number = 0;
     constructor(position: number, analysis: Analysis) {
         super(position, analysis);
     }
@@ -35,6 +36,7 @@ export class Testing123 extends Time implements Sketch {
             this.paint(ctx, position);
             Testing123.frameKeep++;
             if(Testing123.frameKeep > Testing123.frameRate) {
+                ctx.clearRect(0, 0, ctx.canvas.clientWidth, ctx.canvas.clientHeight);
                 Testing123.frameKeep = 0;
             }
             resolve(Testing123.frameKeep);

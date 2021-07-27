@@ -6,6 +6,7 @@ import { Analysis, Bar, Beat, Tatum } from "../track.model";
 export class Adventure extends Time implements Sketch {
     name: string = "adventure...!";
     creator: string = "Captain Brando!";
+    offset: number = 19;
     constructor(position: number, analysis: Analysis) {
         super(position, analysis);
     }
@@ -14,19 +15,19 @@ export class Adventure extends Time implements Sketch {
         let startTime = performance.now();
         ctx.beginPath();
         let timeTaken = performance.now() - startTime;
-        let color = this.getColor(this.position + timeTaken, this.tatum);
+        let color = this.getColor(position + timeTaken, this.tatum);
         ctx.strokeStyle = color;
         ctx.fillStyle = color;
         ctx.lineWidth = 7;
         timeTaken = performance.now() - startTime;
-        let posX = this.getX(ctx, position + timeTaken, this.bar);
+        let posX = this.getX(ctx, position, this.bar);
         let posY = ctx.canvas.height / 2;
         timeTaken = performance.now() - startTime;
         let confidence = this.getConfidence(position + timeTaken, this.tatum);
         
         ctx.moveTo(posX, posY);
         ctx.lineTo(posX, posY - Math.abs(confidence * 750));
-        ctx.moveTo(posX, posY);
+        // ctx.moveTo(posX, posY);
         ctx.lineTo(posX, posY + Math.abs(confidence * 750));
         
         ctx.stroke();
@@ -47,7 +48,9 @@ export class Adventure extends Time implements Sketch {
             if(this.barIndex > Adventure.barCount) {
                 ctx.clearRect(0, 0, ctx.canvas.clientWidth, ctx.canvas.clientHeight);
                 Adventure.barCount++;
-                // if(this.barIndex != Adventure.barCount) Adventure.barCount = this.barIndex;
+                if(this.barIndex != Adventure.barCount) {
+                    Adventure.barCount = this.barIndex;
+                }
             }
             resolve(Adventure.barCount);
         });
@@ -66,7 +69,7 @@ export class Adventure extends Time implements Sketch {
      */
     getX(ctx: CanvasRenderingContext2D, position: number, bar: Bar): number {
         // Return x from 10 to end of canvas
-        let progress_d3 = d3.interpolateNumber(10, ctx.canvas.width - 10);
+        let progress_d3 = d3.interpolateNumber(0, ctx.canvas.width);
         let progress = parseFloat((position / 1000).toFixed(3)) - bar.start;
         // We use the next bar in case the posiition is past
         if(progress < 0) {

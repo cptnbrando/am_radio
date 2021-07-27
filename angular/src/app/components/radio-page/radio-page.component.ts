@@ -68,6 +68,8 @@ export class RadioPageComponent implements OnInit {
 
   public static accessToken: string = "";
 
+  @Output() selectedPreset: number = 1;
+
   constructor(private spotifyService: SpotifyService, private playerService: SpotifyPlayerService, private script: ScriptService, private radioService: RadioService) {
     // Immediately check for valid tokens from the server
     // This function will redirect the user back to the homepage if credentials can't be found

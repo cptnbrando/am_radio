@@ -161,7 +161,7 @@ public class SpotifyPlayerController {
             String queueReturn = queue.executeAsync().get();
 
             // Delay...
-            Thread.sleep(1300);
+            Thread.sleep(1500);
 
             // Skip to the next track
             String skipReturn = skip.executeAsync().get();

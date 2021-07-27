@@ -33,36 +33,30 @@ export class Time {
      * @param segmentMeasures array of all measures of the segments, stored once per track when parsing analysis data
      * @returns promise that resolves when all values are
      */
-    setValues(indexArray: Array<number>, sectionMeasures: Array<Bar>, segmentMeasures: Array<Bar>): any {
+    setValues(indexArray: Array<number>, sectionMeasures: Array<Bar>, segmentMeasures: Array<Bar>, position: number): any {
         return new Promise((resolve) => {
-            let startTime = performance.now();
-            let timeTaken = performance.now() - startTime;
             // Find the beat
-            this.find(this.analysis.beats, this.position + timeTaken, indexArray[0]).then(data => {
+            this.find(this.analysis.beats, position, indexArray[0]).then(data => {
                 this.beat = data[0];
                 if(this.beatIndex < data[1]) this.beatIndex = data[1];
             });
-            timeTaken = performance.now() - startTime;
             // Find the bar
-            this.find(this.analysis.bars, this.position + timeTaken, indexArray[1]).then(data => {
+            this.find(this.analysis.bars, position, indexArray[1]).then(data => {
                 this.bar = data[0];
                 if(this.barIndex < data[1]) this.barIndex = data[1];
             });
-            timeTaken = performance.now() - startTime;
             // Find the tatum
-            this.find(this.analysis.tatums, this.position + timeTaken, indexArray[4]).then(data => {
+            this.find(this.analysis.tatums, position, indexArray[4]).then(data => {
                 this.tatum = data[0];
                 if(this.tatumIndex < data[1]) this.tatumIndex = data[1];
             });
-            timeTaken = performance.now() - startTime;
             // Find the section
-            this.find(sectionMeasures, this.position + timeTaken, indexArray[2]).then(data => {
+            this.find(sectionMeasures, position, indexArray[2]).then(data => {
                 this.section = this.analysis.sections[data[1]];
                 if(this.sectionIndex < data[1]) this.sectionIndex = data[1];
             });
-            timeTaken = performance.now() - startTime;
             // Find the segment
-            this.find(segmentMeasures, this.position + timeTaken, indexArray[2]).then(data => {
+            this.find(segmentMeasures, position, indexArray[3]).then(data => {
                 this.segment = this.analysis.segments[data[1]];
                 if(this.segmentIndex < data[1]) this.segmentIndex = data[1];
             });

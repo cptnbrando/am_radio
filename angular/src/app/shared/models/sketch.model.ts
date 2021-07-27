@@ -11,6 +11,9 @@ export interface Sketch extends Time {
     // Name of sketch creator
     creator: string;
 
+    // Sketch time offset, all positions will be increased by this number
+    offset: number;
+
     /**
      * Paint our sketch, takes a position to be more accurate
      * @param ctx context to draw with

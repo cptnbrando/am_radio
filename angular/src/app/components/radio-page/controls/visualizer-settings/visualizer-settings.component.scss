@@ -1,0 +1,39 @@
+#vizList {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+
+    .preset {
+        background-position: center;
+        background-size: cover;
+        border-color: white;
+        border: solid;
+        width: 150px;
+        height: 150px;
+        margin: 2%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        h5 {
+            background-color: rgba(0, 0, 0, 0.85);
+        }
+
+        &:hover {
+            border-color: red;
+        }
+    }
+
+    .selected {
+        border-color: yellow;
+    }
+}
+
+$presetURL: '../../../../../assets/img/viz';
+
+#preset0 {
+    background-image: url($presetURL + '/testing123.png');
+}
+
+#preset1 {
+    background-image: url($presetURL + '/adventure.png');
+}

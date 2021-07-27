@@ -17,7 +17,7 @@
                 <about *ngIf="selected === 0"></about>
                 <app-settings *ngIf="selected === 1"></app-settings>
                 <chat *ngIf="selected === 2" [isLoading]="isLoading"></chat>
-                <visualizer-settings *ngIf="selected === 3"></visualizer-settings>
+                <visualizer-settings *ngIf="selected === 3" (presetEvent)="presetEvent.emit($event)"></visualizer-settings>
                 <stations-panel *ngIf="selected === 4"></stations-panel>
             </div>
         </div>
