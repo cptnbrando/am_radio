@@ -19,7 +19,7 @@ export interface Sketch extends Time {
      * @param ctx context to draw with
      * @param position the current position
      */
-    paint(ctx: CanvasRenderingContext2D, position: number): void;
+    paint(ctx: CanvasRenderingContext2D): any;
 
     /**
      * This will be called in the render loop
@@ -27,7 +27,7 @@ export interface Sketch extends Time {
      * @param ctx context to loop draw on
      * @param position the current position
      */
-    loop(ctx: CanvasRenderingContext2D, position: number): Promise<any>;
+    loop(ctx: CanvasRenderingContext2D): Promise<any>;
 
     reset(): void;
 }

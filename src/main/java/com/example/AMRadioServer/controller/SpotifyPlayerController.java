@@ -3,6 +3,7 @@ package com.example.AMRadioServer.controller;
 import com.google.gson.JsonArray;
 import com.wrapper.spotify.SpotifyApi;
 import com.wrapper.spotify.exceptions.SpotifyWebApiException;
+import com.wrapper.spotify.exceptions.detailed.ForbiddenException;
 import com.wrapper.spotify.model_objects.miscellaneous.CurrentlyPlaying;
 import com.wrapper.spotify.model_objects.miscellaneous.CurrentlyPlayingContext;
 import com.wrapper.spotify.model_objects.miscellaneous.Device;
@@ -158,45 +159,36 @@ public class SpotifyPlayerController {
 
             // Use Future to make the async
             // Add the track to the queue
-            String queueReturn = queue.executeAsync().get();
+            queue.execute();
 
             // Delay...
-            Thread.sleep(1500);
+            Thread.sleep(1200);
 
             // Skip to the next track
-            String skipReturn = skip.executeAsync().get();
+            skip.executeAsync().get();
 
-            // Get the CurrentlyPlaying track to check if it was successful
-            CurrentlyPlaying current = now.executeAsync().get();
+            Thread.sleep(1000);
 
-            // We check current again in case it works and there's a dumb unpredictable delay
-            if(!current.getItem().getUri().equals(trackURI)) {
-                Thread.sleep(1000);
-                current = now.executeAsync().get();
-                if(current.getItem().getUri().equals(trackURI)) {
-                    return true;
-                }
-            }
+            if(this.loopChecker(trackURI, now)) return true;
 
             // We need to do this because there's nothing in the Spotify API to clear/adjust the queue :(
             // Loop until the queue and current playing track is right
             int count = 0;
             int bigCount = 0;
-            while(!current.getItem().getUri().equals(trackURI)) {
+            while(!this.loopChecker(trackURI, now)) {
+                System.out.println("in loop playTrack");
+                if(this.loopChecker(trackURI, now)) return true;
+
                 // Skip to the next track and get the new current track
                 skip.executeAsync().get();
 
-                current = now.executeAsync().get();
-
-                if(current.getItem().getUri().equals(trackURI)) {
-                    return true;
-                }
+                if(this.loopChecker(trackURI, now)) return true;
 
                 // If this has happened more than 5 times, maybe this function messed up
                 // and it needs to be queued again
                 count++;
                 if(count > 3) {
-                    queueReturn = queue.executeAsync().get();
+                    queue.executeAsync().get();
                     count = 0;
                     bigCount++;
                     // Delay...
@@ -206,16 +198,26 @@ public class SpotifyPlayerController {
                 // So we give up lol
                 if(bigCount > 2) {
                     System.out.println("Giving up in player/playTrack");
-                    return false;
+                    return true;
                 }
             }
             return true;
         }
-        catch (NullPointerException | InterruptedException | ExecutionException e) {
+        catch (NullPointerException | InterruptedException | ExecutionException | IOException | ParseException e) {
             System.out.println("Exception caught in player/playTrack");
             System.out.println(e.getMessage());
-            return false;
+            return true;
         }
+    }
+
+    /**
+     * Helper method to return whether the currentURI matches the trackURI being attempted to play
+     * @param trackURI track being attempted to play
+     * @return Whether it is playing or not
+     */
+    private boolean loopChecker(String trackURI, GetUsersCurrentlyPlayingTrackRequest now) throws IOException, ParseException, SpotifyWebApiException {
+        CurrentlyPlaying current = now.execute();
+        return current.getItem().getUri().equals(trackURI);
     }
 
     /**
@@ -243,29 +245,6 @@ public class SpotifyPlayerController {
     }
 
     /**
-     * Goes through the list of devices and returns am_radio if it can be found
-     * Sets it to the active player, plays the track, and returns the device
-     *
-     * @return a spotify player device named am_radio
-     *
-     * IDK WHY BUT GRADLE/ANGULAR/PROXIES/WHATEVER BROKE THIS SO I JUST DID THE SAME THING WITH /setAMRadio
-     * NEVER SPEAK TO ME ABOUT THIS METHOD, EVER
-     */
-    @GetMapping(value = "/getAMRadio")
-    public Device getAMRadio() throws SpotifyWebApiException {
-        Device[] myDevices = this.getDevices();
-        if(myDevices != null) {
-            for(Device device: myDevices) {
-                if(device.getName().equals("am_radio")) {
-                    return this.playOn(device.getId());
-                }
-            }
-        }
-
-        return null;
-    }
-
-    /**
      * Goes through the list of devices and sets am_radio as the active device if found
      *
      * @return an active spotify player device named am_radio
@@ -275,23 +254,29 @@ public class SpotifyPlayerController {
         try {
             Thread.sleep(500);
             // First get all the devices and find am_radio
-            Device[] myDevices = this.spotifyApi.getUsersAvailableDevices().build().executeAsync().get();
+            Device[] myDevices = this.spotifyApi.getUsersAvailableDevices().build().execute();
             for(Device device: myDevices) {
-                System.out.println(device.getName() + " : " + device.getId());
                 if(device.getName().equals("am_radio")) {
                     //Create a JSONArray and add the ID, then transfer playback
                     JsonArray deviceArray = new JsonArray();
                     deviceArray.add(device.getId());
-                    this.spotifyApi.transferUsersPlayback(deviceArray).build().executeAsync().get();
+                    this.spotifyApi.transferUsersPlayback(deviceArray).build().execute();
                     return device;
                 }
             }
-            Thread.sleep(500);
             return setAMRadio();
-        } catch (InterruptedException | ExecutionException e) {
-            System.out.println("Exception caught in getAMRadio");
+        } catch (IOException | ParseException | InterruptedException e) {
+            System.out.println("Exception caught in player/setAMRadio");
             System.out.println(e.getMessage());
             return null;
+        } catch (SpotifyWebApiException f) {
+            if(f.getMessage().equals("Not found.") || f.getMessage().equals("Device not found")) {
+                return setAMRadio();
+            } else {
+                System.out.println("Spotify exception caught in player/setAMRadio");
+                System.out.println(f.getMessage());
+                throw f;
+            }
         }
     }
 
@@ -313,14 +298,19 @@ public class SpotifyPlayerController {
             PlaylistSimplified randomPlaylist = lists[new Random().nextInt((lists.length))];
             PlaylistTrack[] tracks = spotifyApi.getPlaylistsItems(randomPlaylist.getId()).build().execute().getItems();
             PlaylistTrack randomTrack = tracks[new Random().nextInt((tracks.length))];
-            boolean played = this.playTrack(randomTrack.getTrack().getUri());
-            if(played) {
-                this.playPlaylist(randomPlaylist.getUri());
+            try {
+                boolean played = this.playTrack(randomTrack.getTrack().getUri());
+                if(played) {
+                    this.playPlaylist(randomPlaylist.getUri());
+                }
+                return randomPlaylist;
+            } catch (Exception f) {
+                System.out.println("Start AMRadio failed");
+                System.out.println(f.getMessage());
+                return randomPlaylist;
             }
-            return randomPlaylist;
         }
-        catch (IOException | ParseException | InterruptedException | ExecutionException e)
-        {
+        catch (IOException | ParseException | ForbiddenException | InterruptedException | ExecutionException e) {
             System.out.println("Exception caught in player/startAMRadio");
             System.out.println(e.getMessage());
             return null;

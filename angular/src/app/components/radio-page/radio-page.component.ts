@@ -71,28 +71,26 @@ export class RadioPageComponent implements OnInit {
   @Output() selectedPreset: number = 1;
 
   constructor(private spotifyService: SpotifyService, private playerService: SpotifyPlayerService, private script: ScriptService, private radioService: RadioService) {
+    // Start isLoading
+    this.toggleLoading(true);
+    
     // Immediately check for valid tokens from the server
     // This function will redirect the user back to the homepage if credentials can't be found
-    if(!this.checkTokens()) {
-      window.location.replace(AppComponent.webURL);
-      throw new Error;
-    }
-    else {
+    this.checkTokens().then(() => {
       // We've got an access token, so let's make a spotify web sdk player
       this.loadPlayerScript();
-    }
+      // When we load up, set the User
+      this.setUser();
+      // Also set the UserPlaylists
+      this.setPlaylists();
+    }, onrejected => {
+      // We don't have an access token, so redirect back to the homepage
+      window.location.replace(AppComponent.webURL);
+      throw new Error;
+    });
   }
 
   ngOnInit() {
-    // Start isLoading
-    this.toggleLoading(true);
-
-    // When we load up, set the User
-    this.setUser();
-
-    // Also set the UserPlaylists
-    this.setPlaylists();
-
     this.canvas = document.querySelector("canvas");
   }
 
@@ -148,11 +146,6 @@ export class RadioPageComponent implements OnInit {
     this.setPlayerData().then(data => {
       // Once the radio player is ready, we should prompt the user to swap to the new player
       // ...or we could change it automatically if there's nothing playing rn
-      if(data != null) {
-        // Device toggling done via Station Bar
-        console.log(data);
-        return;
-      }
 
       // If nothing is playing, we set am_radio as the active device, then attempt to play the most recently played track
       // Also open the controls panel
@@ -160,10 +153,10 @@ export class RadioPageComponent implements OnInit {
         console.log("setAMRadio", data);
         if(data) {
           this.currentDevice = data;
-          this.beginAMRadio();
-          if(!this.showControls) {
-            this.toggleBar(2);
-          }
+        }
+        this.beginAMRadio();
+        if(!this.showControls) {
+          this.toggleBar(2);
         }
       });
     });
@@ -182,7 +175,6 @@ export class RadioPageComponent implements OnInit {
     // Attempt to play a random playlist on am_radio
     this.playerService.startAMRadio().subscribe(data => {
       if(data) {
-        // console.log("startAMRadio success!");
         this.playingPlaylist = data;
         this.currentStation.stationName = data.name;
         this.changePlaylist(data);
@@ -426,25 +418,21 @@ export class RadioPageComponent implements OnInit {
     });
   }
 
-  async checkTokens(): Promise<boolean> {
-    await this.spotifyService.checkTokens().subscribe(data => {
-      if(data == null) {
-        // No access token, so we go away!
-        window.location.replace(AppComponent.webURL);
-        return false;
-      }
-      else {
-        // We have to set it to local storage so the playback sdk js script can get it
-        localStorage.setItem("accessToken", data.message);
-        return true;
-      }
-    }, error => {
-      // On error, go away!
-      window.location.replace(AppComponent.webURL);
-      return false;
+  checkTokens(): Promise<boolean> {
+    return new Promise<boolean>((resolve, reject) => {
+      this.spotifyService.checkTokens().subscribe(data => {
+        if(data === null) {
+          reject(false);
+        }
+        else {
+          // We have to set it to local storage so the playback sdk js script can get it
+          localStorage.setItem("accessToken", data.message);
+          resolve(true);
+        }
+      }, error => {
+        reject(false);
+      });
     });
-
-    return false;
   }
 
   // Change volume event handler

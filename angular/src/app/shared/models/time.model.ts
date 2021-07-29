@@ -1,4 +1,4 @@
-import { Sketch } from "./sketch.model";
+import * as d3Array from 'd3-array';
 import { Beat, Bar, Section, Segment, Tatum, Analysis } from "./track.model";
 
 /**
@@ -8,18 +8,26 @@ export class Time {
     // The position in ms
     public position: number;
     public analysis: Analysis;
+    // public features: Features;
 
     // All audio data that can be used in Sketch
-    protected beat!: Beat;
-    public beatIndex: number = 0;
-    protected bar!: Bar;
-    public barIndex: number = 0;
-    protected section!: Section;
-    public sectionIndex: number = 0;
-    protected segment!: Segment;
-    public segmentIndex: number = 0;
-    protected tatum!: Tatum;
-    public tatumIndex: number = 0;
+    public beat!: Beat;
+    public static lastBeat: Beat;
+    public static beatIndex: number = 0;
+    public bar!: Bar;
+    public static lastBar: Beat;
+    public static barIndex: number = 0;
+    public section!: Section;
+    public static lastSection: Section;
+    public static sectionIndex: number = 0;
+    public segment!: Segment;
+    public static lastSegment: Segment;
+    public static segmentIndex: number = 0;
+    public tatum!: Tatum;
+    public static lastTatum: Tatum;
+    public static tatumIndex: number = 0;
+
+    public static beatConfAvg: number = 0.4;
 
     constructor(position: number, analysis: Analysis) {
         this.position = position; 
@@ -33,36 +41,50 @@ export class Time {
      * @param segmentMeasures array of all measures of the segments, stored once per track when parsing analysis data
      * @returns promise that resolves when all values are
      */
-    setValues(indexArray: Array<number>, sectionMeasures: Array<Bar>, segmentMeasures: Array<Bar>, position: number): any {
-        return new Promise((resolve) => {
-            // Find the beat
-            this.find(this.analysis.beats, position, indexArray[0]).then(data => {
+    public setValues(position: number, sectionMeasures: Array<Bar>, segmentMeasures: Array<Bar>): Promise<any> {
+
+        this.position = position;
+
+        // Find the beat
+        const beatPromise = 
+            this.find(this.analysis.beats, position).then(data => {
                 this.beat = data[0];
-                if(this.beatIndex < data[1]) this.beatIndex = data[1];
+                Time.lastBeat = data[0];
+                Time.beatIndex = data[1];
             });
-            // Find the bar
-            this.find(this.analysis.bars, position, indexArray[1]).then(data => {
+        // Find the bar
+        // console.log("bar");
+        const barPromise = 
+            this.find(this.analysis.bars, position).then(data => {
                 this.bar = data[0];
-                if(this.barIndex < data[1]) this.barIndex = data[1];
+                Time.lastBar = data[0];
+                Time.barIndex = data[1];
             });
-            // Find the tatum
-            this.find(this.analysis.tatums, position, indexArray[4]).then(data => {
-                this.tatum = data[0];
-                if(this.tatumIndex < data[1]) this.tatumIndex = data[1];
-            });
-            // Find the section
-            this.find(sectionMeasures, position, indexArray[2]).then(data => {
+        // Find the section
+        // console.log("section");
+        const sectionPromise =
+            this.find(sectionMeasures, position).then(data => {
                 this.section = this.analysis.sections[data[1]];
-                if(this.sectionIndex < data[1]) this.sectionIndex = data[1];
+                Time.lastSection = this.analysis.sections[data[1]];
+                Time.sectionIndex = data[1];
             });
-            // Find the segment
-            this.find(segmentMeasures, position, indexArray[3]).then(data => {
+        // Find the segment
+        const segmentPromise =
+            this.find(segmentMeasures, position).then(data => {
                 this.segment = this.analysis.segments[data[1]];
-                if(this.segmentIndex < data[1]) this.segmentIndex = data[1];
+                Time.lastSegment = this.analysis.segments[data[1]];
+                Time.segmentIndex = data[1];
             });
-            
-            resolve(true);
-        });
+        // Find the tatum
+        const tatumPromise =
+            this.find(this.analysis.tatums, position).then(data => {
+                this.tatum = data[0];
+                Time.lastTatum = data[0];
+                Time.tatumIndex = data[1];
+            });
+
+        // Resolve when all of them complete
+        return Promise.allSettled([beatPromise, barPromise, sectionPromise, segmentPromise, tatumPromise]);
     }
 
     /**
@@ -71,43 +93,29 @@ export class Time {
      * @param position The current position
      * @returns Promise for a found beat / bar / tatum
      */
-    find(patterns: Array<Beat | Bar | Tatum>, position: number, start?: number): Promise<[(Beat | Bar | Tatum), number]>  {
+    private find(patterns: Array<Beat | Bar | Tatum>, position: number, start?: number): Promise<[(Beat | Bar | Tatum), number]>  {
         return new Promise((resolve) => {
-            let roundedPos: number = parseFloat((position / 1000).toFixed(3));
-            let count = (start && start > 5) ? (start - 3) : 0;
-            let foundIndex = (start) ? start : 0;
-            // MASSIVE SHOUTOUT TO THIS ON GOD https://stackoverflow.com/questions/8584902/get-the-closest-number-out-of-an-array
-            // also this https://stackoverflow.com/questions/36144406/how-to-early-break-reduce-method
-            let robertPATTERNson = patterns.slice(count).reduce((lastPattern, currentPattern, index, arrayCopy) => {
-                // Shortcut! If we're past the position, exit out because we've found our value
-                if(currentPattern.start > roundedPos) {
-                    foundIndex = index - 1;
-                    arrayCopy.splice(0);
-                    return lastPattern;
-                }
-                return (Math.abs(currentPattern.start - roundedPos) < Math.abs(lastPattern.start - roundedPos) ? currentPattern : lastPattern);
+            let roundedPos = this.roundPos(position);
+            let starts: Array<number> = [];
+
+            patterns.map((data: Beat | Bar | Tatum) => {
+                starts.push(data.start);
             });
 
-            // We return the pattern found and it's index in the array
-            resolve([robertPATTERNson, foundIndex]);
+            let index = d3Array.bisectLeft(starts, roundedPos, start);
+            resolve([patterns[index], index]);
         });
     }
 
-    roundPos(pos: number): number {
+    protected roundPos(pos: number): number {
         return parseFloat((pos / 1000).toFixed(3));
     }
 
-    // drawInfo(ctx: CanvasRenderingContext2D, selectedSketch: Sketch, currentlyPlaying: any): void {
-    //     ctx.beginPath();
-    //     ctx.strokeStyle = "white";
-    //     ctx.fillStyle = "white";
-    //     ctx.font = '15px Source Code Pro';
-    //     // Sketch info
-    //     ctx.fillText(`Sketch: ${selectedSketch.name}`, 20, 35);
-    //     ctx.fillText(`Created By: ${selectedSketch.creator}`, 20, 65);
-    //     // Track info
-    //     ctx.fillText(`Now Playing: ${currentlyPlaying.name}`, 20, ctx.canvas.height - 65);
-    //     ctx.fillText(`By: ${currentlyPlaying.artists[0].name}`, 20, ctx.canvas.height - 35);
-    //     ctx.closePath();
-    // }
+    public static resetTime(): void {
+        Time.beatIndex = 0;
+        Time.barIndex = 0;
+        Time.segmentIndex = 0;
+        Time.sectionIndex = 0;
+        Time.tatumIndex = 0;
+    }
 }

@@ -2,8 +2,10 @@ import { ElementRef, Input, OnChanges, ViewChild } from '@angular/core';
 import { Component, OnInit } from '@angular/core';
 import { SpotifyService } from 'src/app/services/spotify.service';
 import { Sketch } from 'src/app/shared/models/sketch.model';
-import { Adventure } from 'src/app/shared/models/sketches/adventure.sketch';
-import { Testing123 } from 'src/app/shared/models/sketches/testing123.sketch';
+import { Adventure } from 'src/app/shared/models/sketches/canvas/adventure.sketch';
+import { Lagunitas } from 'src/app/shared/models/sketches/canvas/lagunitas.sketch';
+import { Testing123 } from 'src/app/shared/models/sketches/canvas/testing123.sketch';
+import { Time } from 'src/app/shared/models/time.model';
 import { Analysis, Bar, Beat, Section, Segment, Tatum } from 'src/app/shared/models/track.model';
 
 @Component({
@@ -23,20 +25,15 @@ export class VisualizerComponent implements OnInit, OnChanges {
   features!: any;
 
   // Keeping track of track progress for faster array parsing
-  beatIndex: number = 0;
-  barIndex: number = 0;
-  sectionIndex: number = 0;
   sectionMeasures: Array<Bar> = [];
-  segmentIndex: number = 0;
   segmentMeasures: Array<Bar> = [];
-  tatumIndex: number = 0;
 
   @ViewChild("visualizer", { static: true })
   canvas!: ElementRef<HTMLCanvasElement>;
   ctx!: CanvasRenderingContext2D;
   
-  position: number;
-  animationLoopID: any;
+  position: number = 0;
+  animationLoopID: any = 0;
   isAnimating: boolean = false;
 
   selectedSketch!: Sketch;
@@ -79,26 +76,15 @@ export class VisualizerComponent implements OnInit, OnChanges {
       else if(changes.isLoading?.currentValue === false && this.isPlaying) {
         this.beginVisualizer();
       }
-
+      // If the preset is changed, restart the visualizer loop
       if(changes.selectedPreset) {
-        this.stopVisualizer().then(() => {
+        this.stopVisualizer();
+        if(this.isPlaying) {
           this.beginVisualizer();
-        });
+        }
       }
     } else {
       this.stopVisualizer();
-    }
-  }
-
-  changeVisualizer(num: number): void {
-    console.log("changeVisualizer", num);
-    switch(num) {
-      case 0:
-        this.selectedSketch = new Testing123(this.position, this.analysis);
-        break;
-      case 1:
-        this.selectedSketch = new Adventure(this.position, this.analysis);
-        break;
     }
   }
   
@@ -107,14 +93,14 @@ export class VisualizerComponent implements OnInit, OnChanges {
    * @param trackID track to get
    * @returns audio analysis in promise
    */
-  setAudioData(trackID: string): any {
+  setAudioData(trackID: string): Promise<any> {
     return new Promise((resolve, reject) => {
       this.spotifyService.getAudioFeatures(trackID).subscribe(data => {
         // console.log("FEATURES", data);
         this.features = data;
         this.spotifyService.getAudioAnalysis(trackID).subscribe((data: Analysis) => {
+          // console.log("ANALYSIS", data);
           this.analysis = this.editAnalysisData(data);
-          // console.log("ANALYSIS", this.analysis);
           resolve(data);
         }, error => {
           reject(error);
@@ -133,9 +119,13 @@ export class VisualizerComponent implements OnInit, OnChanges {
     if(!analysis) {
       return analysis;
     }
+    let totalBeatConfidence = 0;
     analysis.beats.map((data: Beat) => {
       data = this.editAudioObject(data);
+      totalBeatConfidence += data.confidence;
     });
+
+    Time.beatConfAvg = totalBeatConfidence / analysis.beats.length;
 
     analysis.bars.map((data: Bar) => {
       data = this.editAudioObject(data);
@@ -146,7 +136,6 @@ export class VisualizerComponent implements OnInit, OnChanges {
       data.measure = this.editAudioObject(data.measure);
       this.sectionMeasures.push(data.measure);
     });
-    // this.sectionMeasures = sectionMs;
 
     this.segmentMeasures = [];
     analysis.segments.map((data: Segment) => {
@@ -196,35 +185,22 @@ export class VisualizerComponent implements OnInit, OnChanges {
    */
   drawFrame(): void {
     // We can get the exact current position every frame from the spotify sdk web player
-    let startTime = performance.now();
+    const startTime = performance.now();
     (<any>window).spotifyPlayer.getCurrentState().then((data: any) => {
       if(!data) {
         this.stopVisualizer();
         return;
       }
+      // It usually takes anywhere between 2 - 15ms to get the position from the player, idk why
       let timeTaken = performance.now() - startTime;
+      // timeTaken = 0;
       this.position = data.position + timeTaken;
-      let sketch = new Testing123(this.position, this.analysis);
-      switch(this.selectedPreset) {
-        case 0:
-          sketch = new Testing123(this.position, this.analysis);
-          break;
-        case 1:
-          sketch = new Adventure(this.position, this.analysis);
-          break;
-      }
+
+      const sketch = this.sketches(this.selectedPreset, this.position, this.analysis);
       this.currentSketch = sketch;
-      let indexArray = [this.beatIndex, this.barIndex, this.sectionIndex, this.segmentIndex, this.tatumIndex];
-      sketch.setValues(indexArray, this.sectionMeasures, this.segmentMeasures, this.position + sketch.offset).then(() => {
-        // We measure the time it takes to offset any slow measurements (2-3 ms delay to get position from player :/)
-        // Store the indexes so that subsequent array parsing can start right next to when the last one ended
-        this.beatIndex = sketch.beatIndex!;
-        this.barIndex = sketch.barIndex!;
-        this.tatumIndex = sketch.tatumIndex!;
-        this.sectionIndex = sketch.sectionIndex!;
-        this.segmentIndex = sketch.segmentIndex!;
-        timeTaken = performance.now() - startTime;
-        sketch.loop(this.ctx, this.position + timeTaken).then(data => {
+      
+      sketch.setValues(this.position, this.sectionMeasures, this.segmentMeasures).then(() => {
+        sketch.loop(this.ctx).then(() => {
           this.drawInfo();
         });
       });
@@ -239,9 +215,16 @@ export class VisualizerComponent implements OnInit, OnChanges {
     this.ctx.strokeStyle = "white";
     this.ctx.fillStyle = "white";
     this.ctx.font = '15px Source Code Pro';
+
     // Sketch info
-    this.ctx.fillText(`Sketch: ${this.selectedSketch.name}`, 20, 35);
-    this.ctx.fillText(`Created By: ${this.selectedSketch.creator}`, 20, 65);
+    let sketch = this.sketches(this.selectedPreset, this.position, this.analysis);
+    this.ctx.fillText(`Sketch: ${sketch.name}`, 20, 35);
+    this.ctx.fillText(`Created By: ${sketch.creator}`, 20, 65);
+    // this.ctx.fillText(`Position: ${parseFloat((this.position / 1000).toFixed(3))} : ${this.currentSketch.beat.start}`, 20, 95);
+    // this.ctx.fillText(`BeatIndex: ${Time.beatIndex} Beat: ${this.currentSketch.beat.confidence} Start: ${this.currentSketch.beat.start}`, 20, 125);
+    // this.ctx.fillText(`TatumIndex: ${Time.tatumIndex} Tatum: ${this.currentSketch.tatum.confidence} Start: ${this.currentSketch.tatum.start}`, 20, 155);
+    // this.ctx.fillText(`BarIndex: ${Time.barIndex} Beat: ${this.currentSketch.bar.confidence} Start: ${this.currentSketch.bar.start}`, 20, 185);
+    
     // Track info
     this.ctx.fillText(`Now Playing: ${this.currentlyPlaying.name}`, 20, this.ctx.canvas.height - 65);
     this.ctx.fillText(`By: ${this.currentlyPlaying.artists[0].name}`, 20, this.ctx.canvas.height - 35);
@@ -252,11 +235,11 @@ export class VisualizerComponent implements OnInit, OnChanges {
    * Start the visualizer with requestAnimationFrame
    */
   beginVisualizer(): void {
-    if(!this.isAnimating && this.analysis && this.features) {
+    if(!this.isAnimating && this.analysis && this.features && this.features.uri === this.currentlyPlaying.uri) {
       this.ctx.clearRect(0, 0, this.ctx.canvas.clientWidth, this.ctx.canvas.clientHeight);
-      this.selectedSketch = new Adventure(this.position, this.analysis);
-      window.requestAnimationFrame(this.render.bind(this));
+      this.selectedSketch = this.sketches(this.selectedPreset, this.position, this.analysis);
       this.isAnimating = true;
+      window.requestAnimationFrame(this.render.bind(this));
     }
   }
 
@@ -266,9 +249,34 @@ export class VisualizerComponent implements OnInit, OnChanges {
   stopVisualizer(): Promise<any> {
     return new Promise((resolve, reject) => {
       window.cancelAnimationFrame(this.animationLoopID);
-      if(this.selectedSketch && this.selectedSketch!.name) this.selectedSketch.reset();
+      if(this.selectedSketch && this.selectedSketch!.name) this.currentSketch.reset();
+      Time.resetTime();
       this.isAnimating = false;
       resolve(this.isAnimating);
     });
+  }
+
+  /**
+   * Returns a new sketch of the selected preset
+   * @param preset number of preset
+   * @param position current position
+   * @param analysis track analysis
+   * @returns new Sketch
+   * 
+   * Sketchs:
+   * 0 - TestingTesting123
+   * 1 - Adventure...!
+   */
+  sketches(preset: number, position: number, analysis: Analysis): Sketch {
+    switch(preset) {
+      case 0:
+        return new Testing123(position, analysis);
+      case 1:
+        return new Adventure(position, analysis);
+      case 2:
+        return new Lagunitas(position, analysis);
+      default:
+        return new Testing123(position, analysis);
+    }
   }
 }

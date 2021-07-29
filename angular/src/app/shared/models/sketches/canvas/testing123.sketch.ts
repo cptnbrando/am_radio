@@ -1,7 +1,7 @@
 import * as d3 from 'd3-interpolate';
-import { Sketch } from "../sketch.model";
-import { Time } from "../time.model";
-import { Analysis, Bar, Beat, Tatum } from "../track.model";
+import { Sketch } from "../../sketch.model";
+import { Time } from "../../time.model";
+import { Analysis, Bar, Beat, Tatum } from "../../track.model";
 
 /**
  * Circles man, the first sketch
@@ -14,14 +14,14 @@ export class Testing123 extends Time implements Sketch {
         super(position, analysis);
     }
 
-    paint(ctx: CanvasRenderingContext2D, position: number): void {
+    paint(ctx: CanvasRenderingContext2D): void {
         ctx.beginPath();
         ctx.strokeStyle = "white";
         ctx.fillStyle = "white";
         ctx.lineWidth = 6;
         let circleX = ctx.canvas.width / 2;
         let circleY = ctx.canvas.height / 2;
-        let confidence = this.getConfidence(position, this.beat);
+        let confidence = this.getConfidence(this.beat);
         let radius = Math.abs(confidence * 750);
         ctx.arc(circleX, circleY, radius, 0, 2 * Math.PI);
         ctx.stroke();
@@ -31,9 +31,9 @@ export class Testing123 extends Time implements Sketch {
     static frameKeep: number = 0;
     static frameRate: number = 10;
 
-    loop(ctx: CanvasRenderingContext2D, position: number): Promise<any> {
+    loop(ctx: CanvasRenderingContext2D): Promise<any> {
         return new Promise((resolve, reject) => {
-            this.paint(ctx, position);
+            this.paint(ctx);
             Testing123.frameKeep++;
             if(Testing123.frameKeep > Testing123.frameRate) {
                 ctx.clearRect(0, 0, ctx.canvas.clientWidth, ctx.canvas.clientHeight);
@@ -72,16 +72,10 @@ export class Testing123 extends Time implements Sketch {
      * @param position the current position
      * @returns an interpolated confidence value for the current beat
      */
-    getConfidence(position: number, type: Beat | Bar | Tatum): number {
+    getConfidence(type: Beat | Bar | Tatum): number {
         // Confidence is always between 0 and 1
-        let confidence_d3 = d3.interpolateNumber(.01, type.confidence);
-        let difference = parseFloat((position / 1000).toFixed(3)) - type.start;
-        // We use the next beat in case the posiition is past
-        if(difference < 0) {
-            type = this.analysis.beats[this.beatIndex + 1];
-            difference = parseFloat((position / 1000).toFixed(3)) - type.start;
-            confidence_d3 = d3.interpolateNumber(.01, type.confidence);
-        }
+        let confidence_d3 = d3.interpolateNumber(type.confidence, .01);
+        let difference = Math.abs(this.roundPos(this.position) - type.start);
         return confidence_d3(difference / type.duration);
     }
 }

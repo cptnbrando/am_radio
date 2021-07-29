@@ -26,10 +26,6 @@ export class SpotifyPlayerService {
     return this.httpCli.get<any>(this.serverURL + "/getCurrentDevice");
   }
 
-  getAMRadio(): Observable<any>{
-    return this.httpCli.get<any>(`${this.serverURL}/getAMRadio`);
-  }
-
   setAMRadio(): Observable<any>{
     return this.httpCli.get<any>(`${this.serverURL}/setAMRadio`);
   }
