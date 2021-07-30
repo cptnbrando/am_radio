@@ -1,15 +1,21 @@
 package com.example.AMRadioServer.model;
 
+import com.wrapper.spotify.SpotifyApi;
+import com.wrapper.spotify.exceptions.SpotifyWebApiException;
 import com.wrapper.spotify.model_objects.IPlaylistItem;
+import com.wrapper.spotify.model_objects.miscellaneous.PlaylistTracksInformation;
+import com.wrapper.spotify.model_objects.specification.Playlist;
 import com.wrapper.spotify.model_objects.specification.PlaylistSimplified;
 import com.wrapper.spotify.model_objects.specification.PlaylistTrack;
 import com.wrapper.spotify.model_objects.specification.User;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.hc.core5.http.ParseException;
 import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.data.annotation.CreatedDate;
 
 import javax.persistence.*;
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -244,5 +250,51 @@ public class Station
         this.setCurrent(null);
         this.setNext(null);
         this.setPlayTime(0);
+    }
+
+    /**
+     * Populate all the transient fields not stored in db using a temporary SpotifyAPI
+     * @param spotifyApi tempAPI
+     * @throws SpotifyWebApiException
+     */
+    public void populateTransients(SpotifyApi spotifyApi) throws SpotifyWebApiException {
+        try {
+            Playlist playlist = spotifyApi.getPlaylist(this.playlistID).build().execute();
+            this.creator = playlist.getOwner();
+            this.playlist = this.simplifyPlaylist(playlist);
+            List<PlaylistTrack> tracks = Arrays.asList(playlist.getTracks().getItems());
+            this.allTracks = tracks;
+            Collections.shuffle(tracks);
+            this.notPlayedTracks = new ArrayList<>(tracks);
+            this.current = null;
+            this.next = null;
+            this.listeners = new HashMap<>();
+        } catch (IOException | ParseException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Convert a Playlist object into a PlaylistSimplified object
+     * @param playlist Playlist object
+     * @return a PlaylistSimplified built from the Playlist
+     */
+    private PlaylistSimplified simplifyPlaylist(Playlist playlist) {
+        PlaylistTracksInformation info = new PlaylistTracksInformation.Builder()
+                .setHref(playlist.getHref())
+                .setTotal(playlist.getTracks().getTotal())
+                .build();
+        return new PlaylistSimplified.Builder()
+                .setCollaborative(playlist.getIsCollaborative())
+                .setExternalUrls(playlist.getExternalUrls())
+                .setHref(playlist.getHref())
+                .setId(playlist.getId())
+                .setImages(playlist.getImages())
+                .setName(playlist.getName())
+                .setOwner(playlist.getOwner())
+                .setPublicAccess(playlist.getIsPublicAccess())
+                .setSnapshotId(playlist.getSnapshotId())
+                .setTracks(info)
+                .build();
     }
 }

@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.wrapper.spotify.SpotifyApi;
 import com.wrapper.spotify.exceptions.SpotifyWebApiException;
 import com.wrapper.spotify.exceptions.detailed.ForbiddenException;
+import com.wrapper.spotify.model_objects.IPlaylistItem;
 import com.wrapper.spotify.model_objects.miscellaneous.CurrentlyPlaying;
 import com.wrapper.spotify.model_objects.miscellaneous.CurrentlyPlayingContext;
 import com.wrapper.spotify.model_objects.miscellaneous.Device;
@@ -156,33 +157,36 @@ public class SpotifyPlayerController {
             AddItemToUsersPlaybackQueueRequest queue = this.spotifyApi.addItemToUsersPlaybackQueue(trackURI).build();
             SkipUsersPlaybackToNextTrackRequest skip = this.spotifyApi.skipUsersPlaybackToNextTrack().build();
             GetUsersCurrentlyPlayingTrackRequest now = this.spotifyApi.getUsersCurrentlyPlayingTrack().build();
+            System.out.println("PLAYTRACK");
+            IPlaylistItem item = now.executeAsync().get().getItem();
+            System.out.println("Attempting to play: " + item.getUri() + " : " + item.getName());
+
+            if(this.loopChecker(trackURI)) return true;
 
             // Use Future to make the async
             // Add the track to the queue
-            queue.execute();
+            String queueReturn = queue.executeAsync().get();
+            if(this.loopChecker(trackURI)) return true;
 
             // Delay...
-            Thread.sleep(1200);
+            Thread.sleep(1000);
 
             // Skip to the next track
-            skip.executeAsync().get();
+            String skipReturn = skip.executeAsync().get();
 
             Thread.sleep(1000);
 
-            if(this.loopChecker(trackURI, now)) return true;
+            if(this.loopChecker(trackURI)) return true;
 
             // We need to do this because there's nothing in the Spotify API to clear/adjust the queue :(
             // Loop until the queue and current playing track is right
             int count = 0;
             int bigCount = 0;
-            while(!this.loopChecker(trackURI, now)) {
-                System.out.println("in loop playTrack");
-                if(this.loopChecker(trackURI, now)) return true;
-
+            while(!this.loopChecker(trackURI)) {
                 // Skip to the next track and get the new current track
                 skip.executeAsync().get();
 
-                if(this.loopChecker(trackURI, now)) return true;
+                if(this.loopChecker(trackURI)) return true;
 
                 // If this has happened more than 5 times, maybe this function messed up
                 // and it needs to be queued again
@@ -203,7 +207,7 @@ public class SpotifyPlayerController {
             }
             return true;
         }
-        catch (NullPointerException | InterruptedException | ExecutionException | IOException | ParseException e) {
+        catch (NullPointerException | InterruptedException | ExecutionException e) {
             System.out.println("Exception caught in player/playTrack");
             System.out.println(e.getMessage());
             return true;
@@ -212,11 +216,13 @@ public class SpotifyPlayerController {
 
     /**
      * Helper method to return whether the currentURI matches the trackURI being attempted to play
+     * Double checks lol
      * @param trackURI track being attempted to play
      * @return Whether it is playing or not
      */
-    private boolean loopChecker(String trackURI, GetUsersCurrentlyPlayingTrackRequest now) throws IOException, ParseException, SpotifyWebApiException {
-        CurrentlyPlaying current = now.execute();
+    private boolean loopChecker(String trackURI) throws ExecutionException, InterruptedException {
+        GetUsersCurrentlyPlayingTrackRequest now = this.spotifyApi.getUsersCurrentlyPlayingTrack().build();
+        CurrentlyPlaying current = now.executeAsync().get();
         return current.getItem().getUri().equals(trackURI);
     }
 

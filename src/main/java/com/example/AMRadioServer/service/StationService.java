@@ -5,24 +5,19 @@ import com.example.AMRadioServer.model.Station;
 import com.example.AMRadioServer.repository.StationRepository;
 import com.wrapper.spotify.SpotifyApi;
 import com.wrapper.spotify.exceptions.SpotifyWebApiException;
-import com.wrapper.spotify.model_objects.specification.Playlist;
 import com.wrapper.spotify.model_objects.specification.PlaylistSimplified;
 import com.wrapper.spotify.model_objects.specification.PlaylistTrack;
 import com.wrapper.spotify.model_objects.specification.User;
 import lombok.Data;
 import org.apache.hc.core5.http.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.repository.PagingAndSortingRepository;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+
+import static com.example.AMRadioServer.config.SpotifyConfiguration.redirectURI;
 
 /**
  * This service class controls the Station
@@ -52,17 +47,26 @@ public class StationService {
 
     private final SpotifyApi spotifyApi;
 
+    private final SpotifyApi tempApi;
+
     @Autowired
-    public StationService(StationRepository stationRepo, SpotifyApi spotifyApi) {
+    public StationService(StationRepository stationRepo, SpotifyApi spotifyApi) throws SpotifyWebApiException {
         this.stationRepo = stationRepo;
         this.spotifyApi = spotifyApi;
         this.allStations = new HashMap<>();
         this.allRadioThreads = new HashMap<>();
 
+        this.tempApi = new SpotifyApi.Builder()
+                .setClientId(System.getenv("SPOTIFY_CLI_ID"))
+                .setClientSecret(System.getenv("SPOTIFY_CLI_SECRET"))
+                .setRedirectUri(redirectURI)
+                .build();
+
         // Initialize with all currently created Stations from db
         List<Station> all = this.stationRepo.findAll();
         for(Station station: all) {
-            allStations.put(station.getStationID(), station);
+            station.populateTransients(this.tempApi);
+            this.saveStation(station);
         }
     }
 

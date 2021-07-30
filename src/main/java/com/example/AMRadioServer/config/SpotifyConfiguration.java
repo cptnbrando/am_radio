@@ -13,7 +13,7 @@ import java.net.URI;
 public class SpotifyConfiguration {
 
     public static String url = System.getenv("RADIO_APP_URL");
-    private static final URI redirectURI = SpotifyHttpManager.makeUri(System.getenv("SPOTIFY_CLI_REDIRECT"));
+    public static final URI redirectURI = SpotifyHttpManager.makeUri(System.getenv("SPOTIFY_CLI_REDIRECT"));
     public static String appURL = url + "/app";
 
     @Bean

@@ -61,6 +61,9 @@ export class RadioPageComponent implements OnInit {
   // isLoading
   @Output() isLoading: boolean = true;
 
+  // isMobile
+  @Output() isMobile: boolean = false;
+
   // This is the canvas element
   // We update attributes of it to display changes to the player
   canvas: any;
@@ -92,6 +95,17 @@ export class RadioPageComponent implements OnInit {
 
   ngOnInit() {
     this.canvas = document.querySelector("canvas");
+    if(window.innerWidth <= 960) {
+      this.isMobile = true;
+      this.showPlaylistBar = false;
+      this.showControls = false;
+      this.showStationBar = false;
+      this.showNav = true;
+
+      document.getElementById("settingsBars")?.addEventListener("click", () => {
+        this.toggleNav(4);
+      }, true);
+    }
   }
 
   // Get the user's playlists and set them to the userPlaylists variable
@@ -361,15 +375,24 @@ export class RadioPageComponent implements OnInit {
 
   toggleBar(bar: number): void {
     // Playlist bar = 0, Station bar = 1, Controls panel = 2
+    // OnMobile we clear them all first
+    let station = this.showStationBar;
+    let playlist = this.showPlaylistBar;
+    let controls = this.showControls;
+    if(this.isMobile) {
+      this.showPlaylistBar = false;
+      this.showControls = false;
+      this.showStationBar = false;
+    }
     switch(bar) {
       case 0:
-        this.showPlaylistBar = !this.showPlaylistBar;
+        this.showPlaylistBar = (playlist) ? false : true;
         break;
       case 1:
-        this.showStationBar = !this.showStationBar;
+        this.showStationBar = (station) ? false : true;
         break;
       case 2:
-        this.showControls = !this.showControls;
+        this.showControls = (controls) ? false : true;
         break;
     }
   }
@@ -474,6 +497,8 @@ export class RadioPageComponent implements OnInit {
           break;
         case 3:
           return;
+        case 4:
+          break;
       }
     }
 
@@ -490,7 +515,7 @@ export class RadioPageComponent implements OnInit {
     this.showNav = !this.showNav;
   }
 
-  @HostListener('window:unload', [ '$event' ])
+  @HostListener('window:unload', ['$event'])
   unloadHandler(event: any) {
     console.log("window unload buh bye");
     if(this.stationNum > 0) {
@@ -498,11 +523,32 @@ export class RadioPageComponent implements OnInit {
     }
   }
 
-  @HostListener('window:beforeunload', [ '$event' ])
+  @HostListener('window:beforeunload', ['$event'])
   beforeUnloadHandler(event: any) {
     console.log("window before unload");
     if(this.stationNum > 0) {
       this.radioService.leaveStation(this.stationNum).subscribe();
+    }
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onResize(event: any) {
+    if(event.target.innerWidth <= 960) {
+      this.isMobile = true;
+      this.showPlaylistBar = false;
+      this.showControls = false;
+      this.showStationBar = false;
+      this.showNav = true;
+
+      document.getElementById("settingsBars")?.addEventListener("click", () => {
+        this.toggleNav(4);
+      }, true);
+    }
+    else {
+      document.getElementById("settingsBars")?.removeEventListener("click", () => {
+        this.toggleNav(4);
+      }, true);
+      this.isMobile = false;
     }
   }
 }

@@ -9,7 +9,6 @@ export class Adventure extends Time implements Sketch {
     offset: number = 420;
     constructor(position: number, analysis: Analysis) {
         super(position, analysis);
-        this.position += this.offset;
     }
 
     static barCount: number = 0;

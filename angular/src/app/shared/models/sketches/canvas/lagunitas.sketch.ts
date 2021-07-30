@@ -23,7 +23,7 @@ export class Lagunitas extends Time implements Sketch {
         // Change the light to flash if a decent beat was hit
         const confidence = this.getBeat();
         if(!Lagunitas.beatSwitch) {
-            if(confidence >= Time.beatConfAvg) {
+            if(confidence >= Time.beatConfAvg - .15) {
                 Lagunitas.beatSwitch = true;
                 this.getLight(ctx).then(light => {
                     Lagunitas.light = light;
@@ -32,7 +32,7 @@ export class Lagunitas extends Time implements Sketch {
                 });
             }
         } else {
-            if(confidence < Time.beatConfAvg) {
+            if(confidence < Time.beatConfAvg - .15) {
                 Lagunitas.beatSwitch = false;
             }
         }
@@ -51,7 +51,6 @@ export class Lagunitas extends Time implements Sketch {
         ctx.arc(circleX, circleY, radius, 0, 2 * Math.PI);
 
         ctx.stroke();
-        // ctx.fill();
         ctx.closePath();
     }
 
@@ -81,7 +80,7 @@ export class Lagunitas extends Time implements Sketch {
     getBeat(): number {
         // Confidence is always between 0 and 1
         if(this.beat.confidence > Time.beatConfAvg) {
-            const confidence_d3 = d3.interpolateNumber(this.beat.confidence, .01);
+            const confidence_d3 = d3.interpolateNumber(.01, this.beat.confidence);
             const difference = Math.abs(this.roundPos(this.position) - this.beat.start);
             return confidence_d3(difference / this.beat.duration);
         } else {

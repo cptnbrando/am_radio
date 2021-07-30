@@ -1,4 +1,4 @@
-import { ElementRef, Input, OnChanges, ViewChild } from '@angular/core';
+import { ElementRef, HostListener, Input, OnChanges, ViewChild } from '@angular/core';
 import { Component, OnInit } from '@angular/core';
 import { SpotifyService } from 'src/app/services/spotify.service';
 import { Sketch } from 'src/app/shared/models/sketch.model';
@@ -78,10 +78,7 @@ export class VisualizerComponent implements OnInit, OnChanges {
       }
       // If the preset is changed, restart the visualizer loop
       if(changes.selectedPreset) {
-        this.stopVisualizer();
-        if(this.isPlaying) {
-          this.beginVisualizer();
-        }
+        this.resetVisualizer();
       }
     } else {
       this.stopVisualizer();
@@ -162,8 +159,14 @@ export class VisualizerComponent implements OnInit, OnChanges {
   }
 
   resizeCanvas(): void {
-    this.canvas.nativeElement.width = window.innerWidth;
-    this.canvas.nativeElement.height = window.innerHeight;
+    if(this.canvas) {
+      this.canvas.nativeElement.width = window.innerWidth;
+      this.canvas.nativeElement.height = window.innerHeight;
+    }
+    if(this.ctx) {
+      this.ctx.canvas.width = window.innerWidth;
+      this.ctx.canvas.height = window.innerHeight;
+    }
   }
   
   initCanvas(): void {
@@ -249,11 +252,19 @@ export class VisualizerComponent implements OnInit, OnChanges {
   stopVisualizer(): Promise<any> {
     return new Promise((resolve, reject) => {
       window.cancelAnimationFrame(this.animationLoopID);
-      if(this.selectedSketch && this.selectedSketch!.name) this.currentSketch.reset();
+      if(this.selectedSketch && this.selectedSketch!.name) this.selectedSketch.reset();
+      if(this.currentSketch && this.currentSketch!.name) this.currentSketch.reset();
       Time.resetTime();
       this.isAnimating = false;
       resolve(this.isAnimating);
     });
+  }
+
+  resetVisualizer(): void {
+    this.stopVisualizer();
+    if(this.isPlaying) {
+      this.beginVisualizer();
+    }
   }
 
   /**
@@ -278,5 +289,11 @@ export class VisualizerComponent implements OnInit, OnChanges {
       default:
         return new Testing123(position, analysis);
     }
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onResize(event: any) {
+    this.resizeCanvas();
+    this.resetVisualizer();
   }
 }
