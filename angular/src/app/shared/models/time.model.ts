@@ -1,3 +1,4 @@
+import { rejects } from 'assert';
 import * as d3Array from 'd3-array';
 import { Beat, Bar, Section, Segment, Tatum, Analysis } from "./track.model";
 
@@ -51,6 +52,10 @@ export class Time {
                 this.beat = data[0];
                 Time.lastBeat = data[0];
                 Time.beatIndex = data[1];
+            }, onRejected => {
+                this.beat = onRejected[0];
+                Time.lastBeat = onRejected[0];
+                Time.beatIndex = onRejected[1];
             });
         // Find the bar
         // console.log("bar");
@@ -59,6 +64,10 @@ export class Time {
                 this.bar = data[0];
                 Time.lastBar = data[0];
                 Time.barIndex = data[1];
+            }, onRejected => {
+                this.bar = onRejected[0];
+                Time.lastBar = onRejected[0];
+                Time.barIndex = onRejected[1];
             });
         // Find the section
         // console.log("section");
@@ -67,6 +76,10 @@ export class Time {
                 this.section = this.analysis.sections[data[1]];
                 Time.lastSection = this.analysis.sections[data[1]];
                 Time.sectionIndex = data[1];
+            }, onRejected => {
+                this.section = this.analysis.sections[onRejected[1]];
+                Time.lastSection = this.analysis.sections[onRejected[1]];
+                Time.sectionIndex = onRejected[1];
             });
         // Find the segment
         const segmentPromise =
@@ -74,6 +87,10 @@ export class Time {
                 this.segment = this.analysis.segments[data[1]];
                 Time.lastSegment = this.analysis.segments[data[1]];
                 Time.segmentIndex = data[1];
+            }, onRejected => {
+                this.segment = this.analysis.segments[onRejected[1]];
+                Time.lastSegment = this.analysis.segments[onRejected[1]];
+                Time.segmentIndex = onRejected[1];
             });
         // Find the tatum
         const tatumPromise =
@@ -81,6 +98,10 @@ export class Time {
                 this.tatum = data[0];
                 Time.lastTatum = data[0];
                 Time.tatumIndex = data[1];
+            }, onRejected => {
+                this.tatum = onRejected[0];
+                Time.lastTatum = onRejected[0];
+                Time.tatumIndex = onRejected[1];
             });
 
         // Resolve when all of them complete
@@ -94,7 +115,7 @@ export class Time {
      * @returns Promise for a found beat / bar / tatum
      */
     private find(patterns: Array<Beat | Bar | Tatum>, position: number, start?: number): Promise<[(Beat | Bar | Tatum), number]>  {
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
             let roundedPos = this.roundPos(position);
             let starts: Array<number> = [];
 
@@ -103,7 +124,11 @@ export class Time {
             });
 
             let index = d3Array.bisectLeft(starts, roundedPos, start);
-            resolve([patterns[index], index]);
+            if(patterns[index]) {
+                resolve([patterns[index], index]);
+            } else {
+                reject([patterns[0], 0]);
+            }
         });
     }
 

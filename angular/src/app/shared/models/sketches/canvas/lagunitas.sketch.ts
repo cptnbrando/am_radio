@@ -43,7 +43,7 @@ export class Lagunitas extends Time implements Sketch {
         ctx.fillStyle = "yellow";
         ctx.lineWidth = 7;
 
-        // Draw a circle and fill it in at the current light
+        // Draw a circle and stroke it in at the current light
         const circleX = Lagunitas.light[0];
         const circleY = Lagunitas.light[1];
 
@@ -51,6 +51,9 @@ export class Lagunitas extends Time implements Sketch {
         ctx.arc(circleX, circleY, radius, 0, 2 * Math.PI);
 
         ctx.stroke();
+
+        ctx.moveTo(0, ctx.canvas.height / 2);
+
         ctx.closePath();
     }
 
@@ -79,6 +82,9 @@ export class Lagunitas extends Time implements Sketch {
 
     getBeat(): number {
         // Confidence is always between 0 and 1
+        if(!this.beat) {
+            return 0;
+        }
         if(this.beat.confidence > Time.beatConfAvg) {
             const confidence_d3 = d3.interpolateNumber(.01, this.beat.confidence);
             const difference = Math.abs(this.roundPos(this.position) - this.beat.start);

@@ -83,6 +83,11 @@ public class SpotifyController {
         return spotifyApi.getAccessToken();
     }
 
+    @GetMapping(value = "/getTokens")
+    public String getTokens() {
+        return this.spotifyApi.getAccessToken();
+    }
+
     /**
      * Get all playlists for the signed in user
      *

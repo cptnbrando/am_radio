@@ -43,7 +43,7 @@ public class StationService {
     // Holds all threads for each station
     private HashMap<Integer, Thread> allRadioThreads;
 
-    private HashMap<Integer, ExecutorService> allRadioExecutors;
+//    private HashMap<Integer, ExecutorService> allRadioExecutors;
 
     private final SpotifyApi spotifyApi;
 
@@ -65,7 +65,7 @@ public class StationService {
         // Initialize with all currently created Stations from db
         List<Station> all = this.stationRepo.findAll();
         for(Station station: all) {
-            station.populateTransients(this.tempApi);
+//            station.populateTransients(this.tempApi);
             this.saveStation(station);
         }
     }
@@ -152,12 +152,11 @@ public class StationService {
                 // Check if it exists in the db
                 // If so, return the HashMap value (so listeners and tracks also get returned)
                 if(stationRepo.existsById(stationID)) {
-                    Station station = this.allStations.get(stationID);
                     // We can fill in the HashMap Transient values here, if they're empty
-                    if(station.getCreator() == null) {
-                        station = this.fillStationData(station);
-                    }
-                    return station;
+//                    if(station.getCreator() == null) {
+//                        station = this.fillStationData(station);
+//                    }
+                    return this.allStations.get(stationID);
                 }
 
                 return null;

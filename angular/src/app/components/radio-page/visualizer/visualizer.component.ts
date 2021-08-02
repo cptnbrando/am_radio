@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { SpotifyService } from 'src/app/services/spotify.service';
 import { Sketch } from 'src/app/shared/models/sketch.model';
 import { Adventure } from 'src/app/shared/models/sketches/canvas/adventure.sketch';
+import { RollerCoaster } from 'src/app/shared/models/sketches/canvas/coaster.sketch';
 import { Lagunitas } from 'src/app/shared/models/sketches/canvas/lagunitas.sketch';
 import { Testing123 } from 'src/app/shared/models/sketches/canvas/testing123.sketch';
 import { Time } from 'src/app/shared/models/time.model';
@@ -18,7 +19,7 @@ export class VisualizerComponent implements OnInit, OnChanges {
   @Input() isLoading: boolean = true;
   @Input() isPlaying: boolean = false;
 
-  @Input() selectedPreset: number = 1;
+  @Input() selectedPreset: number = 3;
 
   // Currently playing track analysis and feature data
   analysis!: Analysis;
@@ -49,7 +50,6 @@ export class VisualizerComponent implements OnInit, OnChanges {
 
   // Start and stop the visualizer based on changes to input values
   ngOnChanges(changes: any): void {
-    // console.log(changes);
     // We never want the visualizer to be playing when nothing's playing
     if(this.currentlyPlaying.name != "Nothing Playing") {
       // If there's a new track playing, get and set the new analysis/features data
@@ -93,11 +93,10 @@ export class VisualizerComponent implements OnInit, OnChanges {
   setAudioData(trackID: string): Promise<any> {
     return new Promise((resolve, reject) => {
       this.spotifyService.getAudioFeatures(trackID).subscribe(data => {
-        // console.log("FEATURES", data);
         this.features = data;
         this.spotifyService.getAudioAnalysis(trackID).subscribe((data: Analysis) => {
-          // console.log("ANALYSIS", data);
           this.analysis = this.editAnalysisData(data);
+          console.log("ANALYSIS", this.analysis);
           resolve(data);
         }, error => {
           reject(error);
@@ -135,12 +134,8 @@ export class VisualizerComponent implements OnInit, OnChanges {
     });
 
     this.segmentMeasures = [];
-    analysis.segments.map((data: Segment) => {
-      data.loudnessEnd = parseFloat(data.loudnessEnd.toFixed(3));
-      data.loudnessMax = parseFloat(data.loudnessMax.toFixed(3));
-      data.loudnessMaxTime = parseFloat(data.loudnessMaxTime.toFixed(3));
-      data.loudnessStart = parseFloat(data.loudnessStart.toFixed(3));
-      data.measure = this.editAudioObject(data.measure);
+    analysis.segments.map((data: Segment, index: number) => {
+      data = this.editSegment(data, analysis, index);
       this.segmentMeasures.push(data.measure);
     });
 
@@ -155,6 +150,22 @@ export class VisualizerComponent implements OnInit, OnChanges {
     data.confidence = parseFloat(data.confidence.toFixed(3));
     data.duration = parseFloat(data.duration.toFixed(3));
     data.start = parseFloat(data.start.toFixed(3));
+    return data;
+  }
+
+  /**
+   * Round all the values to 3 decimal places and fix the loudnessEnd to list the start loudness of the next segment
+   * @param data Segment to edit
+   * @param analysis Track analysis object
+   * @param index Index of segment
+   * @returns Segment with rounded loudness values and corrent loudnessEnd values
+   */
+  editSegment(data: Segment, analysis: Analysis, index: number): Segment {
+    if(index < analysis.segments.length - 1) {
+      data.loudnessEnd = analysis.segments[index + 1].loudnessStart;
+    }
+    data.loudnessMaxTime = parseFloat(data.loudnessMaxTime.toFixed(3));
+    data.measure = this.editAudioObject(data.measure);
     return data;
   }
 
@@ -277,6 +288,8 @@ export class VisualizerComponent implements OnInit, OnChanges {
    * Sketchs:
    * 0 - TestingTesting123
    * 1 - Adventure...!
+   * 2 - Lagunitas
+   * 3 - Adventure2.0...!
    */
   sketches(preset: number, position: number, analysis: Analysis): Sketch {
     switch(preset) {
@@ -286,6 +299,8 @@ export class VisualizerComponent implements OnInit, OnChanges {
         return new Adventure(position, analysis);
       case 2:
         return new Lagunitas(position, analysis);
+      case 3:
+        return new RollerCoaster(position, analysis);
       default:
         return new Testing123(position, analysis);
     }

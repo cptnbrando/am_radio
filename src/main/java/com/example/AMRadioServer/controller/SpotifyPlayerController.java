@@ -157,9 +157,9 @@ public class SpotifyPlayerController {
             AddItemToUsersPlaybackQueueRequest queue = this.spotifyApi.addItemToUsersPlaybackQueue(trackURI).build();
             SkipUsersPlaybackToNextTrackRequest skip = this.spotifyApi.skipUsersPlaybackToNextTrack().build();
             GetUsersCurrentlyPlayingTrackRequest now = this.spotifyApi.getUsersCurrentlyPlayingTrack().build();
-            System.out.println("PLAYTRACK");
+//            System.out.println("PLAYTRACK");
             IPlaylistItem item = now.executeAsync().get().getItem();
-            System.out.println("Attempting to play: " + item.getUri() + " : " + item.getName());
+//            System.out.println("Attempting to play: " + item.getUri() + " : " + item.getName());
 
             if(this.loopChecker(trackURI)) return true;
 
@@ -223,6 +223,9 @@ public class SpotifyPlayerController {
     private boolean loopChecker(String trackURI) throws ExecutionException, InterruptedException {
         GetUsersCurrentlyPlayingTrackRequest now = this.spotifyApi.getUsersCurrentlyPlayingTrack().build();
         CurrentlyPlaying current = now.executeAsync().get();
+//        if(current.getItem().getUri().equals(trackURI)) {
+//            System.out.println("Track found: " + current.getItem().getUri());
+//        }
         return current.getItem().getUri().equals(trackURI);
     }
 
@@ -334,11 +337,19 @@ public class SpotifyPlayerController {
             this.spotifyApi.startResumeUsersPlayback().build().execute();
             return true;
         }
-        catch (IOException | ParseException e)
-        {
+        catch (IOException | ParseException e) {
             System.out.println("Exception in player/play");
             System.out.println(e.getMessage());
             return false;
+        } catch (SpotifyWebApiException f) {
+            if(f.getMessage().equals("Player command failed: No active device found")) {
+                this.setAMRadio();
+                this.play();
+                return true;
+            }
+            else {
+                throw f;
+            }
         }
     }
 

@@ -19,7 +19,7 @@ export class TokenInterceptor implements HttpInterceptor
     });
     
     return next.handle(request).pipe(
-      retry(3),
+      retry(1),
       delay(500)
     );
   }

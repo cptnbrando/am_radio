@@ -71,7 +71,7 @@ export class RadioPageComponent implements OnInit {
 
   public static accessToken: string = "";
 
-  @Output() selectedPreset: number = 1;
+  @Output() selectedPreset: number = 3;
 
   constructor(private spotifyService: SpotifyService, private playerService: SpotifyPlayerService, private script: ScriptService, private radioService: RadioService) {
     // Start isLoading
@@ -143,7 +143,7 @@ export class RadioPageComponent implements OnInit {
         if(data) {
           this.currentDevice = data;
         }
-        console.log(data);
+        // console.log(data);
         resolve(data);
       }, error => {
         reject(error);
@@ -164,7 +164,7 @@ export class RadioPageComponent implements OnInit {
       // If nothing is playing, we set am_radio as the active device, then attempt to play the most recently played track
       // Also open the controls panel
       this.playerService.setAMRadio().subscribe(data => {
-        console.log("setAMRadio", data);
+        // console.log("setAMRadio", data);
         if(data) {
           this.currentDevice = data;
         }
@@ -225,7 +225,7 @@ export class RadioPageComponent implements OnInit {
             this.nextURI = data.nextURI;
             this.playerService.addToQueue(this.nextURI).subscribe();
             this.setPlayerData();
-            console.log("Added to queue", data.nextURI);
+            // console.log("Added to queue", data.nextURI);
           }
         }
       });
@@ -241,17 +241,21 @@ export class RadioPageComponent implements OnInit {
   onCurrentChange(event: any): void {
     // This is the queue loop for an infinite station
     let currentCanvas = this.canvas.getAttribute("current");
-    if(currentCanvas && currentCanvas !== this.currentURI && !this.isLoading) {
-      // Update the player data if the current song was changed
-      this.currentURI = currentCanvas;
+    (<any>window).spotifyPlayer.getCurrentState().then((data: any) => {
+      if(data) {
+        if(data.context.uri !== this.currentURI && !this.isLoading) {
+          // Update the player data if the current song was changed
+          this.currentURI = currentCanvas;
 
-      this.setPlayerData();
+          this.setPlayerData();
 
-      // This is going to be our queue loop to add new songs to the queue
-      if(this.stationNum > 0 && this.currentStation.playTime > 0) {
-        this.queueNextTrack(this.stationNum);
+          // This is going to be our queue loop to add new songs to the queue
+          if(this.stationNum > 0 && this.currentStation.playTime > 0) {
+            this.queueNextTrack(this.stationNum);
+          }
+        }
       }
-    }
+    });
   }
 
   // Event callback for repeat changes detected by Spotify SDK player
@@ -354,7 +358,7 @@ export class RadioPageComponent implements OnInit {
             this.currentStation = data;
             this.setPlayerData();
             // this.queueNextTrack(stationNum);
-            console.log(`setStation, joinStation ${stationNum}`, data);
+            // console.log(`setStation, joinStation ${stationNum}`, data);
           }
         });
       }
@@ -502,7 +506,7 @@ export class RadioPageComponent implements OnInit {
       }
     }
 
-    let overlay = Array.from(document.getElementsByClassName("disappear") as HTMLCollectionOf<HTMLElement>);
+    const overlay = Array.from(document.getElementsByClassName("disappear") as HTMLCollectionOf<HTMLElement>);
     if(this.showNav) {
       overlay.forEach(element => {
         element.style.visibility = "hidden"

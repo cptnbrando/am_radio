@@ -1,4 +1,4 @@
-import { AfterViewChecked, AfterViewInit, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { AfterViewChecked, AfterViewInit, Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output } from '@angular/core';
 import { AppComponent } from 'src/app/app.component';
 import { RadioService } from 'src/app/services/radio.service';
 import { SocketService } from 'src/app/services/socket.service';
@@ -8,25 +8,41 @@ import { SocketService } from 'src/app/services/socket.service';
   templateUrl: './controls.component.html',
   styleUrls: ['./controls.component.scss']
 })
-export class ControlsComponent implements OnInit, AfterViewChecked {
+export class ControlsComponent implements OnInit, AfterViewChecked, OnChanges {
 
   @Input() showControls: boolean = false;
-  selected: number = 0;
+  tabCheck: boolean = true;
+  selectedTab: number = 0;
 
   @Input() stationNum: number = 0;
 
   @Input() isLoading: boolean = true;
 
+  @Input() selectedPreset: number = 3;
+  @Output() preset: number = 3;
   @Output() presetEvent = new EventEmitter<number>();
 
-  constructor(public socketService: SocketService, public radioService: RadioService) { }
+  constructor(public socketService: SocketService, public radioService: RadioService) {
+  }
 
   ngOnInit(): void {
   }
 
-  // So that the selected tab appears when panel is mounted
   ngAfterViewChecked(): void {
-    this.tabClick(this.selected);
+    if(this.tabCheck) {
+      this.tabClick(this.selectedTab);
+    }
+  }
+
+  ngOnChanges(changes: any): void {
+    if(changes.selectedPreset) {      
+      if(changes.selectedPreset?.currentValue !== this.preset) {
+        this.preset = changes.selectedPreset.currentValue;
+      }
+    }
+    if(changes.showControls) {
+      this.tabCheck = true;
+    }
   }
 
   /**
@@ -37,6 +53,7 @@ export class ControlsComponent implements OnInit, AfterViewChecked {
   tabClick(select: number): void {
     // Remove .selected from all tabs
     let allTabs = document.querySelectorAll(".tab");
+    if(!allTabs) return;
     allTabs.forEach(theTab => {
       theTab.classList.remove("selected");
     });
@@ -44,7 +61,14 @@ export class ControlsComponent implements OnInit, AfterViewChecked {
     // Add .selected to the selected tab and set it to the panel
     let tab = document.getElementById(`tab${select}`);
     tab?.classList.add("selected");
-    this.selected = select;
+    if(tab) {
+      this.selectedTab = select;
+      this.tabCheck = false;
+    }
+  }
+
+  changePreset(event: any): void {
+    this.presetEvent.emit(event);
   }
 
   // Logout from am_radio
