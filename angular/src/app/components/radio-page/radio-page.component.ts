@@ -71,6 +71,8 @@ export class RadioPageComponent implements OnInit {
 
   @Output() selectedPreset: number = 3;
 
+  @Output() mousePos: Array<number> = [0, 0];
+
   constructor(private spotifyService: SpotifyService, private playerService: SpotifyPlayerService, private script: ScriptService, private radioService: RadioService) {
     // Start isLoading
     this.toggleLoading(true);
@@ -241,7 +243,9 @@ export class RadioPageComponent implements OnInit {
     let currentCanvas = this.canvas.getAttribute("current");
     (<any>window).spotifyPlayer.getCurrentState().then((data: any) => {
       if(data) {
-        if(data.context.uri !== this.currentURI && !this.isLoading) {
+        if(data.track_window.current_track.uri != this.currentURI && !this.isLoading) {
+          console.log(data);
+          console.log("data diff: " + data.track_window.current_track.uri + " : " + this.currentURI);
           // Update the player data if the current song was changed
           this.currentURI = currentCanvas;
 
@@ -355,8 +359,6 @@ export class RadioPageComponent implements OnInit {
             this.nextURI = data.nextURI;
             this.currentStation = data;
             this.setPlayerData();
-            // this.queueNextTrack(stationNum);
-            // console.log(`setStation, joinStation ${stationNum}`, data);
           }
         });
       }
@@ -500,6 +502,9 @@ export class RadioPageComponent implements OnInit {
         case 3:
           return;
         case 4:
+          if(this.showPlaylistBar) return;
+          if(this.showControls) return;
+          if(this.showStationBar) return;
           break;
       }
     }
@@ -535,12 +540,8 @@ export class RadioPageComponent implements OnInit {
 
   @HostListener('window:resize', ['$event'])
   onResize(event: any) {
-    if(event.target.innerWidth <= 960 || event.target.innerHeight <= 1050) {
+    if(event.target.innerWidth <= 960) {
       this.isMobile = true;
-      this.showPlaylistBar = false;
-      this.showControls = false;
-      this.showStationBar = false;
-      this.showNav = true;
 
       document.getElementById("settingsBars")?.addEventListener("click", () => {
         this.toggleNav(4);
@@ -552,5 +553,15 @@ export class RadioPageComponent implements OnInit {
       }, true);
       this.isMobile = false;
     }
+
+    this.showPlaylistBar = false;
+    this.showControls = false;
+    this.showStationBar = false;
+    this.showNav = true;
+  }
+
+  @HostListener('mousemove', ['$event'])
+  onMousemove(event: MouseEvent) {
+    this.mousePos = [event.clientX, event.clientY];
   }
 }

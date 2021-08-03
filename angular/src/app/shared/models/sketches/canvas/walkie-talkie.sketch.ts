@@ -1,8 +1,7 @@
 import * as d3 from 'd3-interpolate';
 import { Sketch } from "../../sketch.model";
 import { Time } from "../../time.model";
-import { Analysis, Beat, Tatum } from "../../track.model";
-import { RollerCoaster } from "./coaster.sketch";
+import { Analysis } from "../../track.model";
 
 export class WalkieTalkie extends Time implements Sketch {
     name: string = "Walkie Talkie";
@@ -11,30 +10,36 @@ export class WalkieTalkie extends Time implements Sketch {
     isMobile: boolean;
     size: number;
     nodes: Array<number>;
-    constructor(position: number, analysis: Analysis, isMobile: boolean) {
+    mousePos: Array<number>;
+    constructor(position: number, analysis: Analysis, isMobile: boolean, mousePos: Array<number>) {
         super(position, analysis);
         this.isMobile = isMobile;
+        this.mousePos = mousePos;
 
         // Less nodes on mobile
-        this.size = (isMobile) ? 3 : 5
+        // More nodes on desktop depending on track intensity
+        this.size = (isMobile) ? 4 : Math.floor(Time.beatConfAvg * 10) + 1;
         this.nodes = [];
         for(let i = 0; i < this.size; i++) {
             this.nodes.push(0);
         }
     }
 
-    
     paint(ctx: CanvasRenderingContext2D): void {
         ctx.beginPath();
         const color = WalkieTalkie.chosenColor;
         ctx.strokeStyle = color;
         ctx.fillStyle = color;
         ctx.lineWidth = 7;
+
+        const gap = (this.isMobile) ? 0 : 100 - (this.mousePos[1] * .1);
+        const space = (this.isMobile) ? 0 : this.mousePos[0] * .05;
         
         // Set midpoint to beat confidence
         const midX = ctx.canvas.width / 2;
-        const midY = ctx.canvas.height / 2;
+        const actualMidY = ctx.canvas.height / 2;
         const confidence = this.getConfidence();
+        let midY = actualMidY;
         this.nodes[0] = (confidence * 1000 > midY) ? midY : confidence * 1000;
         for(let i = 1; i < this.nodes.length; i++) {
             let conf = (confidence * ((this.size - i) / this.size)) * 1000;
@@ -45,16 +50,22 @@ export class WalkieTalkie extends Time implements Sketch {
 
         let quarter = ctx.canvas.width * (1 / (this.size * 2));
         let xPos = 0;
+        let base = 0;
         
         for(let i = this.size - 1; i > 0; i--) {
+            midY = actualMidY - gap;
             xPos = (this.size - i) * (quarter / 2);
+            base = (this.size - i) * quarter;
+            base += space;
             ctx.lineTo(xPos, midY - this.nodes[i]);
-            ctx.lineTo((this.size - i) * quarter, midY);
-            
+            ctx.lineTo(base, midY);
+            midY = actualMidY + gap;
             ctx.moveTo((this.size - i) * quarter, midY);
             ctx.lineTo(xPos, midY + this.nodes[i]);
-            ctx.lineTo((this.size - i) * quarter, midY);
+            ctx.lineTo(base, midY);
         }
+
+        midY = actualMidY;
         
         ctx.moveTo(midX - (quarter / 2), midY);
         ctx.lineTo(midX, midY - Math.abs(this.nodes[0]));
@@ -67,17 +78,19 @@ export class WalkieTalkie extends Time implements Sketch {
         const canvasWidth = ctx.canvas.width;
         ctx.moveTo(canvasWidth, midY);
         for(let i = this.size - 1; i > 0; i--) {
+            midY = actualMidY - gap;
             xPos = ((this.size - i) * (quarter / 2));
+            base = canvasWidth - ((this.size - i) * quarter);
+            base -= space;
             ctx.lineTo(canvasWidth - xPos, midY - this.nodes[i]);
-            ctx.lineTo(canvasWidth - ((this.size - i) * quarter), midY);
-            
-            ctx.moveTo(canvasWidth - ((this.size - i) * quarter), midY);
+            ctx.lineTo(base, midY);
+            midY = actualMidY + gap;
+            ctx.moveTo(base, midY);
             ctx.lineTo(canvasWidth - xPos, midY + this.nodes[i]);
-            ctx.lineTo(canvasWidth - ((this.size - i) * quarter), midY);
+            ctx.lineTo(base, midY);
         }
         
         ctx.stroke();
-        
         ctx.closePath();
     }
     
@@ -85,21 +98,42 @@ export class WalkieTalkie extends Time implements Sketch {
     static chosenColor: string = WalkieTalkie.colors[Math.floor(Math.random()*WalkieTalkie.colors.length)];
     static frameRate: number = 10;
     static frameKeep: number = 0;
+
+    static barCount: number = 0;
+    static colorCount: number = 0;
+    static colorMax: number = 0;
     loop(ctx: CanvasRenderingContext2D): Promise<any> {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             this.paint(ctx);
             if(WalkieTalkie.frameKeep > WalkieTalkie.frameRate) {
                 ctx.clearRect(0, 0, ctx.canvas.clientWidth, ctx.canvas.clientHeight);
                 WalkieTalkie.frameKeep = 0;
             }
-            WalkieTalkie.chosenColor = WalkieTalkie.colors[Math.floor(Math.random()*WalkieTalkie.colors.length)];
+
+            // Every bar, we set the max frames to use before swapping the color according to the confidence of the bar
+            // It's 10 - the value because higher confidence means we swap colors faster, or require less frames to swap
+            if(WalkieTalkie.barCount !== Time.barIndex) {
+                WalkieTalkie.barCount = Time.barIndex;
+                const barConf = Math.floor(10 - (this.analysis.bars[WalkieTalkie.barCount].confidence * 10)) + 5;
+                WalkieTalkie.colorMax = (barConf < 0) ? 0 : barConf;
+            }
+
+            // We use a simple static counter to swap the colors according to the bar confidence
+            if(WalkieTalkie.colorCount > WalkieTalkie.colorMax) {
+                WalkieTalkie.colorCount = 0;
+                WalkieTalkie.chosenColor = WalkieTalkie.colors[Math.floor(Math.random()*WalkieTalkie.colors.length)];
+            }
+            WalkieTalkie.colorCount++;
             WalkieTalkie.frameKeep++;
             resolve(true);
         });
     }
 
     reset(): void {
-        // throw new Error("Method not implemented.");
+        WalkieTalkie.frameKeep = 0;
+        WalkieTalkie.barCount = 0;
+        WalkieTalkie.colorCount = 0;
+        WalkieTalkie.colorMax = 0;
     }
 
     /**

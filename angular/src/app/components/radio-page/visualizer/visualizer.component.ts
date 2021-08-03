@@ -43,6 +43,8 @@ export class VisualizerComponent implements OnInit, OnChanges {
 
   @Input() isMobile: boolean = false;
 
+  @Input() mousePos: Array<number> = [0, 0];
+
   constructor(private spotifyService: SpotifyService) {
     this.position = 0;
   }
@@ -99,7 +101,7 @@ export class VisualizerComponent implements OnInit, OnChanges {
         this.features = data;
         this.spotifyService.getAudioAnalysis(trackID).subscribe((data: Analysis) => {
           this.analysis = this.editAnalysisData(data);
-          console.log("ANALYSIS", this.analysis);
+          // console.log("ANALYSIS", this.analysis);
           resolve(data);
         }, error => {
           reject(error);
@@ -305,7 +307,7 @@ export class VisualizerComponent implements OnInit, OnChanges {
       case 3:
         return new RollerCoaster(position, analysis);
       case 4:
-        return new WalkieTalkie(position, analysis, this.isMobile);
+        return new WalkieTalkie(position, analysis, this.isMobile, this.mousePos);
       default:
         return new Testing123(position, analysis);
     }

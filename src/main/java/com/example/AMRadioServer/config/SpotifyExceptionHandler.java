@@ -44,11 +44,11 @@ public class SpotifyExceptionHandler {
         // TODO: this sets it for this api, but the new access token needs to go to the player too...
         try {
             final AuthorizationCodeRefreshRequest authRequest = spotifyApi.authorizationCodeRefresh(clientID, clientSecret, refreshToken).build();
-            AuthorizationCodeCredentials auth = authRequest.executeAsync().get();
+            AuthorizationCodeCredentials auth = authRequest.execute();
             this.spotifyApi.setAccessToken(auth.getAccessToken());
             this.spotifyApi.setRefreshToken(auth.getRefreshToken());
         }
-        catch(InterruptedException | ExecutionException e) {
+        catch(IOException | ParseException e) {
             System.out.println("Exception in newTokens");
             System.out.println(e.getMessage());
             throw new SpotifyWebApiException("No refresh token found");
@@ -74,7 +74,7 @@ public class SpotifyExceptionHandler {
         // Catches invalid access tokens
         if(e.getMessage().equals("The access token expired")) {
             try {
-//                System.out.println("Attempting to get new tokens");
+                System.out.println("Attempting to get new tokens");
                 this.newTokens();
                 return null;
             } catch (Exception g) {
@@ -92,6 +92,7 @@ public class SpotifyExceptionHandler {
         // Catches rate limit
         if(e.getMessage().equals("API rate limit exceeded")) {
             try {
+                System.out.println("Rate: " + e.getMessage());
                 Thread.sleep(5000);
                 return null;
             } catch (InterruptedException interruptedException) {

@@ -65,7 +65,11 @@ public class SpotifyController {
      * @throws IOException
      */
     @GetMapping(value = "/getUserCode")
-    public String getSpotifyUserCode(@RequestParam("code") String userCode, HttpServletResponse response) throws IOException {
+    public String getSpotifyUserCode(@RequestParam(value = "code", required = false) String userCode, HttpServletResponse response) throws IOException {
+        if(userCode == null) {
+            response.sendRedirect(SpotifyConfiguration.url);
+            return "";
+        }
         AuthorizationCodeRequest authorizationCodeRequest = spotifyApi.authorizationCode(userCode).build();
 
         try {

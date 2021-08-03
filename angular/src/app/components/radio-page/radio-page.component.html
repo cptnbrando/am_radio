@@ -29,5 +29,5 @@
 <app-visualizer id="visualizer" appDomWatcher (ready)="onPlayerReady($event)" (currentChange)="onCurrentChange($event)"
   (playbackChange)="onPlaybackChange($event)" (shuffleChange)="onShuffleChange($event)"
   (repeatChange)="onRepeatChange($event)" [isLoading]="isLoading" [currentlyPlaying]="currentlyPlaying"
-  [isPlaying]="isPlaying" [selectedPreset]="selectedPreset" [isMobile]="isMobile">
+  [isPlaying]="isPlaying" [selectedPreset]="selectedPreset" [isMobile]="isMobile" [mousePos]="mousePos">
 </app-visualizer>
