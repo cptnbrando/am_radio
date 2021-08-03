@@ -244,8 +244,6 @@ export class RadioPageComponent implements OnInit {
     (<any>window).spotifyPlayer.getCurrentState().then((data: any) => {
       if(data) {
         if(data.track_window.current_track.uri != this.currentURI && !this.isLoading) {
-          console.log(data);
-          console.log("data diff: " + data.track_window.current_track.uri + " : " + this.currentURI);
           // Update the player data if the current song was changed
           this.currentURI = currentCanvas;
 

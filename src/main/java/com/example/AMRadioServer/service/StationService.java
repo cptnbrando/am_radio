@@ -5,9 +5,11 @@ import com.example.AMRadioServer.model.Station;
 import com.example.AMRadioServer.repository.StationRepository;
 import com.wrapper.spotify.SpotifyApi;
 import com.wrapper.spotify.exceptions.SpotifyWebApiException;
+import com.wrapper.spotify.model_objects.credentials.ClientCredentials;
 import com.wrapper.spotify.model_objects.specification.PlaylistSimplified;
 import com.wrapper.spotify.model_objects.specification.PlaylistTrack;
 import com.wrapper.spotify.model_objects.specification.User;
+import com.wrapper.spotify.requests.authorization.client_credentials.ClientCredentialsRequest;
 import lombok.Data;
 import org.apache.hc.core5.http.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,55 +45,35 @@ public class StationService {
     // Holds all threads for each station
     private HashMap<Integer, Thread> allRadioThreads;
 
-//    private HashMap<Integer, ExecutorService> allRadioExecutors;
-
     private final SpotifyApi spotifyApi;
 
-    private final SpotifyApi tempApi;
-
     @Autowired
-    public StationService(StationRepository stationRepo, SpotifyApi spotifyApi) throws SpotifyWebApiException {
+    public StationService(StationRepository stationRepo, SpotifyApi spotifyApi) throws SpotifyWebApiException, IOException, ParseException {
         this.stationRepo = stationRepo;
         this.spotifyApi = spotifyApi;
         this.allStations = new HashMap<>();
         this.allRadioThreads = new HashMap<>();
 
-        this.tempApi = new SpotifyApi.Builder()
+        final SpotifyApi tempApi = new SpotifyApi.Builder()
                 .setClientId(System.getenv("SPOTIFY_CLI_ID"))
                 .setClientSecret(System.getenv("SPOTIFY_CLI_SECRET"))
                 .setRedirectUri(redirectURI)
                 .build();
 
+        final ClientCredentialsRequest clientCredentialsRequest = tempApi.clientCredentials()
+                .build();
+
+        final ClientCredentials clientCredentials = clientCredentialsRequest.execute();
+
+        // Set client access token for tempAPI
+        tempApi.setAccessToken(clientCredentials.getAccessToken());
+
         // Initialize with all currently created Stations from db
         List<Station> all = this.stationRepo.findAll();
         for(Station station: all) {
-//            station.populateTransients(this.tempApi);
+            station.populateTransients(tempApi);
             this.saveStation(station);
-        }
-    }
-
-    /**
-     * SpotifyAPI needs a session, so the first user to access it can fill it with theirs
-     * Also saves it to the db
-     * @param station - Station to fill
-     */
-    private Station fillStationData(Station station) {
-        try {
-            if(station.getAllTracks() == null) {
-                PlaylistTrack[] tracks = this.spotifyApi.getPlaylist(station.getPlaylistID()).build().execute().getTracks().getItems();
-                station.setAllTracks(Arrays.asList(tracks));
-                station.setNotPlayedTracks(new ArrayList<>(Arrays.asList(tracks)));
-            }
-            if(station.getCreator() == null) {
-                station.setCreator(this.spotifyApi.getUsersProfile(station.getCreatorID()).build().execute());
-            }
-            this.saveStation(station);
-            return station;
-        } catch (IOException | SpotifyWebApiException | ParseException e)
-        {
-            System.out.println("Spotify exception caught in StationService/fillStation");
-            System.out.println(e.getMessage());
-            return null;
+            this.start(station.getStationID());
         }
     }
 
@@ -102,8 +84,7 @@ public class StationService {
      * @param playlist a PlaylistSimplified object
      * @return ResponseMessage with details
      */
-    public ResponseMessage createStation(int stationID, PlaylistSimplified playlist)
-    {
+    public ResponseMessage createStation(int stationID, PlaylistSimplified playlist) throws SpotifyWebApiException {
         // If there's already a Playlist in the Station number being created
         if(this.stationRepo.existsById(stationID)) {
             return new ResponseMessage("Station Exists: " + stationID);
@@ -125,7 +106,7 @@ public class StationService {
             this.saveStation(newStation);
             return new ResponseMessage("Created");
         }
-        catch (IOException | SpotifyWebApiException | ParseException e)
+        catch (IOException | ParseException e)
         {
             System.out.println("Spotify exception caught in StationService createStation");
             System.out.println(e.getMessage());

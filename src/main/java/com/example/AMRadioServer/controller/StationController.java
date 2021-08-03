@@ -30,7 +30,7 @@ public class StationController extends SpotifyPlayerController {
      * @return Response Message with details
      */
     @PostMapping(value = "/{stationID}")
-    public ResponseMessage insertNewStation(@PathVariable("stationID") int stationID, @RequestBody PlaylistSimplified playlist) {
+    public ResponseMessage insertNewStation(@PathVariable("stationID") int stationID, @RequestBody PlaylistSimplified playlist) throws SpotifyWebApiException {
         return this.stationService.createStation(stationID, playlist);
     }
 
@@ -136,8 +136,11 @@ public class StationController extends SpotifyPlayerController {
         // Get the station
         Station station = this.stationService.getStation(stationID);
 
+        System.out.println("/sync for: " + stationID);
+        this.play();
         // Play the currently playing track
         if(this.playTrack(station.getCurrentURI())) {
+            System.out.println("synced played track");
             // Wait a second...
             Thread.sleep(1000);
 

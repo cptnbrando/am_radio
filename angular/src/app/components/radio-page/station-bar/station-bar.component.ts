@@ -36,12 +36,14 @@ export class StationBarComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: any): void {
-    if(changes.stationNum) {
-      this.errorMessage = "";
-      this._stationNumDisplay = this.stationNumDisplay(this.stationNum);
-    }
-    if(changes.currentStation) {
-      this._stationDateDisplay = this.stationDateDisplay(this.currentStation.stationCreated);
+    if(this.stationNum != 0) {
+      if(changes.stationNum) {
+        this.errorMessage = "";
+        this._stationNumDisplay = this.stationNumDisplay(this.stationNum);
+      }
+      if(changes.currentStation) {
+        this._stationDateDisplay = (this.currentStation) ? this.stationDateDisplay(this.currentStation.stationCreated) : "";
+      }
     }
   }
 
