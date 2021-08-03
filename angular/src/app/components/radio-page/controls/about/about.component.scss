@@ -1,3 +1,22 @@
-.noMobile {
-    display: none;
+// Utilities
+@use "src/app/global"as global;
+
+#list {
+    list-style-type: armenian;
+}
+
+
+@media only screen and (max-width: global.$mobileWidth) {
+    .center {
+        text-align: center;
+    }
+    #list {
+        li {
+            position: relative;
+            left: -10px;
+        }
+    }
+    .noMobile {
+        display: none;
+    }
 }

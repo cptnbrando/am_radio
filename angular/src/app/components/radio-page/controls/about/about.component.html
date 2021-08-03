@@ -1,25 +1,22 @@
 <div>
-    <h1>this is am_radio</h1>
-    <p>it's a way to listen to music with others</p>
-    <p>click around and explore, almost everything does something when clicked on</p>
-    <ul class="noMobile">
-        <li>Use the player icons below to control Spotify</li>
-        <li>Click the anywhere on nav bar up top to open/close this panel</li>
-        <li>Click the number in the top right to go up through stations, right click it to go down</li>
-        <li>000 is your personal player. Click the album art in the bottom left to open the Playlists panel, where you can change the track at anytime.</li>
-        <li>You can also use the keyboard to do things</li>
-        <ul>
+    <h1 class="center">this is am_radio</h1>
+    <p class="center">it's a way to listen to music with others</p>
+    <ul id="list">
+        <li>Click the top bar to open/close this panel</li>
+        <li>Click the song name to open the Playlists panel</li>
+        <li>Click the number in the top right to go up through stations, right click (or hold) it to go down</li>
+        <li class="noMobile">You can also use the keyboard to do things</li>
+        <ul class="noMobile">
             <li>Use the number keys to change the station</li>
             <li>Use the left and right arrow keys to change the track on 000</li>
             <li>Use the up and down arrow keys to change the station</li>
             <li>Use the 'S' key to open the Station panel, 'P' key to open Playlist panel</li>
         </ul>
-        <li>Click the info in the bottom right to open the Station panel, where you can view info about the current station</li>
-        <li>If you're on an unowned station, select a playlist on the Playlist panel and click the create button on the Station panel. Anybody that goes to that station will hear your playlist, in sync with the world</li>
-        <li>Right click the logo in the top left to logout of am_radio</li>
-        <li>Stations reset with every update, which is usually daily right now</li>
-        <li>Click the visualizer to fullscreen it, click anywhere to open the menus</li>
+        <li>Click the bottom right to open the station panel</li>
+        <li>Click the visualizer to fullscreen it</li>
     </ul>
+    <p>Use the playlist and station panels to create a station</p>
+    <p>Everybody that visits that station will hear it, in sync 🎵</p>
     <p class="noMobile">The main process works through your Spotify queue. In the backend for a station, a database keeps track of the currently playing song and when it started. am_radio will seek to the time it's been since the track started playing, and queue up the next one whenever the current one ends.</p>
     <p>Thank you for using my app<br>
         - Captain Brando!
