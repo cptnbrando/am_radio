@@ -69,8 +69,6 @@ export class RadioPageComponent implements OnInit {
   canvas: any;
   showNav: boolean = true;
 
-  public static accessToken: string = "";
-
   @Output() selectedPreset: number = 3;
 
   constructor(private spotifyService: SpotifyService, private playerService: SpotifyPlayerService, private script: ScriptService, private radioService: RadioService) {
@@ -537,7 +535,7 @@ export class RadioPageComponent implements OnInit {
 
   @HostListener('window:resize', ['$event'])
   onResize(event: any) {
-    if(event.target.innerWidth <= 960) {
+    if(event.target.innerWidth <= 960 || event.target.innerHeight <= 1050) {
       this.isMobile = true;
       this.showPlaylistBar = false;
       this.showControls = false;

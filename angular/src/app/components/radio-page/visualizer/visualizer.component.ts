@@ -6,6 +6,7 @@ import { Adventure } from 'src/app/shared/models/sketches/canvas/adventure.sketc
 import { RollerCoaster } from 'src/app/shared/models/sketches/canvas/coaster.sketch';
 import { Lagunitas } from 'src/app/shared/models/sketches/canvas/lagunitas.sketch';
 import { Testing123 } from 'src/app/shared/models/sketches/canvas/testing123.sketch';
+import { WalkieTalkie } from 'src/app/shared/models/sketches/canvas/walkie-talkie.sketch';
 import { Time } from 'src/app/shared/models/time.model';
 import { Analysis, Bar, Beat, Section, Segment, Tatum } from 'src/app/shared/models/track.model';
 
@@ -39,6 +40,8 @@ export class VisualizerComponent implements OnInit, OnChanges {
 
   selectedSketch!: Sketch;
   currentSketch!: Sketch;
+
+  @Input() isMobile: boolean = false;
 
   constructor(private spotifyService: SpotifyService) {
     this.position = 0;
@@ -301,6 +304,8 @@ export class VisualizerComponent implements OnInit, OnChanges {
         return new Lagunitas(position, analysis);
       case 3:
         return new RollerCoaster(position, analysis);
+      case 4:
+        return new WalkieTalkie(position, analysis, this.isMobile);
       default:
         return new Testing123(position, analysis);
     }

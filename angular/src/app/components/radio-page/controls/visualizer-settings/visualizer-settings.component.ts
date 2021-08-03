@@ -26,7 +26,8 @@ export class VisualizerSettingsComponent implements OnInit, AfterViewInit {
     new Preset(0, "TestingTesting123", "/testing123.png"),
     new Preset(1, "Adventure...!", "/adventure.png"),
     new Preset(2, "Lagunitas", "/lagunitas.png"),
-    new Preset(3, "Roller Coaster 🎢", "/coaster.png")
+    new Preset(3, "Roller Coaster 🎢", "/coaster.png"),
+    new Preset(4, "Walkie Talkie", "/walkie.png")
   ];
 
   constructor() {

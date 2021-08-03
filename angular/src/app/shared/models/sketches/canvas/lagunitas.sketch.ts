@@ -7,7 +7,6 @@ export class Lagunitas extends Time implements Sketch {
     name: string = "Lagunitas";
     creator: string = "Captain Brando!";
     offset: number = 0;
-
     constructor(position: number, analysis: Analysis) {
         super(position, analysis);
     }
@@ -23,7 +22,7 @@ export class Lagunitas extends Time implements Sketch {
         // Change the light to flash if a decent beat was hit
         const confidence = this.getBeat();
         if(!Lagunitas.beatSwitch) {
-            if(confidence >= Time.beatConfAvg - .15) {
+            if(confidence >= Time.beatConfAvg - .3) {
                 Lagunitas.beatSwitch = true;
                 this.getLight(ctx).then(light => {
                     Lagunitas.light = light;
@@ -32,7 +31,7 @@ export class Lagunitas extends Time implements Sketch {
                 });
             }
         } else {
-            if(confidence < Time.beatConfAvg - .15) {
+            if(confidence < Time.beatConfAvg - .3) {
                 Lagunitas.beatSwitch = false;
             }
         }

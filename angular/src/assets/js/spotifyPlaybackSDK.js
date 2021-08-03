@@ -17,8 +17,13 @@ window.onSpotifyWebPlaybackSDKReady = () => {
     canvas.setAttribute("badState", "true");
   }
   
-  player.addListener('initialization_error', ({ message }) => { error(message); });
+  player.addListener('initialization_error', ({ message }) => {
+    console.log("Initialization error:");
+    error(message);
+  });
   player.addListener('authentication_error', ({ message }) => {
+    console.log("authentication error:");
+    error(message);
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.onreadystatechange = function() { 
       if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
@@ -30,14 +35,15 @@ window.onSpotifyWebPlaybackSDKReady = () => {
     }
     xmlHttp.open( "GET", "/api/spotify/getTokens", true );
     xmlHttp.send( null );
-    // player.getOAuthToken(cb => {
-    //   localStorage.setItem("accessToken", xmlHttp.responseText);
-    //   cb(xmlHttp.responseText);
-    // });
-    // error(message);
   });
-  player.addListener('account_error', ({ message }) => { error(message); });
-  player.addListener('playback_error', ({ message }) => { error(message); });
+  player.addListener('account_error', ({ message }) => {
+    console.log("Account_error:");
+    error(message);
+  });
+  player.addListener('playback_error', ({ message }) => {
+    console.log("playback error:");
+    error(message);
+  });
 
   player.addListener('player_state_changed', state => { 
     if(state) {
