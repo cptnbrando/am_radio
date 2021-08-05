@@ -301,11 +301,11 @@ export class VisualizerComponent implements OnInit, OnChanges {
       case 0:
         return new Testing123(position, analysis);
       case 1:
-        return new Adventure(position, analysis);
+        return new Adventure(position, analysis, this.isMobile);
       case 2:
         return new Lagunitas(position, analysis);
       case 3:
-        return new RollerCoaster(position, analysis);
+        return new RollerCoaster(position, analysis, this.isMobile);
       case 4:
         return new WalkieTalkie(position, analysis, this.isMobile, this.mousePos);
       default:

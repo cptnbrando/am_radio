@@ -7,8 +7,10 @@ export class Adventure extends Time implements Sketch {
     name: string = "adventure...!";
     creator: string = "Captain Brando!";
     offset: number = 420;
-    constructor(position: number, analysis: Analysis) {
+    isMobile: boolean;
+    constructor(position: number, analysis: Analysis, isMobile: boolean) {
         super(position, analysis);
+        this.isMobile = isMobile;
     }
 
     static barCount: number = 0;
@@ -18,17 +20,17 @@ export class Adventure extends Time implements Sketch {
     
     paint(ctx: CanvasRenderingContext2D): void {
         ctx.beginPath();
-        let color = this.getColor(this.position, this.tatum);
+        const color = this.getColor(this.position, this.tatum);
         ctx.strokeStyle = color;
         ctx.fillStyle = color;
-        ctx.lineWidth = 7;
+        ctx.lineWidth = (this.isMobile) ? 1 : 7;
 
-        let posX = this.getX(ctx, this.bar);
-        let posY = ctx.canvas.height / 2;
+        const posX = this.getX(ctx, this.bar);
+        const posY = ctx.canvas.height / 2;
 
-        let confidence = this.getConfidence(this.position, this.tatum);
+        const confidence = this.getConfidence(this.position, this.tatum);
         ctx.moveTo(posX, posY);
-        let max = 500;
+        const max = 500;
         ctx.lineTo(posX, posY - Math.abs(confidence * max));
         ctx.lineTo(posX, posY + Math.abs(confidence * max));
         

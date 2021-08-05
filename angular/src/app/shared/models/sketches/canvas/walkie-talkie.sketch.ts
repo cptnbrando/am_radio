@@ -97,33 +97,17 @@ export class WalkieTalkie extends Time implements Sketch {
         ctx.closePath();
     }
     
+    static frameRate: number = 10;
+    static frameKeep: number = 0;
+    
     static colors: string[] = ["red", "blue", "yellow", "green", "white", "purple", "orange", "aqua", "crimson", "cyan", "chocolate", "DarkSalmon", "ForestGreen", "Gainsboro", "LavenderBlush", "LemonChiffon", "LightSkyBlue", "MidnightBlue", "Silver", "SeaGreen", "Sienna", "SlateBlue", "Gold", "Khaki", "DarkOrange", "Aquamarine"];
     static sectionColors: string[] = WalkieTalkie.colorArrayRandom(4, WalkieTalkie.colors);
     static chosenColor: string = WalkieTalkie.colors[Math.floor(Math.random()*WalkieTalkie.colors.length)];
-    static frameRate: number = 10;
-    static frameKeep: number = 0;
-
-    static barCount: number = 0;
     static sectionCount: number = 0;
-    static colorCount: number = 0;
-    static colorMax: number = 0;
+
     loop(ctx: CanvasRenderingContext2D): Promise<any> {
         return new Promise((resolve) => {
-            this.paint(ctx);
-            if(WalkieTalkie.frameKeep > WalkieTalkie.frameRate) {
-                ctx.clearRect(0, 0, ctx.canvas.clientWidth, ctx.canvas.clientHeight);
-                WalkieTalkie.frameKeep = 0;
-            }
-
-            // Every bar, we set the max frames to use before swapping the color according to the confidence of the bar
-            // It's 10 - the value because higher confidence means we swap colors faster, or require less frames to swap
-            if(WalkieTalkie.barCount !== Time.barIndex) {
-                WalkieTalkie.barCount = Time.barIndex;
-                const barConf = Math.floor(10 - (this.analysis.bars[WalkieTalkie.barCount].confidence * 10)) + 5;
-                WalkieTalkie.colorMax = (barConf < 0) ? 0 : barConf;
-            }
-
-            // Every section we set a new three random colors
+            // Every section we set four new random colors
             if(WalkieTalkie.sectionCount !== Time.sectionIndex) {
                 // Filter is used to have them be different colors
                 WalkieTalkie.sectionColors = WalkieTalkie.colorArrayRandom(4, WalkieTalkie.colors.filter((el) => {
@@ -131,23 +115,23 @@ export class WalkieTalkie extends Time implements Sketch {
                 }));
                 WalkieTalkie.sectionCount = Time.sectionIndex;
             }
+            
+            // Use d3 to get an interpolated color
+            WalkieTalkie.chosenColor = this.d3Color(WalkieTalkie.sectionColors);
 
-            // We use a simple static counter to swap the colors according to the bar confidence
-            if(WalkieTalkie.colorCount > WalkieTalkie.colorMax) {
-                WalkieTalkie.colorCount = 0;
-                WalkieTalkie.chosenColor = WalkieTalkie.sectionColors[Math.floor(Math.random()*WalkieTalkie.sectionColors.length)];
-            }
-            WalkieTalkie.colorCount++;
+            // Paint the scene and clear the frame according to the framerate
+            this.paint(ctx);
             WalkieTalkie.frameKeep++;
+            if(WalkieTalkie.frameKeep > WalkieTalkie.frameRate) {
+                ctx.clearRect(0, 0, ctx.canvas.clientWidth, ctx.canvas.clientHeight);
+                WalkieTalkie.frameKeep = 0;
+            }
             resolve(true);
         });
     }
 
     reset(): void {
         WalkieTalkie.frameKeep = 0;
-        WalkieTalkie.barCount = 0;
-        WalkieTalkie.colorCount = 0;
-        WalkieTalkie.colorMax = 0;
         WalkieTalkie.sectionCount = 0;
         WalkieTalkie.sectionColors = WalkieTalkie.colorArrayRandom(4, WalkieTalkie.colors);
     }
@@ -182,5 +166,16 @@ export class WalkieTalkie extends Time implements Sketch {
         }
 
         return colors;
+    }
+
+    /**
+     * Uses d3.piecewise to return an interpolated color from a given array of colors
+     * @param colors array of colors
+     * @returns interpolated color
+     */
+    d3Color(colors: string[]): string {
+        const difference = Math.abs(this.roundPos(this.position) - this.beat.start);
+        const colorD3 = d3.piecewise(d3.interpolateRgb.gamma(2.2), colors);
+        return colorD3(difference / this.beat.duration);
     }
 }

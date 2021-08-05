@@ -1,7 +1,7 @@
 import * as d3 from 'd3-interpolate';
 import { Sketch } from "../../sketch.model";
 import { Time } from "../../time.model";
-import { Analysis, Beat } from "../../track.model";
+import { Analysis } from "../../track.model";
 
 export class Lagunitas extends Time implements Sketch {
     name: string = "Lagunitas";

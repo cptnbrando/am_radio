@@ -7,8 +7,10 @@ export class RollerCoaster extends Time implements Sketch {
     name: string = "RollerCoaster 🎢";
     creator: string = "Captain Brando!";
     offset: number = 420;
-    constructor(position: number, analysis: Analysis) {
+    isMobile: boolean;
+    constructor(position: number, analysis: Analysis, isMobile: boolean) {
         super(position, analysis);
+        this.isMobile = isMobile;
     }
 
     static barCount: number = 0;
@@ -21,7 +23,7 @@ export class RollerCoaster extends Time implements Sketch {
         const color = this.getColor(this.position, this.tatum);
         ctx.strokeStyle = color;
         ctx.fillStyle = color;
-        ctx.lineWidth = 7;
+        ctx.lineWidth = (this.isMobile) ? 1 : 7;
 
         const posX = this.getX(ctx, this.bar);
         const posY = ctx.canvas.height;
