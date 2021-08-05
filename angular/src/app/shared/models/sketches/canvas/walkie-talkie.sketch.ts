@@ -32,7 +32,10 @@ export class WalkieTalkie extends Time implements Sketch {
         ctx.fillStyle = color;
         ctx.lineWidth = 7;
 
+        // gap is a y axis (up/down) gap based on y mouse position
         const gap = (this.isMobile) ? 0 : 100 - (this.mousePos[1] * .1);
+
+        // space is an x axis (left/right) space based on x mouse position
         const space = (this.isMobile) ? 0 : this.mousePos[0] * .05;
         
         // Set midpoint to beat confidence
@@ -48,7 +51,8 @@ export class WalkieTalkie extends Time implements Sketch {
         
         ctx.moveTo(0, midY);
 
-        let quarter = ctx.canvas.width * (1 / (this.size * 2));
+        const canvasWidth = ctx.canvas.width;
+        const quarter = ctx.canvas.width * (1 / (this.size * 2));
         let xPos = 0;
         let base = 0;
         
@@ -60,7 +64,7 @@ export class WalkieTalkie extends Time implements Sketch {
             ctx.lineTo(xPos, midY - this.nodes[i]);
             ctx.lineTo(base, midY);
             midY = actualMidY + gap;
-            ctx.moveTo((this.size - i) * quarter, midY);
+            ctx.moveTo(base, midY);
             ctx.lineTo(xPos, midY + this.nodes[i]);
             ctx.lineTo(base, midY);
         }
@@ -75,7 +79,6 @@ export class WalkieTalkie extends Time implements Sketch {
         ctx.lineTo(midX, midY + Math.abs(this.nodes[0]));
         ctx.lineTo(midX + (quarter / 2), midY);
         
-        const canvasWidth = ctx.canvas.width;
         ctx.moveTo(canvasWidth, midY);
         for(let i = this.size - 1; i > 0; i--) {
             midY = actualMidY - gap;
@@ -94,12 +97,14 @@ export class WalkieTalkie extends Time implements Sketch {
         ctx.closePath();
     }
     
-    static colors: string[] = ["red", "blue", "yellow", "green", "white", "purple", "orange", "aqua"];
+    static colors: string[] = ["red", "blue", "yellow", "green", "white", "purple", "orange", "aqua", "crimson", "cyan", "chocolate", "DarkSalmon", "ForestGreen", "Gainsboro", "LavenderBlush", "LemonChiffon", "LightSkyBlue", "MidnightBlue", "Silver", "SeaGreen", "Sienna", "SlateBlue", "Gold", "Khaki", "DarkOrange", "Aquamarine"];
+    static sectionColors: string[] = WalkieTalkie.colorArrayRandom(4, WalkieTalkie.colors);
     static chosenColor: string = WalkieTalkie.colors[Math.floor(Math.random()*WalkieTalkie.colors.length)];
     static frameRate: number = 10;
     static frameKeep: number = 0;
 
     static barCount: number = 0;
+    static sectionCount: number = 0;
     static colorCount: number = 0;
     static colorMax: number = 0;
     loop(ctx: CanvasRenderingContext2D): Promise<any> {
@@ -118,10 +123,19 @@ export class WalkieTalkie extends Time implements Sketch {
                 WalkieTalkie.colorMax = (barConf < 0) ? 0 : barConf;
             }
 
+            // Every section we set a new three random colors
+            if(WalkieTalkie.sectionCount !== Time.sectionIndex) {
+                // Filter is used to have them be different colors
+                WalkieTalkie.sectionColors = WalkieTalkie.colorArrayRandom(4, WalkieTalkie.colors.filter((el) => {
+                    return !WalkieTalkie.sectionColors.includes(el);
+                }));
+                WalkieTalkie.sectionCount = Time.sectionIndex;
+            }
+
             // We use a simple static counter to swap the colors according to the bar confidence
             if(WalkieTalkie.colorCount > WalkieTalkie.colorMax) {
                 WalkieTalkie.colorCount = 0;
-                WalkieTalkie.chosenColor = WalkieTalkie.colors[Math.floor(Math.random()*WalkieTalkie.colors.length)];
+                WalkieTalkie.chosenColor = WalkieTalkie.sectionColors[Math.floor(Math.random()*WalkieTalkie.sectionColors.length)];
             }
             WalkieTalkie.colorCount++;
             WalkieTalkie.frameKeep++;
@@ -134,6 +148,8 @@ export class WalkieTalkie extends Time implements Sketch {
         WalkieTalkie.barCount = 0;
         WalkieTalkie.colorCount = 0;
         WalkieTalkie.colorMax = 0;
+        WalkieTalkie.sectionCount = 0;
+        WalkieTalkie.sectionColors = WalkieTalkie.colorArrayRandom(4, WalkieTalkie.colors);
     }
 
     /**
@@ -147,5 +163,24 @@ export class WalkieTalkie extends Time implements Sketch {
         let confidence_d3 = d3.interpolateNumber(beat.confidence, 0);
         let difference = Math.abs(this.roundPos(this.position) - beat.start);
         return confidence_d3(difference / beat.duration);
+    }
+
+    /**
+     * Returns a new unique array of random colors given a size
+     * @param size the size of the returned array
+     * @returns a unique colors array of given size
+     */
+    static colorArrayRandom(size: number, check: Array<string>): Array<string> {
+        let colors: string[] = [];
+
+        while(colors.length < size) {
+            let random = Math.floor(Math.random()*check.length);
+            const color = check[random];
+            if(colors.indexOf(color) === -1) {
+                colors.push(color);
+            }
+        }
+
+        return colors;
     }
 }

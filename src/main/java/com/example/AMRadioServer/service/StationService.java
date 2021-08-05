@@ -54,6 +54,7 @@ public class StationService {
         this.allStations = new HashMap<>();
         this.allRadioThreads = new HashMap<>();
 
+        // We use a temporary API to fill in the station transients
         final SpotifyApi tempApi = new SpotifyApi.Builder()
                 .setClientId(System.getenv("SPOTIFY_CLI_ID"))
                 .setClientSecret(System.getenv("SPOTIFY_CLI_SECRET"))
@@ -75,6 +76,8 @@ public class StationService {
             this.saveStation(station);
             this.start(station.getStationID());
         }
+
+        System.out.println("Station transients filled in");
     }
 
     /**
@@ -106,16 +109,10 @@ public class StationService {
             this.saveStation(newStation);
             return new ResponseMessage("Created");
         }
-        catch (IOException | ParseException e)
-        {
-            System.out.println("Spotify exception caught in StationService createStation");
+        catch (IOException | IllegalArgumentException | ParseException e) {
+            System.out.println("Exception caught in StationService createStation");
             System.out.println(e.getMessage());
-            return new ResponseMessage("Spotify exception error StationService createStation");
-        }
-        catch (IllegalArgumentException e) {
-            System.out.println("IllegalArgumentException caught in StationService createStation");
-            System.out.println(e.getMessage());
-            return new ResponseMessage("IllegalArgumentException error StationService createStation");
+            return new ResponseMessage("Exception in StationService createStation");
         }
     }
 
@@ -133,13 +130,9 @@ public class StationService {
                 // Check if it exists in the db
                 // If so, return the HashMap value (so listeners and tracks also get returned)
                 if(stationRepo.existsById(stationID)) {
-                    // We can fill in the HashMap Transient values here, if they're empty
-//                    if(station.getCreator() == null) {
-//                        station = this.fillStationData(station);
-//                    }
                     return this.allStations.get(stationID);
                 }
-
+                // If not in db, return null
                 return null;
             }
             catch (IllegalArgumentException e) {
@@ -149,6 +142,7 @@ public class StationService {
             }
         }
 
+        // Otherwise just return the data from the HashMap
         return this.allStations.get(stationID);
     }
 
@@ -199,7 +193,10 @@ public class StationService {
     public void removeListener(int stationID, User user) {
         try {
             Station station = this.getStation(stationID, false);
-            station.getListeners().remove(user.getId());
+
+            if(station.getListeners().containsKey(user.getId())) {
+                station.getListeners().remove(user.getId());
+            }
 
             // If it's the last listener, stop the thread
             if(station.getListeners().isEmpty()) {
@@ -212,7 +209,7 @@ public class StationService {
             this.saveStation(station);
         }
         catch (NullPointerException ignored) {
-//            System.out.println("NullPointer caught in StationService/removeListener");
+            System.out.println("NullPointer caught in StationService/removeListener");
         } catch (SecurityException e) {
             System.out.println("SecurityException caught in StationService/removeListener");
         }

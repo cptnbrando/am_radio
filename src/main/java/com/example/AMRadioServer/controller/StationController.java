@@ -6,8 +6,11 @@ import com.example.AMRadioServer.service.StationService;
 import com.wrapper.spotify.exceptions.SpotifyWebApiException;
 import com.wrapper.spotify.model_objects.specification.PlaylistSimplified;
 import com.wrapper.spotify.model_objects.specification.User;
+import com.wrapper.spotify.requests.data.player.GetUsersCurrentlyPlayingTrackRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.concurrent.ExecutionException;
 
 @RestController
 @CrossOrigin(originPatterns = "*", allowCredentials = "true")
@@ -52,7 +55,7 @@ public class StationController extends SpotifyPlayerController {
      * @param stationID ID of station to join
      */
     @GetMapping(value = "/{stationID}/join")
-    public Station joinStation(@PathVariable("stationID") int stationID) throws SpotifyWebApiException, InterruptedException {
+    public Station joinStation(@PathVariable("stationID") int stationID) throws SpotifyWebApiException {
         Station station = this.stationService.getStation(stationID, false);
         if(station == null) {
             return null;
@@ -71,22 +74,38 @@ public class StationController extends SpotifyPlayerController {
         }
 
         // Wait a second for the fields to get right, then get the station again
-        Thread.sleep(1000);
-        station = this.stationService.getStation(stationID, false);
+        try {
+            Thread.sleep(1000);
+            station = this.stationService.getStation(stationID, false);
 
-        // Play the current track and seek it to the right time if the station is playing
-        // System.currentTime - station.getPlayTime
-        if(station.isPlaying() && super.playTrack(station.getCurrentURI())) {
-            super.seek((int) (System.currentTimeMillis() - station.getPlayTime()));
+            // Check if the station is playing. If not, add a delay and try again!
+            // System.currentTime - station.getPlayTime
+            if(!station.isPlaying()) {
+                Thread.sleep(1000);
+                station = this.stationService.getStation(stationID, false);
+            }
+
+            // Play the track if the current playing track is not the current station track
+            // Seek the track and play
+            if(station.isPlaying()) {
+                // If the track is not already playing, we probably need to play the track AND queue up the next one
+                if(!super.playCheck(station.getCurrentURI())) {
+                    if(super.playTrack(station.getCurrentURI())) {
+                        // Add the next one to the queue
+                        super.addToQueue(station.getNextURI());
+                    }
+                }
+
+                // If it's already playing immediately, just seek to the time. No queue. Delay...
+                Thread.sleep(800);
+                super.seek((int) (System.currentTimeMillis() - station.getPlayTime()));
+            }
+
+            return station;
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            return station;
         }
-
-        // Wait a second for the playTrack to go through
-        Thread.sleep(1000);
-
-        // Add the next one to the queue
-        super.addToQueue(station.getNextURI());
-
-        return station;
     }
 
     /**
