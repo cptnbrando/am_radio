@@ -3,20 +3,9 @@
         <h1>Visualizer Presets</h1>
     </div>
     <div id="vizList">
-        <div id="preset0" class="preset clickable" (click)="change(0)">
-            <h5>testingtesting123</h5>
-        </div>
-        <div id="preset1" class="preset clickable" (click)="change(1)">
-            <h5>adventure...!</h5>
-        </div>
-        <div id="preset2" class="preset clickable" (click)="change(2)">
-            <h5>Lagunitas</h5>
-        </div>
-        <div id="preset3" class="preset clickable" (click)="change(3)">
-            <h5>Roller Coaster 🎢</h5>
-        </div>
-        <div id="preset4" class="preset clickable" (click)="change(4)">
-            <h5>~Walkie Talkie~</h5>
+        <div *ngFor="let preset of presets" class="preset clickable" id="{{'preset' + preset.id}}"
+            (click)="change(preset.id)" [style.background-image]="'url(' + preset.image + ')'">
+            <h5>{{preset.name}}</h5>
         </div>
     </div>
 </div>

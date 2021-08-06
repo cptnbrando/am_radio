@@ -5,6 +5,7 @@ import { Sketch } from 'src/app/shared/models/sketch.model';
 import { Adventure } from 'src/app/shared/models/sketches/canvas/adventure.sketch';
 import { RollerCoaster } from 'src/app/shared/models/sketches/canvas/coaster.sketch';
 import { Lagunitas } from 'src/app/shared/models/sketches/canvas/lagunitas.sketch';
+import { Rain } from 'src/app/shared/models/sketches/canvas/rain.sketch';
 import { Testing123 } from 'src/app/shared/models/sketches/canvas/testing123.sketch';
 import { WalkieTalkie } from 'src/app/shared/models/sketches/canvas/walkie-talkie.sketch';
 import { Time } from 'src/app/shared/models/time.model';
@@ -308,6 +309,8 @@ export class VisualizerComponent implements OnInit, OnChanges {
         return new RollerCoaster(position, analysis, this.isMobile);
       case 4:
         return new WalkieTalkie(position, analysis, this.isMobile, this.mousePos);
+      case 5:
+        return new Rain(position, analysis);
       default:
         return new Testing123(position, analysis);
     }

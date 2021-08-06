@@ -7,7 +7,7 @@ export class Preset {
   constructor(id: number, name: string, image: string) {
     this.id = id;
     this.name = name;
-    this.image = image;
+    this.image = '../../../../../assets/img/viz/' + image;
   }
 }
 
@@ -23,11 +23,12 @@ export class VisualizerSettingsComponent implements OnInit, AfterViewInit {
   presetChange: boolean = false;
 
   presets: Array<Preset> = [
-    new Preset(0, "TestingTesting123", "/testing123.png"),
-    new Preset(1, "Adventure...!", "/adventure.png"),
-    new Preset(2, "Lagunitas", "/lagunitas.png"),
-    new Preset(3, "Roller Coaster 🎢", "/coaster.png"),
-    new Preset(4, "Walkie Talkie", "/walkie.png")
+    new Preset(0, "TestingTesting123", "testing123.png"),
+    new Preset(1, "Adventure...!", "adventure.png"),
+    new Preset(2, "Lagunitas", "lagunitas.png"),
+    new Preset(3, "Roller Coaster 🎢", "coaster.png"),
+    new Preset(4, "Walkie Talkie", "walkie.png"),
+    new Preset(5, "☔ Acid Rain ☔", "rain.png")
   ];
 
   constructor() {
