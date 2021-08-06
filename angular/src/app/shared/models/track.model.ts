@@ -11,6 +11,29 @@ export interface Analysis {
     track: any;
 }
 
+/**
+ * A Features object for a track from Spotify
+ */
+export interface Features {
+    acousticness: number;
+    analysisUrl: string;
+    danceability: number;
+    durationMs: number;
+    energy: number;
+    id: string;
+    instrumentalness: string;
+    key: number;
+    liveness: number;
+    loudness: number;
+    mode: string;
+    speechiness: number;
+    tempo: number;
+    timeSignature: number;
+    trackHref: string;
+    type: string;
+    uri: string;
+    valence: number;
+}
 
 /**
  * A beat. You know, like, untz untz etc.

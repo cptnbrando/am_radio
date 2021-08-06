@@ -28,7 +28,8 @@ export class VisualizerSettingsComponent implements OnInit, AfterViewInit {
     new Preset(2, "Lagunitas", "lagunitas.png"),
     new Preset(3, "Roller Coaster 🎢", "coaster.png"),
     new Preset(4, "Walkie Talkie", "walkie.png"),
-    new Preset(5, "☔ Acid Rain ☔", "rain.png")
+    new Preset(5, "🌦 Rain 🌦", "rain.png"),
+    new Preset(6, "☔ Acid Rain ☔", "rain.png")
   ];
 
   constructor() {

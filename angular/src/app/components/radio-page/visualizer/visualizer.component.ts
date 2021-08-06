@@ -2,6 +2,7 @@ import { ElementRef, HostListener, Input, OnChanges, ViewChild } from '@angular/
 import { Component, OnInit } from '@angular/core';
 import { SpotifyService } from 'src/app/services/spotify.service';
 import { Sketch } from 'src/app/shared/models/sketch.model';
+import { AcidRain } from 'src/app/shared/models/sketches/canvas/acidRain.sketch';
 import { Adventure } from 'src/app/shared/models/sketches/canvas/adventure.sketch';
 import { RollerCoaster } from 'src/app/shared/models/sketches/canvas/coaster.sketch';
 import { Lagunitas } from 'src/app/shared/models/sketches/canvas/lagunitas.sketch';
@@ -9,7 +10,7 @@ import { Rain } from 'src/app/shared/models/sketches/canvas/rain.sketch';
 import { Testing123 } from 'src/app/shared/models/sketches/canvas/testing123.sketch';
 import { WalkieTalkie } from 'src/app/shared/models/sketches/canvas/walkie-talkie.sketch';
 import { Time } from 'src/app/shared/models/time.model';
-import { Analysis, Bar, Beat, Section, Segment, Tatum } from 'src/app/shared/models/track.model';
+import { Analysis, Features, Bar, Beat, Section, Segment, Tatum } from 'src/app/shared/models/track.model';
 
 @Component({
   selector: 'app-visualizer',
@@ -25,7 +26,7 @@ export class VisualizerComponent implements OnInit, OnChanges {
 
   // Currently playing track analysis and feature data
   analysis!: Analysis;
-  features!: any;
+  features!: Features;
 
   // Keeping track of track progress for faster array parsing
   sectionMeasures: Array<Bar> = [];
@@ -98,8 +99,9 @@ export class VisualizerComponent implements OnInit, OnChanges {
    */
   setAudioData(trackID: string): Promise<any> {
     return new Promise((resolve, reject) => {
-      this.spotifyService.getAudioFeatures(trackID).subscribe(data => {
+      this.spotifyService.getAudioFeatures(trackID).subscribe((data: Features) => {
         this.features = data;
+        console.log("FEATURES", data);
         this.spotifyService.getAudioAnalysis(trackID).subscribe((data: Analysis) => {
           this.analysis = this.editAnalysisData(data);
           // console.log("ANALYSIS", this.analysis);
@@ -310,7 +312,9 @@ export class VisualizerComponent implements OnInit, OnChanges {
       case 4:
         return new WalkieTalkie(position, analysis, this.isMobile, this.mousePos);
       case 5:
-        return new Rain(position, analysis);
+        return new Rain(position, analysis, this.features);
+      case 6:
+        return new AcidRain(position, analysis, this.features);
       default:
         return new Testing123(position, analysis);
     }

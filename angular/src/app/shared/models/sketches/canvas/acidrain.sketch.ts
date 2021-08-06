@@ -16,8 +16,8 @@ class Drop {
     }
 }
 
-export class Rain extends Time implements Sketch {
-    name: string = "🌦 Rain 🌦";
+export class AcidRain extends Time implements Sketch {
+    name: string = "☔ Acid Rain ☔";
     creator: string = "Captain Brando!";
     offset: number = 0;
     features: Features;
@@ -32,9 +32,9 @@ export class Rain extends Time implements Sketch {
 
     paint(ctx: CanvasRenderingContext2D): void {
         let dropsToRemove: Drop[] = [];
-        ctx.lineWidth = Rain.lineWidth;
+        ctx.lineWidth = AcidRain.lineWidth;
         
-        Rain.allDrops.map((drop: Drop) => {
+        AcidRain.allDrops.map((drop: Drop) => {
             if(drop.y > ctx.canvas.height) {
                 dropsToRemove.push(drop);
                 this.paintBlack(ctx, drop);
@@ -52,20 +52,20 @@ export class Rain extends Time implements Sketch {
             }
         });
 
-        Rain.allDrops = Rain.allDrops.filter((el) => {
+        AcidRain.allDrops = AcidRain.allDrops.filter((el) => {
             return !dropsToRemove.includes(el);
         });
     }
 
     paintBlack(ctx: CanvasRenderingContext2D, drop: Drop): void {
         ctx.beginPath();
-        ctx.lineWidth = Rain.lineWidth + 2;
+        ctx.lineWidth = AcidRain.lineWidth + 2;
         ctx.strokeStyle = "black";
         ctx.moveTo(drop.x, drop.y - 20);
         ctx.lineTo(drop.x, drop.y + drop.size + 10);
         ctx.stroke();
         ctx.closePath();
-        ctx.lineWidth = Rain.lineWidth;
+        ctx.lineWidth = AcidRain.lineWidth;
     }
 
     makeDrop(width: number): Drop {
@@ -79,11 +79,11 @@ export class Rain extends Time implements Sketch {
     static lineWidth: number = 7;
 
     loop(ctx: CanvasRenderingContext2D): Promise<any> {
-        if(!Rain.ctx) Rain.ctx = ctx;
+        if(!AcidRain.ctx) AcidRain.ctx = ctx;
         return new Promise((resolve) => {
-            if(Time.segmentIndex !== Rain.segmentCount) {
-                Rain.allDrops.push(this.makeDrop(ctx.canvas.width));
-                Rain.segmentCount = Time.segmentIndex;
+            if(Time.segmentIndex !== AcidRain.segmentCount) {
+                AcidRain.allDrops.push(this.makeDrop(ctx.canvas.width));
+                AcidRain.segmentCount = Time.segmentIndex;
             }
             this.paint(ctx);
             resolve(true);
@@ -91,9 +91,9 @@ export class Rain extends Time implements Sketch {
     }
 
     reset(): void {
-        Rain.segmentCount = 0;
-        Rain.allDrops = [];
-        if(Rain.ctx) Rain.ctx.clearRect(0, 0, Rain.ctx.canvas.clientWidth, Rain.ctx.canvas.clientHeight);
+        AcidRain.segmentCount = 0;
+        AcidRain.allDrops = [];
+        if(AcidRain.ctx) AcidRain.ctx.clearRect(0, 0, AcidRain.ctx.canvas.clientWidth, AcidRain.ctx.canvas.clientHeight);
     }
 
     /**
@@ -106,13 +106,7 @@ export class Rain extends Time implements Sketch {
      * @returns xPos 0-width inclusive value representative of pitch to key
      */
     getRandomX(width: number): number {
-        const key = this.features.key + 1;
-        const max = Math.max(...this.segment.pitches);
-        const maxIndex = this.segment.pitches.indexOf(max);
-        const keyDistance = Math.abs(maxIndex - key);
-        const d3Width = d3.interpolateNumber(0.5, width);
-        const randomExtra = (Math.random() < Math.random()) ? Math.floor(Math.random() * 100) : -Math.floor(Math.random() * 100);
-        return d3Width(keyDistance / 12) + randomExtra;
+        return Math.floor(Math.random() * (width + 1));
     }
 
     /**
@@ -120,7 +114,7 @@ export class Rain extends Time implements Sketch {
      * @param check array of available colors
      */
     getRandomColor(): string {
-        return Rain.allColors[Math.floor(Math.random()*Rain.allColors.length)];
+        return AcidRain.allColors[Math.floor(Math.random()*AcidRain.allColors.length)];
     }
 
     getGradient(drop: Drop): string {
