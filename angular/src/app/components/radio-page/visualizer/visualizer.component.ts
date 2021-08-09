@@ -2,7 +2,7 @@ import { ElementRef, HostListener, Input, OnChanges, ViewChild } from '@angular/
 import { Component, OnInit } from '@angular/core';
 import { SpotifyService } from 'src/app/services/spotify.service';
 import { Sketch } from 'src/app/shared/models/sketch.model';
-import { AcidRain } from 'src/app/shared/models/sketches/canvas/acidRain.sketch';
+import { AcidRain } from 'src/app/shared/models/sketches/canvas/acidrain.sketch';
 import { Adventure } from 'src/app/shared/models/sketches/canvas/adventure.sketch';
 import { RollerCoaster } from 'src/app/shared/models/sketches/canvas/coaster.sketch';
 import { Lagunitas } from 'src/app/shared/models/sketches/canvas/lagunitas.sketch';
@@ -21,6 +21,7 @@ export class VisualizerComponent implements OnInit, OnChanges {
   @Input() currentlyPlaying: any = {};
   @Input() isLoading: boolean = true;
   @Input() isPlaying: boolean = false;
+  @Input() currentStation: any = {};
 
   @Input() selectedPreset: number = 3;
 
@@ -251,6 +252,11 @@ export class VisualizerComponent implements OnInit, OnChanges {
     this.ctx.fillText(`Now Playing: ${this.currentlyPlaying.name}`, 20, this.ctx.canvas.height - 65);
     this.ctx.fillText(`By: ${this.currentlyPlaying.artists[0].name}`, 20, this.ctx.canvas.height - 35);
     this.ctx.closePath();
+
+    // Station info
+    if(this.currentStation.id) {
+      this.ctx.fillText(`${this.currentStation.id}`, this.ctx.canvas.width - 500, 35);
+    }
   }
 
   /**

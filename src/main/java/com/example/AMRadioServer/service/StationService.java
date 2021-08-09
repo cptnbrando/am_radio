@@ -15,6 +15,7 @@ import org.apache.hc.core5.http.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -53,31 +54,45 @@ public class StationService {
         this.spotifyApi = spotifyApi;
         this.allStations = new HashMap<>();
         this.allRadioThreads = new HashMap<>();
+    }
 
+    @PostConstruct
+    public void fillStations() {
         // We use a temporary API to fill in the station transients
-        final SpotifyApi tempApi = new SpotifyApi.Builder()
+        SpotifyApi tempApi = new SpotifyApi.Builder()
                 .setClientId(System.getenv("SPOTIFY_CLI_ID"))
                 .setClientSecret(System.getenv("SPOTIFY_CLI_SECRET"))
                 .setRedirectUri(redirectURI)
                 .build();
 
-        final ClientCredentialsRequest clientCredentialsRequest = tempApi.clientCredentials()
+        ClientCredentialsRequest clientCredentialsRequest = tempApi.clientCredentials()
                 .build();
 
-        final ClientCredentials clientCredentials = clientCredentialsRequest.execute();
+        try {
+            ClientCredentials clientCredentials = clientCredentialsRequest.execute();
+            // Set client access token for tempAPI
+            tempApi.setAccessToken(clientCredentials.getAccessToken());
 
-        // Set client access token for tempAPI
-        tempApi.setAccessToken(clientCredentials.getAccessToken());
+            // Initialize with all currently created Stations from db
+            // Create a radio thread and add it to the map
+            List<Station> all = this.stationRepo.findAll();
+            for(Station station: all) {
+                station.populateTransients(tempApi);
+                RadioThread radio = new RadioThread(this, station.getStationID());
+                Thread worker = new Thread(radio);
+                this.allRadioThreads.put(station.getStationID(), worker);
+                this.saveStation(station);
+            }
 
-        // Initialize with all currently created Stations from db
-        List<Station> all = this.stationRepo.findAll();
-        for(Station station: all) {
-            station.populateTransients(tempApi);
-            this.saveStation(station);
-            this.start(station.getStationID());
+            System.out.println("Station transients filled in");
+
+        } catch (IOException | ParseException | SpotifyWebApiException e) {
+            System.out.println("Unable to fill in stations. Using blank maps.");
+            e.printStackTrace();
+            this.allStations = new HashMap<>();
+            this.allRadioThreads = new HashMap<>();
         }
 
-        System.out.println("Station transients filled in");
     }
 
     /**

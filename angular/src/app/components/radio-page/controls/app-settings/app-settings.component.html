@@ -1,1 +1,7 @@
-<p>n/a</p>
+<div id="settingsPanel">
+    <div class="setting">
+        <h2>Fullscreen</h2>
+        <!-- <input id="fullscreen" class="toggle" type="checkbox" (click)="toggleFullscreen()" [(ngModel)]="isFullscreen"> -->
+        <mat-slide-toggle [checked]="isFullscreen" (change)="toggleFullscreen()"></mat-slide-toggle>
+    </div>
+</div>

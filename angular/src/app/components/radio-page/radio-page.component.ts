@@ -317,14 +317,17 @@ export class RadioPageComponent implements OnInit {
     if(this.isPlaying){
       this.playerService.pause().subscribe();
     }
-
-    // BeginAMRadio on station 000, otherwise join/start the station
+    
     if(stationNum === 0){
       this.beginAMRadio();
-      return;
     }
     else {
       this.setStation(stationNum);
+      // BeginAMRadio on station 000, otherwise join/start the station
+      if(!this.showNav) {
+        this.toggleLoading(false);
+        this.toggleNav(4);
+      }
     }
   }
 

@@ -106,6 +106,7 @@ export class Rain extends Time implements Sketch {
      * @returns xPos 0-width inclusive value representative of pitch to key
      */
     getRandomX(width: number): number {
+        const i = 0;
         const key = this.features.key + 1;
         const max = Math.max(...this.segment.pitches);
         const maxIndex = this.segment.pitches.indexOf(max);
