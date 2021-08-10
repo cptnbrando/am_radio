@@ -102,7 +102,7 @@ export class VisualizerComponent implements OnInit, OnChanges {
     return new Promise((resolve, reject) => {
       this.spotifyService.getAudioFeatures(trackID).subscribe((data: Features) => {
         this.features = data;
-        console.log("FEATURES", data);
+        // console.log("FEATURES", data);
         this.spotifyService.getAudioAnalysis(trackID).subscribe((data: Analysis) => {
           this.analysis = this.editAnalysisData(data);
           // console.log("ANALYSIS", this.analysis);

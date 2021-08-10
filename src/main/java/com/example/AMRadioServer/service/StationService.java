@@ -78,9 +78,10 @@ public class StationService {
             List<Station> all = this.stationRepo.findAll();
             for(Station station: all) {
                 station.populateTransients(tempApi);
-                RadioThread radio = new RadioThread(this, station.getStationID());
-                Thread worker = new Thread(radio);
-                this.allRadioThreads.put(station.getStationID(), worker);
+//                RadioThread radio = new RadioThread(this, station.getStationID());
+//                Thread worker = new Thread(radio);
+//                this.allRadioThreads.put(station.getStationID(), worker);
+                this.start(station.getStationID());
                 this.saveStation(station);
             }
 
@@ -159,6 +160,19 @@ public class StationService {
 
         // Otherwise just return the data from the HashMap
         return this.allStations.get(stationID);
+    }
+
+    /**
+     * Gets all stations from the HashMap
+     * @return List of all Stations
+     */
+    public List<Station> getAll() {
+        Stack<Station> all = new Stack<>();
+        for(int key : this.allStations.keySet()) {
+            all.push(this.allStations.get(key));
+        }
+
+        return all;
     }
 
     /**

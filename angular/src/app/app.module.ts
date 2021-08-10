@@ -21,7 +21,8 @@ import { DomWatcherDirective } from './shared/directives/dom-watcher.directive';
 import { FormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatSliderModule } from '@angular/material/slider';
-import {MatSlideToggleModule} from '@angular/material/slide-toggle';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatTableModule } from '@angular/material/table'; 
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { SeekerComponent } from './components/radio-page/player/seeker/seeker.component';
 import { ChatComponent } from './components/radio-page/controls/chat/chat.component';
@@ -61,7 +62,8 @@ import { NgParticlesModule } from 'ng-particles';
     MatSliderModule,
     MatProgressSpinnerModule,
     NgParticlesModule,
-    MatSlideToggleModule
+    MatSlideToggleModule,
+    MatTableModule
   ],
   providers: [
     {

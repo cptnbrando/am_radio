@@ -13,6 +13,7 @@ export class ControlsComponent implements OnInit, AfterViewChecked, OnChanges {
   @Input() showControls: boolean = false;
   tabCheck: boolean = true;
   selectedTab: number = 0;
+  @Input() isMobile: boolean = false;
 
   @Input() stationNum: number = 0;
 

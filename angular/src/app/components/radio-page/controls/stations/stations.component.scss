@@ -1,0 +1,24 @@
+#head {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+
+    button {
+        text-align: center;
+        width: 40px;
+        height: 40px;
+    }
+}
+
+table {
+    width: 100%;
+    background-color: black;
+    font-family: 'Courier New', Courier, monospace;
+    border: solid;
+    
+    .mat-header-cell, .mat-cell {
+        border-color: white;
+        color: white;
+    }
+}

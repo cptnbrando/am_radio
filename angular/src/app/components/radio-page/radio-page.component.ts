@@ -192,6 +192,11 @@ export class RadioPageComponent implements OnInit {
         this.playingPlaylist = data;
         this.currentStation.stationName = data.name;
         this.changePlaylist(data);
+
+        // Pause on mobile because autoplay is a no go
+        if(this.isMobile) {
+          this.playerService.pause().subscribe();
+        }
       }
       
       // Change volume back, and toggle loading
@@ -347,7 +352,7 @@ export class RadioPageComponent implements OnInit {
       if(data) {
         // Set the volume to 0 to not have that annoying skip
         // Store the previous value to set it afterwards
-        let myVol = this.volume;
+        const myVol = this.volume;
         this.changeVolume(0);
         this.currentStation = data;
         this.radioService.joinStation(stationNum).subscribe((data) => {

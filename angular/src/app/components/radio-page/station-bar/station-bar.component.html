@@ -4,10 +4,10 @@
     
         <h3>{{currentStation.stationInfo}}</h3>
 
-        <div *ngIf="currentStation.stationID != 0 && !isLoading">
+        <div *ngIf="currentStation.stationID !== 0 && !isLoading">
             <h3 *ngIf="currentStation.creatorID">Created by: {{currentStation.creator.displayName}}<br> at
               {{this._stationDateDisplay}}</h3>
-            <div *ngIf="currentStation.playTime != 0">
+            <div *ngIf="currentStation.playTime !== 0">
                 <div>
                     <h4>Now Playing: {{currentStation.current.name}}
                     <br>By: {{currentStation.current.artists[0].name}}

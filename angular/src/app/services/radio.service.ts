@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { AppComponent } from '../app.component';
+import { Station } from '../shared/models/station.model';
 
 @Injectable({
   providedIn: 'root'
@@ -14,6 +15,10 @@ export class RadioService {
 
   getStation(num: number): Observable<any>{
     return this.httpCli.get<any>(`${this.serverURL}/${num}`);
+  }
+
+  getAllStations(): Observable<Station[]> {
+    return this.httpCli.get<Station[]>(`${this.serverURL}/all`);
   }
 
   createStation(num: number, playlist: any): Observable<any>{

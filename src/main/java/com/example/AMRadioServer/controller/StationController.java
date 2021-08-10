@@ -10,6 +10,7 @@ import com.wrapper.spotify.requests.data.player.GetUsersCurrentlyPlayingTrackReq
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 @RestController
@@ -50,6 +51,15 @@ public class StationController extends SpotifyPlayerController {
     }
 
     /**
+     * Gets all stations from the HashMap
+     * @return List of all Stations
+     */
+    @GetMapping(value = "/all")
+    public List<Station> getAllStations() {
+        return this.stationService.getAll();
+    }
+
+    /**
      * Start or join the station
      *
      * @param stationID ID of station to join
@@ -57,6 +67,7 @@ public class StationController extends SpotifyPlayerController {
     @GetMapping(value = "/{stationID}/join")
     public Station joinStation(@PathVariable("stationID") int stationID) throws SpotifyWebApiException {
         Station station = this.stationService.getStation(stationID, false);
+//        System.out.println("Join: " + station.getStationID());
         if(station == null) {
             return null;
         }

@@ -8,9 +8,8 @@ import { Station } from 'src/app/shared/models/station.model';
   styleUrls: ['./station-bar.component.scss']
 })
 export class StationBarComponent implements OnInit, OnChanges {
-
   @Input() showStationBar: boolean = false;
-  @Input() currentStation: Station;
+  @Input() currentStation: Station = new Station;
   @Input() selectedPlaylist: any;
 
   @Output() createdStation = new EventEmitter<any>();
@@ -29,10 +28,15 @@ export class StationBarComponent implements OnInit, OnChanges {
   errorMessage: string = "";
 
   constructor(private radioService: RadioService) {
-    this.currentStation = new Station;
   }
 
   ngOnInit(): void {
+    this._stationNumDisplay = this.stationNumDisplay(this.stationNum);
+    if(this.stationNum > 0) {
+      this.radioService.getStation(this.stationNum).subscribe(data => {
+        this.currentStation = data;
+      });
+    }
   }
 
   ngOnChanges(changes: any): void {
