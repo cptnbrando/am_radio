@@ -29,6 +29,7 @@ export class StationsComponent implements OnInit, OnChanges {
   @Input() stationNum: number = 0;
   allStations: Station[] = [];
   @Input() isMobile: boolean = false;
+  @Input() isLoading: boolean = false;
 
   @Output() changeStationEvent = new EventEmitter<number>();
 
@@ -79,16 +80,15 @@ export class StationsComponent implements OnInit, OnChanges {
 
   constructor(private radioService: RadioService) { }
   ngOnChanges(changes: SimpleChanges): void {
-    // console.log(changes);
-    if(changes.stationNum) {
-      if(changes.stationNum.currentValue > 0) {
-        this.refreshStations();
-      }
-    }
     if(changes.isMobile) {
       if(changes.isMobile.currentValue === true) {
         this.columns = this.mobileCols;
         this.displayedColumns = this.mobileCols.map(c => c.columnDef);
+      }
+    }
+    if(changes.isLoading) {
+      if(changes.isLoading.currentValue === false) {
+        this.refreshStations();
       }
     }
   }
@@ -99,13 +99,14 @@ export class StationsComponent implements OnInit, OnChanges {
 
   refreshStations(): void {
     this.radioService.getAllStations().subscribe(data => {
-      // console.log(data);
       this.allStations = data;
     });
   }
 
-  changeStation(formatNum: any): void {
-    console.log(formatNum);
+  changeStation(station: Station): void {
+    if(!this.isLoading) {
+      this.changeStationEvent.emit(station.stationID);
+    }
   }
 
   /**

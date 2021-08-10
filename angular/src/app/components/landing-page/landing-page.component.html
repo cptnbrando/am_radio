@@ -23,13 +23,13 @@
       </div>
     </div>
     <div id="appPage">
-      <div id="loginPage" class="page" *ngIf="this.currentPage === 0">
+      <div id="loginPage" class="page" *ngIf="this.currentPage === 0" @fadeSlideInOut>
         <h1>welcome to am_radio</h1>
         <button (click)="login()" class="clickable spotifyButton">
           <fa-icon [icon]="faSpotify"></fa-icon> Login with Spotify
         </button>
       </div>
-      <div id="aboutPage" class="page" *ngIf="this.currentPage === 1">
+      <div id="aboutPage" class="page" *ngIf="this.currentPage === 1" @fadeSlideOutIn>
         <div>
           <h1>about</h1>
           <br>

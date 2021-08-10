@@ -1,4 +1,4 @@
-<div id="stationBar" *ngIf="showStationBar" class="disappear overlayBar">
+<div id="stationBar" *ngIf="showStationBar" class="disappear overlayBar" @fadeSlideOutIn>
     <div class="absoluteDiv">
         <h2>{{this._stationNumDisplay}} : {{currentStation.stationName}}</h2>
     

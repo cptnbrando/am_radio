@@ -1,10 +1,22 @@
+import { trigger, state, style, transition, animate } from '@angular/animations';
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { faArrowLeft, faPlay } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-playlist-bar',
   templateUrl: './playlist-bar.component.html',
-  styleUrls: ['./playlist-bar.component.scss']
+  styleUrls: ['./playlist-bar.component.scss'],
+  animations: [
+    trigger('fadeSlideInOut', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateX(-100px)' }),
+        animate('200ms', style({ opacity: 1, transform: 'translateX(10px)' })),
+      ]),
+      transition(':leave', [
+        animate('200ms', style({ opacity: 0, transform: 'translateX(-100px)' })),
+      ]),
+    ]),
+  ]
 })
 export class PlaylistBarComponent implements OnInit {
 

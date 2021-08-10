@@ -1,3 +1,4 @@
+import { trigger, transition, style, animate } from '@angular/animations';
 import { Component, OnInit } from '@angular/core';
 import { faGithub, faInstagram, faSpotify, faTwitter, faYoutube } from '@fortawesome/free-brands-svg-icons';
 import { faAngleDoubleLeft, faAngleDoubleRight } from '@fortawesome/free-solid-svg-icons';
@@ -7,7 +8,27 @@ import { SpotifyService } from '../../services/spotify.service';
 @Component({
   selector: 'app-landing-page',
   templateUrl: './landing-page.component.html',
-  styleUrls: ['./landing-page.component.scss']
+  styleUrls: ['./landing-page.component.scss'],
+  animations: [
+    trigger('fadeSlideOutIn', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateX(100px)' }),
+        animate('150ms', style({ opacity: 1, transform: 'translateX(0)' })),
+      ]),
+      transition(':leave', [
+        animate('150ms', style({ opacity: 0, transform: 'translateX(100px)' })),
+      ]),
+    ]),
+    trigger('fadeSlideInOut', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateX(-100px)' }),
+        animate('150ms', style({ opacity: 1, transform: 'translateX(10px)' })),
+      ]),
+      transition(':leave', [
+        animate('150ms', style({ opacity: 0, transform: 'translateX(-100px)' })),
+      ]),
+    ]),
+  ]
 })
 export class LandingPageComponent implements OnInit {
   // Media icons

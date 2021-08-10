@@ -1,4 +1,4 @@
-<div id="playlistBar" *ngIf="showPlaylistBar" class="disappear overlayBar">
+<div id="playlistBar" *ngIf="showPlaylistBar" class="disappear overlayBar" @fadeSlideInOut>
     <div class="playlistBarDiv" *ngIf="!selectedPlaylist && !selectedPlaylistTracks">
         <div class="playlistBarHead">
           <h2>My Playlists</h2>

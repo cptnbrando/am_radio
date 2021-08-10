@@ -1,3 +1,4 @@
+import { trigger, transition, style, animate } from '@angular/animations';
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { RadioService } from 'src/app/services/radio.service';
 import { Station } from 'src/app/shared/models/station.model';
@@ -5,7 +6,18 @@ import { Station } from 'src/app/shared/models/station.model';
 @Component({
   selector: 'app-station-bar',
   templateUrl: './station-bar.component.html',
-  styleUrls: ['./station-bar.component.scss']
+  styleUrls: ['./station-bar.component.scss'],
+  animations: [
+    trigger('fadeSlideOutIn', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateX(100px)' }),
+        animate('200ms', style({ opacity: 1, transform: 'translateX(0)' })),
+      ]),
+      transition(':leave', [
+        animate('200ms', style({ opacity: 0, transform: 'translateX(100px)' })),
+      ]),
+    ]),
+  ]
 })
 export class StationBarComponent implements OnInit, OnChanges {
   @Input() showStationBar: boolean = false;

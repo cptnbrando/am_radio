@@ -1,12 +1,25 @@
+import { trigger, transition, style, animate } from '@angular/animations';
 import { AfterViewChecked, AfterViewInit, Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output } from '@angular/core';
 import { AppComponent } from 'src/app/app.component';
 import { RadioService } from 'src/app/services/radio.service';
 import { SocketService } from 'src/app/services/socket.service';
+import { Preset } from './visualizer-settings/visualizer-settings.component';
 
 @Component({
   selector: 'app-controls',
   templateUrl: './controls.component.html',
-  styleUrls: ['./controls.component.scss']
+  styleUrls: ['./controls.component.scss'],
+  animations: [
+    trigger('fadeSlideUpDown', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateY(-75px)' }),
+        animate('200ms', style({ opacity: 1, transform: 'translateY(0px)' })),
+      ]),
+      transition(':leave', [
+        animate('200ms', style({ opacity: 0, transform: 'translateY(-75px)' })),
+      ]),
+    ]),
+  ]
 })
 export class ControlsComponent implements OnInit, AfterViewChecked, OnChanges {
 
@@ -22,6 +35,8 @@ export class ControlsComponent implements OnInit, AfterViewChecked, OnChanges {
   @Input() selectedPreset: number = 3;
   @Output() preset: number = 3;
   @Output() presetEvent = new EventEmitter<number>();
+  @Output() changeStationEvent = new EventEmitter<number>();
+  @Input() presets: Array<Preset> = [];
 
   constructor(public socketService: SocketService, public radioService: RadioService) {
   }
@@ -70,6 +85,10 @@ export class ControlsComponent implements OnInit, AfterViewChecked, OnChanges {
 
   changePreset(event: any): void {
     this.presetEvent.emit(event);
+  }
+
+  changeStation(event: any): void {
+    this.changeStationEvent.emit(event);
   }
 
   // Logout from am_radio

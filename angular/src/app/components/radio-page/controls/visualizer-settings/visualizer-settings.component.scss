@@ -1,3 +1,6 @@
+// Utilities
+@use "src/app/global"as global;
+
 #vizList {
     display: flex;
     flex-wrap: wrap;
@@ -25,5 +28,20 @@
 
     .selected {
         border-color: yellow;
+    }
+}
+
+@media only screen and (max-width: global.$mobileWidth) {
+    #vizList {
+        display: flex;
+        justify-content: center;
+
+        .preset {
+            width: 125px;
+            height: 125px;
+            h5 {
+                font-size: 12px;
+            }
+        }
     }
 }

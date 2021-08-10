@@ -17,20 +17,11 @@ export class Preset {
   styleUrls: ['./visualizer-settings.component.scss']
 })
 export class VisualizerSettingsComponent implements OnInit, AfterViewInit {
+  @Input() presets: Array<Preset> = [];
   @Input() selectedPreset: number = 3;
   @Output() presetEvent = new EventEmitter<number>();
 
   presetChange: boolean = false;
-
-  presets: Array<Preset> = [
-    new Preset(0, "TestingTesting123", "testing123.png"),
-    new Preset(1, "Adventure...!", "adventure.png"),
-    new Preset(2, "Lagunitas", "lagunitas.png"),
-    new Preset(3, "Roller Coaster 🎢", "coaster.png"),
-    new Preset(4, "Walkie Talkie", "walkie.png"),
-    new Preset(5, "🌦 Rain 🌦", "rain.png"),
-    new Preset(6, "☔ Acid Rain ☔", "rain.png")
-  ];
 
   constructor() {
   }

@@ -1,4 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
+import { faVolumeUp } from '@fortawesome/free-solid-svg-icons';
+import { SpotifyPlayerService } from 'src/app/services/spotify-player.service';
+import { Device } from 'src/app/shared/models/device.model';
 
 @Component({
   selector: 'app-settings',
@@ -7,12 +10,18 @@ import { Component, OnInit } from '@angular/core';
 })
 export class AppSettingsComponent implements OnInit {
   isFullscreen: boolean = false;
+  devices: Device[] = [];
 
-  constructor() {
+  @Input() isLoading: boolean = false;
+
+  faVolumeUp = faVolumeUp;
+
+  constructor(private playerService: SpotifyPlayerService) {
   }
 
   ngOnInit(): void {
     this.isFullscreen = document.fullscreenElement != null;
+    this.refreshDevices();
   }
 
   toggleFullscreen() {
@@ -21,6 +30,20 @@ export class AppSettingsComponent implements OnInit {
     }
     else {
       document.querySelector("body")?.requestFullscreen();
+    }
+  }
+
+  refreshDevices(): void {
+    this.playerService.getDevices().subscribe(data => {
+      this.devices = data;
+    });
+  }
+
+  changeDevice(id: string): void {
+    if(!this.isLoading) {
+      this.playerService.playOn(id).subscribe(data => {
+        this.refreshDevices();
+      });
     }
   }
 }

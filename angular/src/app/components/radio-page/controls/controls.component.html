@@ -1,4 +1,4 @@
-<div id="controlsBar" *ngIf="showControls" class="disappear overlayBar">
+<div id="controlsBar" *ngIf="showControls" class="disappear overlayBar" @fadeSlideUpDown>
     <div id="window">
         <div>
             <div id="tabs">
@@ -15,11 +15,12 @@
             </div>
             <div id="controlsPanel">
                 <about *ngIf="selectedTab === 0"></about>
-                <app-settings *ngIf="selectedTab === 1"></app-settings>
+                <app-settings *ngIf="selectedTab === 1" [isLoading]="isLoading"></app-settings>
                 <chat *ngIf="selectedTab === 2" [isLoading]="isLoading"></chat>
-                <visualizer-settings *ngIf="selectedTab === 3" [selectedPreset]="preset" (presetEvent)="changePreset($event)">
+                <visualizer-settings *ngIf="selectedTab === 3" [selectedPreset]="preset" (presetEvent)="changePreset($event)" [presets]="presets">
                 </visualizer-settings>
-                <stations-panel *ngIf="selectedTab === 4" [stationNum]="stationNum" [isMobile]="isMobile"></stations-panel>
+                <stations-panel *ngIf="selectedTab === 4" [stationNum]="stationNum" [isMobile]="isMobile"
+                  (changeStationEvent)="changeStation($event)" [isLoading]="isLoading"></stations-panel>
             </div>
         </div>
     </div>

@@ -12,7 +12,7 @@
       [isLoading]="isLoading"></app-playlist-bar>
     <app-controls class="mid setting" [showControls]="showControls" [isLoading]="isLoading" (click)="toggleNav(1)"
       [stationNum]="stationNum" [selectedPreset]="selectedPreset" (presetEvent)="this.selectedPreset = $event"
-      [isMobile]="isMobile">
+      [isMobile]="isMobile" (changeStationEvent)="changeStation($event)" [presets]="presets">
     </app-controls>
     <app-station-bar class="side setting" [stationNum]="stationNum" [showStationBar]="showStationBar"
       [currentStation]="currentStation" [selectedPlaylist]="selectedPlaylist"

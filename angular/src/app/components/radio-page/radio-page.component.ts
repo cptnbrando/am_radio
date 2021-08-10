@@ -7,6 +7,7 @@ import { Station } from 'src/app/shared/models/station.model';
 import { ScriptService } from '../../services/script.service';
 import { SpotifyPlayerService } from '../../services/spotify-player.service'
 import { SpotifyService } from '../../services/spotify.service';
+import { Preset } from './controls/visualizer-settings/visualizer-settings.component';
 
 @Component({
   selector: 'app-radio-page',
@@ -70,8 +71,17 @@ export class RadioPageComponent implements OnInit {
   showNav: boolean = true;
 
   @Output() selectedPreset: number = 3;
-
   @Output() mousePos: Array<number> = [0, 0];
+
+  @Output() presets: Array<Preset> = [
+    new Preset(0, "TestingTesting123", "testing123.png"),
+    new Preset(1, "Adventure...!", "adventure.png"),
+    new Preset(2, "Lagunitas", "lagunitas.png"),
+    new Preset(3, "Roller Coaster 🎢", "coaster.png"),
+    new Preset(4, "Walkie Talkie", "walkie.png"),
+    new Preset(5, "🌦 Rain 🌦", "rain.png"),
+    new Preset(6, "☔ Acid Rain ☔", "rain.png")
+  ];
 
   constructor(private spotifyService: SpotifyService, private playerService: SpotifyPlayerService, private script: ScriptService, private radioService: RadioService) {
     // Start isLoading
@@ -86,6 +96,8 @@ export class RadioPageComponent implements OnInit {
       this.setUser();
       // Also set the UserPlaylists
       this.setPlaylists();
+      // Also set a random preset
+      this.selectedPreset = Math.floor(Math.random() * this.presets.length);
     }, onrejected => {
       // We don't have an access token, so redirect back to the homepage
       window.location.replace(AppComponent.webURL);

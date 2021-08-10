@@ -1,6 +1,7 @@
 import { ElementRef, HostListener, Input, OnChanges, ViewChild } from '@angular/core';
 import { Component, OnInit } from '@angular/core';
 import { SpotifyService } from 'src/app/services/spotify.service';
+import { Device } from 'src/app/shared/models/device.model';
 import { Sketch } from 'src/app/shared/models/sketch.model';
 import { AcidRain } from 'src/app/shared/models/sketches/canvas/acidrain.sketch';
 import { Adventure } from 'src/app/shared/models/sketches/canvas/adventure.sketch';
@@ -22,6 +23,7 @@ export class VisualizerComponent implements OnInit, OnChanges {
   @Input() isLoading: boolean = true;
   @Input() isPlaying: boolean = false;
   @Input() currentStation: any = {};
+  @Input() currentDevice?: Device;
 
   @Input() selectedPreset: number = 3;
 
