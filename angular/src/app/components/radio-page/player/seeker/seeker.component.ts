@@ -127,7 +127,8 @@ export class SeekerComponent implements OnInit, OnChanges {
       this.positionObserver = timer(500, 500).subscribe(() => {
         if(!this.isSeeking) {
           (<any>window).spotifyPlayer.getCurrentState().then((data: any) => {
-            this.position = data.position;
+            if(data) this.position = data.position;
+            else this.resetPosition(true);
           });
         } else {
           this.position = this.seekValue;

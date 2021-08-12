@@ -1,4 +1,4 @@
-import { trigger, state, style, transition, animate } from '@angular/animations';
+import { trigger, style, transition, animate } from '@angular/animations';
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { faArrowLeft, faPlay } from '@fortawesome/free-solid-svg-icons';
 
@@ -11,10 +11,7 @@ import { faArrowLeft, faPlay } from '@fortawesome/free-solid-svg-icons';
       transition(':enter', [
         style({ opacity: 0, transform: 'translateX(-100px)' }),
         animate('200ms', style({ opacity: 1, transform: 'translateX(10px)' })),
-      ]),
-      transition(':leave', [
-        animate('200ms', style({ opacity: 0, transform: 'translateX(-100px)' })),
-      ]),
+      ])
     ]),
   ]
 })

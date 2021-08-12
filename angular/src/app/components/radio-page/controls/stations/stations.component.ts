@@ -3,23 +3,6 @@ import { faRedo } from '@fortawesome/free-solid-svg-icons';
 import { RadioService } from 'src/app/services/radio.service';
 import { Station } from 'src/app/shared/models/station.model';
 
-class TableStation {
-  // ID of the Station, aka the Station number or channel
-  stationID: number;
-
-  // Date of Station creation
-  stationCreated: any;
-
-  // Name of the Station, should be set to the Spotify Playlist initially
-  stationName: string;
-
-  constructor(id: number, date: any, name: string) {
-    this.stationID = id;
-    this.stationCreated = date;
-    this.stationName = name;
-  }
-}
-
 @Component({
   selector: 'stations-panel',
   templateUrl: './stations.component.html',
@@ -48,6 +31,11 @@ export class StationsComponent implements OnInit, OnChanges {
       columnDef: 'current',
       header: 'Now Playing',
       cell: (element: Station) => (element.current) ? `${element.current.artists[0].name} - ${element.current.name}` : "Inactive",
+    },
+    {
+      columnDef: 'listeners',
+      header: 'Listeners',
+      cell: (element: Station) => `${element.listeners.length}`,
     }
   ];
 
@@ -71,6 +59,11 @@ export class StationsComponent implements OnInit, OnChanges {
       columnDef: 'date',
       header: 'Created On',
       cell: (element: Station) => `${this.stationDateDisplay(element.stationCreated)}`,
+    },
+    {
+      columnDef: 'listeners',
+      header: 'Listeners',
+      cell: (element: Station) => `${element.listeners.length}`,
     }
   ];
 
@@ -99,6 +92,14 @@ export class StationsComponent implements OnInit, OnChanges {
 
   refreshStations(): void {
     this.radioService.getAllStations().subscribe(data => {
+      // We need the listeners hashmaps as arrays, Java hashmaps return objects so we convert them
+      data.map(station => {
+        const listeners: any[] = [];
+        Object.keys(station.listeners).map(index => {
+          listeners.push(station.listeners[index]);
+        });
+        station.listeners = listeners;
+      });
       this.allStations = data;
     });
   }

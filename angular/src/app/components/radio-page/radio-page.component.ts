@@ -195,7 +195,6 @@ export class RadioPageComponent implements OnInit {
     this.currentStation = new Station();
     this.toggleLoading(true);
     // So that it doesn't sound awful loading up
-    let currentVol = this.volume;
     this.changeVolume(0);
 
     // Attempt to play a random playlist on am_radio
@@ -210,10 +209,6 @@ export class RadioPageComponent implements OnInit {
           this.playerService.pause().subscribe();
         }
       }
-      
-      // Change volume back, and toggle loading
-      this.changeVolume(currentVol);
-      this.toggleLoading(false);
     });
   }
 

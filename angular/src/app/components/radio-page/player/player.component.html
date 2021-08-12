@@ -5,11 +5,13 @@
         <div id="currentImage" class="album column clickable noMobile" (click)="toggleBar(0)">
             <img [src]="currentlyPlaying.album.images[0].url" alt="image">
         </div>
-        <div id="currentInfo" class="info column clickable" (click)="toggleBar(0)">
-            <div id="currentName">{{this.currentlyPlaying.name}}</div>
-            <div id="currentArtist">{{this.currentlyPlaying.artists[0].name}}</div>
-            <div id="currentAlbum" class="noMobile">{{this.currentlyPlaying.album.name}}</div>
-            <div id="currentPlaylist" class="noMobile" *ngIf="this.stationNum === 0 && this.playingPlaylist != null">
+        <div id="currentInfo" class="info column clickable scrollContainer" (click)="toggleBar(0)">
+            <div id="currentTrack" class="scrollCheck">
+                {{this.currentlyPlaying.artists[0].name}} - {{this.currentlyPlaying.name}}
+            </div>
+            <div id="currentAlbum" class="noMobile scrollCheck">{{this.currentlyPlaying.album.name}}</div>
+            <div id="currentPlaylist" class="noMobile scrollCheck"
+              *ngIf="this.stationNum === 0 && this.playingPlaylist != null">
               Playlist: {{this.playingPlaylist.name}}</div>
         </div>
     </div>
@@ -37,12 +39,12 @@
 
     <div id="stationInfo" class="playerItem">
         <div class="vertical">
-            <div class="clickable" (click)="toggleBar(1)">
-                <div>{{this.currentStation.stationName}}</div>
+            <div class="clickable scrollContainer margin" (click)="toggleBar(1)">
+                <div id="stationName" class="scrollCheck">{{this.currentStation.stationName}}</div>
                 <div class="noMobile">{{this.user.displayName}}</div>
                 <div class="noMobile">{{this.currentDevice.name}}</div>
             </div>
-            <div class="horizontal">
+            <div class="horizontal margin">
                 <div class="clickable" (click)="toggleMute()" id="volumeIcon">
                     <fa-icon [icon]="faVolumeUp" *ngIf="this.volume > 50"></fa-icon>
                     <fa-icon [icon]="faVolumeOff" *ngIf="this.volume === 0"></fa-icon>

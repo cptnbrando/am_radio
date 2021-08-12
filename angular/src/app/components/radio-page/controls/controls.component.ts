@@ -14,10 +14,7 @@ import { Preset } from './visualizer-settings/visualizer-settings.component';
       transition(':enter', [
         style({ opacity: 0, transform: 'translateY(-75px)' }),
         animate('200ms', style({ opacity: 1, transform: 'translateY(0px)' })),
-      ]),
-      transition(':leave', [
-        animate('200ms', style({ opacity: 0, transform: 'translateY(-75px)' })),
-      ]),
+      ])
     ]),
   ]
 })

@@ -25,6 +25,7 @@
     flex: 1;
     columns: auto 2;
     column-gap: 15px;
+    overflow: hidden;
 
     #currentImage img {
         border: solid;
@@ -71,18 +72,18 @@
   #player {
     flex-direction: column;
     align-items: center;
+    flex-wrap: unset;
 
     .playerItem {
-      width: 100%;
       justify-content: space-around;
       margin: 5px;
+      width: 100%;
     }
 
     #currentInfo {
-        width: 100%;
         display: flex;
         flex-direction: row;
-        justify-content: space-between;
+        justify-content: center;
         margin-bottom: 10px;
     }
 
@@ -93,6 +94,9 @@
             flex-direction: row-reverse;
             justify-content: space-between;
             align-items: center;
+            .margin {
+                margin: 5px;
+            }
         }
     }
 

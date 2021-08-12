@@ -12,10 +12,7 @@ import { Station } from 'src/app/shared/models/station.model';
       transition(':enter', [
         style({ opacity: 0, transform: 'translateX(100px)' }),
         animate('200ms', style({ opacity: 1, transform: 'translateX(0)' })),
-      ]),
-      transition(':leave', [
-        animate('200ms', style({ opacity: 0, transform: 'translateX(100px)' })),
-      ]),
+      ])
     ]),
   ]
 })

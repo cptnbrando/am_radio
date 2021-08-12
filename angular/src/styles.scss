@@ -77,3 +77,59 @@ app-root {
 .overlayBar {
   background-color: rgba(0, 0, 0, 0.85);
 }
+
+.scrollContainer {
+  overflow: hidden;
+}
+
+.scrollCheck {
+  width: min-content;
+  white-space: nowrap;
+}
+
+.scroll {
+  /* animation properties */
+  -moz-transform: translateX(100%);
+  -webkit-transform: translateX(100%);
+  transform: translateX(100%);
+
+  -moz-animation: my-animation 15s linear infinite;
+  -webkit-animation: my-animation 15s linear infinite;
+  animation: my-animation 15s linear infinite;
+}
+
+/* for Firefox */
+@-moz-keyframes my-animation {
+  from {
+    -moz-transform: translateX(100%);
+  }
+
+  to {
+    -moz-transform: translateX(-90%);
+  }
+}
+
+/* for Chrome */
+@-webkit-keyframes my-animation {
+  from {
+    -webkit-transform: translateX(100%);
+  }
+
+  to {
+    -webkit-transform: translateX(-90%);
+  }
+}
+
+@keyframes my-animation {
+  from {
+    -moz-transform: translateX(100%);
+    -webkit-transform: translateX(100%);
+    transform: translateX(100%);
+  }
+
+  to {
+    -moz-transform: translateX(-90%);
+    -webkit-transform: translateX(-90%);
+    transform: translateX(-90%);
+  }
+}

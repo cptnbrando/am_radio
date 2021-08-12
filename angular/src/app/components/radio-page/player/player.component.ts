@@ -1,5 +1,6 @@
-import { Component, EventEmitter, HostListener, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, HostListener, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { faAngleLeft, faAngleRight, faPause, faPlay, faRandom, faRecycle, faSync, faVolumeDown, faVolumeMute, faVolumeOff, faVolumeUp } from '@fortawesome/free-solid-svg-icons';
+import { AppComponent } from 'src/app/app.component';
 import { RadioService } from 'src/app/services/radio.service';
 import { SpotifyPlayerService } from '../../../services/spotify-player.service';
 
@@ -8,7 +9,7 @@ import { SpotifyPlayerService } from '../../../services/spotify-player.service';
   templateUrl: './player.component.html',
   styleUrls: ['./player.component.scss']
 })
-export class PlayerComponent implements OnInit {
+export class PlayerComponent implements OnInit, OnChanges {
   // FontAwesome icons
   faPlay = faPlay;
   faPause = faPause;
@@ -52,9 +53,46 @@ export class PlayerComponent implements OnInit {
   @Output() toggleLoadingEvent = new EventEmitter<boolean>();
 
   @Output() setPlayerEvent = new EventEmitter<boolean>();
+  @Input() isMobile: boolean = false;
 
   constructor(private playerService: SpotifyPlayerService, private radioService: RadioService) {
+  }
 
+  trackWidth: number = 0;
+  divWidth: number = 0;
+
+  ngOnChanges(changes: SimpleChanges): void {
+    // This is to scroll the overflowing text for track/album/playlist
+    if(changes.currentlyPlaying) {
+      const track = document.querySelector("#currentTrack");
+      const album = document.querySelector("#currentAlbum");
+      const playlist = document.querySelector("#currentPlaylist");
+      const station = document.querySelector("#stationName");
+      const div = document.querySelector("#player");
+      const offset = (this.isMobile) ? 10 : 200;
+      if(div) {
+        if(track) {
+          setTimeout(() => {
+            AppComponent.startMarquee(track, div, offset);
+          }, 1000);
+        }
+        if(album) {
+          setTimeout(() => {
+            AppComponent.startMarquee(album, div, offset);
+          }, 1000);
+        }
+        if(playlist) {
+          setTimeout(() => {
+            AppComponent.startMarquee(playlist, div, offset);
+          }, 1000);
+        }
+        if(station) {
+          setTimeout(() => {
+            AppComponent.startMarquee(station, div, offset + div.clientWidth / 2);
+          }, 1000);
+        }
+      }
+    }
   }
 
   ngOnInit(): void {
