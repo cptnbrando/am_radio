@@ -73,22 +73,22 @@ export class PlayerComponent implements OnInit, OnChanges {
       if(div) {
         if(track) {
           setTimeout(() => {
-            AppComponent.startMarquee(track, div, offset);
+            AppComponent.startScroll(track, div, offset);
           }, 1000);
         }
         if(album) {
           setTimeout(() => {
-            AppComponent.startMarquee(album, div, offset);
+            AppComponent.startScroll(album, div, offset);
           }, 1000);
         }
         if(playlist) {
           setTimeout(() => {
-            AppComponent.startMarquee(playlist, div, offset);
+            AppComponent.startScroll(playlist, div, offset);
           }, 1000);
         }
-        if(station) {
+        if(this.isMobile && station) {
           setTimeout(() => {
-            AppComponent.startMarquee(station, div, offset + div.clientWidth / 2);
+            AppComponent.startScroll(station, div, offset + div.clientWidth / 2);
           }, 1000);
         }
       }

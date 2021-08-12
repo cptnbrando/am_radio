@@ -28,6 +28,8 @@ import { AppSettingsComponent } from './components/radio-page/controls/app-setti
 import { VisualizerSettingsComponent } from './components/radio-page/controls/visualizer-settings/visualizer-settings.component';
 import { AboutComponent } from './components/radio-page/controls/about/about.component';
 import { StationsComponent } from './components/radio-page/controls/stations/stations.component';
+import { MobileStationsComponent } from './components/radio-page/controls/stations/mobile-stations/mobile-stations.component';
+import { CdkDetailRowDirective } from './components/radio-page/controls/stations/mobile-stations/row.directive';
 
 @NgModule({
   declarations: [
@@ -46,7 +48,9 @@ import { StationsComponent } from './components/radio-page/controls/stations/sta
     VisualizerSettingsComponent,
     AppSettingsComponent,
     AboutComponent,
-    StationsComponent
+    StationsComponent,
+    MobileStationsComponent,
+    CdkDetailRowDirective
   ],
   imports: [
     BrowserModule,

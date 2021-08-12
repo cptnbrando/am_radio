@@ -16,33 +16,10 @@ export class StationsComponent implements OnInit, OnChanges {
 
   @Output() changeStationEvent = new EventEmitter<number>();
 
-  mobileCols = [
-    {
-      columnDef: 'id',
-      header: 'No.',
-      cell: (element: Station) => `${this.stationNumDisplay(element.stationID)}`,
-    },
-    {
-      columnDef: 'name',
-      header: 'Name',
-      cell: (element: Station) => `${element.stationName}`,
-    },
-    {
-      columnDef: 'current',
-      header: 'Now Playing',
-      cell: (element: Station) => (element.current) ? `${element.current.artists[0].name} - ${element.current.name}` : "Inactive",
-    },
-    {
-      columnDef: 'listeners',
-      header: 'Listeners',
-      cell: (element: Station) => `${element.listeners.length}`,
-    }
-  ];
-
   columns = [
     {
       columnDef: 'id',
-      header: 'No.',
+      header: '#',
       cell: (element: Station) => `${this.stationNumDisplay(element.stationID)}`,
     },
     {
@@ -73,12 +50,6 @@ export class StationsComponent implements OnInit, OnChanges {
 
   constructor(private radioService: RadioService) { }
   ngOnChanges(changes: SimpleChanges): void {
-    if(changes.isMobile) {
-      if(changes.isMobile.currentValue === true) {
-        this.columns = this.mobileCols;
-        this.displayedColumns = this.mobileCols.map(c => c.columnDef);
-      }
-    }
     if(changes.isLoading) {
       if(changes.isLoading.currentValue === false) {
         this.refreshStations();

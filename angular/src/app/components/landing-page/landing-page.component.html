@@ -15,10 +15,10 @@
     <div id="overlay">
       <div id="arrows">
         <div>
-          <fa-icon [icon]="faAngleDoubleLeft" class="clickable" size="4x" (click)="loginPage()" *ngIf="this.currentPage !== 0"></fa-icon>
+          <fa-icon [icon]="faAngleDoubleLeft" class="clickable" size="4x" (click)="loginPage()" *ngIf="this.currentPage === 1 || this.currentPage === 2"></fa-icon>
         </div>
         <div>
-          <fa-icon [icon]="faAngleDoubleRight" class="clickable" size="4x" (click)="aboutPage()" *ngIf="this.currentPage !== 1"></fa-icon>
+          <fa-icon [icon]="faAngleDoubleRight" class="clickable" size="4x" (click)="aboutPage()" *ngIf="this.currentPage === 0"></fa-icon>
         </div>
       </div>
     </div>
@@ -28,17 +28,21 @@
         <button (click)="login()" class="clickable spotifyButton">
           <fa-icon [icon]="faSpotify"></fa-icon> Login with Spotify
         </button>
+        <div>
+          <h5>by logging in, you consent to cookies being stored on your device.</h5>
+          <h5 class="clickable" (click)="this.currentPage = 2" style="color: blue;">Privacy Policy</h5>
+        </div>
       </div>
       <div id="aboutPage" class="page" *ngIf="this.currentPage === 1" @fadeSlideOutIn>
         <div>
           <h1>about</h1>
           <br>
-          <p>am_radio is a way to share and listen to Spotify playlists with others</p>
-          <p>Log in and you can listen to your own music or browse live user created stations 🎶</p>
-          <p>You can also chat with other users</p>
-          <p>You can create your own radio station from one of your playlists if the number is unowned. 
-            Anybody on that station will be listening in sync with you. Share it with friends 
-            and have a party 🎉</p>
+          <p>am_radio is a way to share and listen to music with others live, powered by Spotify, Angular, and Spring Boot</p>
+          <p>Log in to listen to your own music, or browse live user created stations 🎶</p>
+          <p>Experience a customizable music visualizer that seemlessly adapts to all your favorite songs ✨</p>
+          <p>You can also chat with other users through individual station chatrooms 😀</p>
+          <p>Create your own live radio station from a playlist. Anybody on that station will be listening in sync with you. 
+            Share it with friends or meet new people that share your music taste! 🎉</p>
           <p>If you're interested in the project, <a href="https://github.com/cptnbrando/am_radio" target="_blank">the
             github can be found here</a>. You can also reach me on Twitter <a href="https://twitter.com/captainbrandooo" target="_blank">
             @CaptainBrandooo</a></p>
@@ -58,11 +62,26 @@
           </a>
         </div>
       </div>
+      <div id="privacy" class="page" *ngIf="this.currentPage === 2" @fadeSlideOutIn>
+        <div>
+          <h1>privacy</h1>
+          <br>
+          <p>
+            am_radio uses the Spotify Playback SDK and the Spotify Web API to create live radio stations from submitted Spotify playlists. It does this by storing the Spotify URI of submitted playlists in a backend server. Only public playlists can be accessed by the Web API/SDK, so only publicly accessable playlist URIs will be stored, and only if a user wishes to create a station. You may use am_radio without creating a station, and no data will be stored anywhere.
+          </p>
+          <p>
+            There are also some cookies involved. When you successfully log in to am_radio, a Spotify access token will be generated and stored as a cookie on your device. This token expires after a set time, and am_radio will update the cookie with a fresh access token automatically. This is the only cookie I have implemented. The Spotify Playback SDK uses some cookies that I cannot control. This app uses Google Analytics to monitor user data, which may use cookies as well.
+          </p>
+          <p>
+            I created this app with very special care to store minimal data. am_radio will never store any data other than public Playlist URIs and user generated Station information. While it never stores other information, it may use and parse other User information provided by the Spotify Web API, including public User display names and URIs, public library details such as public Playlists and saved Tracks, and Player information like track position and repeat settings.
+          </p>
+        </div>
+      </div>
     </div>
   </div>
 
   <div id="footer">
-    <h3>&#169; Captain Brando! 2021</h3>
+    <h3>&#169; Captain Brando!</h3>
     <h4>v0.8.5</h4>
   </div>
 </div>

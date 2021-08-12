@@ -176,40 +176,48 @@ export class RadioPageComponent implements OnInit {
       // If nothing is playing, we set am_radio as the active device, then attempt to play the most recently played track
       // Also open the controls panel
       this.playerService.setAMRadio().subscribe(data => {
-        // console.log("setAMRadio", data);
+        // So that it doesn't sound awful loading up
+        this.changeVolume(0);
         if(data) {
           this.currentDevice = data;
         }
-        this.beginAMRadio();
-        if(!this.showControls) {
-          this.toggleBar(2);
-        }
+        this.beginAMRadio().then(success => {
+          // Pause on mobile because autoplay is a no go
+          if(success) {
+            if(this.isMobile) {
+              this.playerService.pause().subscribe();
+            }
+            this.changeVolume(100);
+          }
+          if(!this.showControls) {
+            this.toggleBar(2);
+          }
+        });
       });
     });
   }
 
   // Man... hour 5:48:50 - 5:48:54 on Fireplace 10 hours full hd is nutty
   // This will set the current station to default 000 and get/startAMRadio
-  beginAMRadio(): void {
-    // So that the station bar doesn't tweak from missing fields
-    this.currentStation = new Station();
-    this.toggleLoading(true);
-    // So that it doesn't sound awful loading up
-    this.changeVolume(0);
-
-    // Attempt to play a random playlist on am_radio
-    this.playerService.startAMRadio().subscribe(data => {
-      if(data) {
-        this.playingPlaylist = data;
-        this.currentStation.stationName = data.name;
-        this.changePlaylist(data);
-
-        // Pause on mobile because autoplay is a no go
-        if(this.isMobile) {
-          this.playerService.pause().subscribe();
+  beginAMRadio(): Promise<any> {
+    return new Promise((resolve, reject) => {
+      // So that the station bar doesn't tweak from missing fields
+      this.currentStation = new Station();
+      this.toggleLoading(true);
+  
+      // Attempt to play a random playlist on am_radio
+      this.playerService.startAMRadio().subscribe(data => {
+        if(data) {
+          this.playingPlaylist = data;
+          this.currentStation.stationName = data.name;
+          this.changePlaylist(data);
+          resolve(true);
         }
-      }
-    });
+        else {
+          resolve(false);
+        }
+      });
+    })
   }
 
   /**

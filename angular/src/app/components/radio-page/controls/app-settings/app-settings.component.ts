@@ -27,6 +27,7 @@ export class AppSettingsComponent implements OnInit {
   toggleFullscreen() {
     if(this.isFullscreen) {
       document.exitFullscreen();
+      window.scrollTo(0, 0);
     }
     else {
       document.querySelector("body")?.requestFullscreen();

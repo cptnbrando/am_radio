@@ -105,7 +105,7 @@ app-root {
   }
 
   to {
-    -moz-transform: translateX(-90%);
+    -moz-transform: translateX(-100%);
   }
 }
 
@@ -116,7 +116,7 @@ app-root {
   }
 
   to {
-    -webkit-transform: translateX(-90%);
+    -webkit-transform: translateX(-100%);
   }
 }
 
@@ -128,8 +128,8 @@ app-root {
   }
 
   to {
-    -moz-transform: translateX(-90%);
-    -webkit-transform: translateX(-90%);
-    transform: translateX(-90%);
+    -moz-transform: translateX(-100%);
+    -webkit-transform: translateX(-100%);
+    transform: translateX(-100%);
   }
 }

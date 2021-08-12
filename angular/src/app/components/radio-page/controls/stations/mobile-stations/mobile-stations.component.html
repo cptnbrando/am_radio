@@ -1,0 +1,35 @@
+<h4>tap to expand, hold to play</h4>
+<div class="example-container mat-elevation-z8">
+    <mat-table #table [dataSource]="this.dataSource">
+        <!-- ID Column -->
+        <ng-container matColumnDef="id">
+            <mat-header-cell *matHeaderCellDef mat-sort-header> ID </mat-header-cell>
+            <mat-cell *matCellDef="let station"> {{this.stationNumDisplay(station.stationID)}} </mat-cell>
+        </ng-container>
+
+        <!-- Name Column -->
+        <ng-container matColumnDef="name">
+            <mat-header-cell *matHeaderCellDef mat-sort-header> Name </mat-header-cell>
+            <mat-cell *matCellDef="let station"> {{station.stationName}} </mat-cell>
+        </ng-container>
+
+        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: displayedColumns;" matRipple class="element-row"
+            [cdkDetailRow]="row" [cdkDetailRowTpl]="tpl" (contextmenu)="changeStation(row)">
+        </mat-row>
+    </mat-table>
+</div>
+
+<ng-template #tpl let-element>
+    <div class="mat-row detail-row" [@detailExpand] style="overflow: hidden">
+        <div>Created by {{element.creator.displayName}} on {{this.stationDateDisplay(element.stationCreated)}}</div>
+        <br>
+        <div *ngIf="!element.current">Station Inactive</div>
+        <div *ngIf="element.current">
+            # of listeners: {{element.listeners.length}}
+            <br>
+            <div>Now Playing</div>
+            <div>{{element.current.artists[0].name}} - {{element.current.name}}</div>
+        </div>
+    </div>
+</ng-template>
