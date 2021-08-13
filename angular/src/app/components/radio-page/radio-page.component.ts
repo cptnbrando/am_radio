@@ -40,6 +40,7 @@ export class RadioPageComponent implements OnInit {
   // Spotify track information
   @Output() currentlyPlaying: any = {};
   @Output() isPlaying: boolean = false;
+  @Output() isLoved: boolean = false;
   @Output() position: number = 0;
   next: any = "";
   @Output() shuffle: boolean = false;
@@ -292,18 +293,34 @@ export class RadioPageComponent implements OnInit {
     return new Promise((resolve, reject) => {
       this.playerService.getPlayer().subscribe(data => {
         if(data) {
+          console.log(data);
           // Set the data
           this.position = data.progress_ms;
           this.currentlyPlaying = data.item;
           this.currentURI = data.item.uri;
           this.currentDevice = data.device;
           this.isPlaying = data.is_playing;
+          
+          // Get whether the track is loved or not
+          this.isLoved = this.checkLovedTrack(data.item.id);
         }
         resolve(data);
       }, error => {
         reject(error);
       });
     })
+  }
+
+  /**
+   * Check whether a track is in a user's library or not
+   * @param trackID id of track to check
+   * @returns whether the track is loved or not
+   */
+  checkLovedTrack(trackID: string): boolean {
+    this.spotifyService.checkLovedTrack(trackID).subscribe(data => {
+      return data;
+    });
+    return false;
   }
 
   /**
@@ -527,8 +544,8 @@ export class RadioPageComponent implements OnInit {
           if(this.showStationBar) return;
           if(!this.isMobile) return;
           break;
-        }
       }
+    }
       
     const overlay = Array.from(document.getElementsByClassName("disappear") as HTMLCollectionOf<HTMLElement>);
     if(this.showNav) {

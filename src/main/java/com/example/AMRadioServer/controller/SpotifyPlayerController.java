@@ -4,7 +4,6 @@ import com.google.gson.JsonArray;
 import com.wrapper.spotify.SpotifyApi;
 import com.wrapper.spotify.exceptions.SpotifyWebApiException;
 import com.wrapper.spotify.exceptions.detailed.ForbiddenException;
-import com.wrapper.spotify.model_objects.IPlaylistItem;
 import com.wrapper.spotify.model_objects.miscellaneous.CurrentlyPlaying;
 import com.wrapper.spotify.model_objects.miscellaneous.CurrentlyPlayingContext;
 import com.wrapper.spotify.model_objects.miscellaneous.Device;
@@ -300,11 +299,11 @@ public class SpotifyPlayerController {
             this.spotifyApi.setRepeatModeOnUsersPlayback("context").build().executeAsync().get();
 
             // Get a random playlist and play a random track from it (so the queue gets reset)
+            PlaylistSimplified[] lists = request.executeAsync().get().getItems();
+            PlaylistSimplified randomPlaylist = lists[new Random().nextInt((lists.length))];
+            PlaylistTrack[] tracks = spotifyApi.getPlaylistsItems(randomPlaylist.getId()).build().execute().getItems();
+            PlaylistTrack randomTrack = tracks[new Random().nextInt((tracks.length))];
             try {
-                PlaylistSimplified[] lists = request.executeAsync().get().getItems();
-                PlaylistSimplified randomPlaylist = lists[new Random().nextInt((lists.length))];
-                PlaylistTrack[] tracks = spotifyApi.getPlaylistsItems(randomPlaylist.getId()).build().execute().getItems();
-                PlaylistTrack randomTrack = tracks[new Random().nextInt((tracks.length))];
                 boolean played = this.playTrack(randomTrack.getTrack().getUri());
                 if(played) {
                     this.playPlaylist(randomPlaylist.getUri());
@@ -313,10 +312,10 @@ public class SpotifyPlayerController {
             } catch (Exception f) {
                 System.out.println("Start AMRadio failed");
                 System.out.println(f.getMessage());
-                return request.execute().getItems()[0];
+                return randomPlaylist;
             }
         }
-        catch (IOException | ParseException | ForbiddenException | InterruptedException | ExecutionException e) {
+        catch (IOException | ParseException | ForbiddenException | InterruptedException | ExecutionException | NullPointerException e) {
             System.out.println("Exception caught in player/startAMRadio");
             System.out.println(e.getMessage());
             return null;

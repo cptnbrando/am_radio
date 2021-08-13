@@ -74,4 +74,12 @@ export class SpotifyService {
   getAudioAnalysis(trackID: string): Observable<any> {
     return this.httpCli.get<any>(`${this.serverURL}/getAudioAnalysis?trackID=${trackID}`);
   }
+
+  checkLovedTrack(trackID: string): Observable<boolean> {
+    return this.httpCli.get<boolean>(`${this.serverURL}/${trackID}/checkLoved`);
+  }
+
+  loveTrack(trackID: string): Observable<any> {
+    return this.httpCli.post<any>(`${this.serverURL}/${trackID}/love`, trackID);
+  }
 }

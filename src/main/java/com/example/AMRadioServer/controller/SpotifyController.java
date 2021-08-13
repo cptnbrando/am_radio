@@ -6,7 +6,6 @@ import com.wrapper.spotify.SpotifyApi;
 import com.wrapper.spotify.exceptions.SpotifyWebApiException;
 import com.wrapper.spotify.model_objects.credentials.AuthorizationCodeCredentials;
 import com.wrapper.spotify.model_objects.miscellaneous.AudioAnalysis;
-import com.wrapper.spotify.model_objects.miscellaneous.Device;
 import com.wrapper.spotify.model_objects.specification.*;
 import com.wrapper.spotify.requests.authorization.authorization_code.AuthorizationCodeRequest;
 import com.wrapper.spotify.requests.authorization.authorization_code.AuthorizationCodeUriRequest;
@@ -46,7 +45,7 @@ public class SpotifyController {
                 .scope("user-read-private, user-read-email, streaming, " +
                         "user-read-playback-state, user-read-currently-playing, " +
                         "user-modify-playback-state, playlist-modify-public, " +
-                        "user-read-recently-played")
+                        "user-read-recently-played, user-library-read, user-library-modify")
                 .show_dialog(true)
                 .build();
 
@@ -190,6 +189,29 @@ public class SpotifyController {
             System.out.println("Exception caught in spotify/getAudioAnalysis");
             System.out.println(e.getMessage());
             return null;
+        }
+    }
+
+    @PostMapping(value = "/{trackID}/love")
+    public boolean love(@PathVariable("trackID") String trackID) throws SpotifyWebApiException {
+        try {
+            this.spotifyApi.saveTracksForUser(trackID).build().execute();
+            return true;
+        } catch (IOException | ParseException e) {
+            System.out.println("Exception in Spotify/love");
+            System.out.println(e.getMessage());
+            return false;
+        }
+    }
+
+    @GetMapping(value = "/{trackID}/checkLoved")
+    public boolean checkLoved(@PathVariable("trackID") String trackID) throws SpotifyWebApiException {
+        try {
+            return this.spotifyApi.checkUsersSavedTracks(trackID).build().execute()[0];
+        } catch (IOException | ParseException e) {
+            System.out.println("Exception in Spotify/checkLoved");
+            System.out.println(e.getMessage());
+            return false;
         }
     }
 }

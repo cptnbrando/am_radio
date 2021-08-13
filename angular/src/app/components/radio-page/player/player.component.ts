@@ -1,8 +1,11 @@
 import { Component, EventEmitter, HostListener, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { faAngleLeft, faAngleRight, faPause, faPlay, faRandom, faRecycle, faSync, faVolumeDown, faVolumeMute, faVolumeOff, faVolumeUp } from '@fortawesome/free-solid-svg-icons';
+import { faHeart as fasHeart } from '@fortawesome/free-solid-svg-icons';
+import { faHeart as farHeart } from '@fortawesome/free-regular-svg-icons';
 import { AppComponent } from 'src/app/app.component';
 import { RadioService } from 'src/app/services/radio.service';
 import { SpotifyPlayerService } from '../../../services/spotify-player.service';
+import { SpotifyService } from 'src/app/services/spotify.service';
 
 @Component({
   selector: 'app-player',
@@ -18,6 +21,8 @@ export class PlayerComponent implements OnInit, OnChanges {
   faRandom = faRandom;
   faSync = faSync;
   faRecycle = faRecycle;
+  fasHeart = fasHeart;
+  farHeart = farHeart;
 
   faVolumeUp = faVolumeUp;
   faVolumeOff = faVolumeOff;
@@ -39,6 +44,7 @@ export class PlayerComponent implements OnInit, OnChanges {
   @Input() currentDevice: any = {};
   @Input() currentlyPlaying: any = {};
   @Input() position: number = 0;
+  @Input() isLoved: boolean = false;
 
   @Input() volume: number = 100;
   @Output() volumeEvent = new EventEmitter<number>();
@@ -55,7 +61,7 @@ export class PlayerComponent implements OnInit, OnChanges {
   @Output() setPlayerEvent = new EventEmitter<boolean>();
   @Input() isMobile: boolean = false;
 
-  constructor(private playerService: SpotifyPlayerService, private radioService: RadioService) {
+  constructor(private playerService: SpotifyPlayerService, private radioService: RadioService, private spotifyService: SpotifyService) {
   }
 
   trackWidth: number = 0;
@@ -197,8 +203,7 @@ export class PlayerComponent implements OnInit, OnChanges {
 
   // Event for repeat button, toggle repeat
   repeatChange(): void {
-    if(!this.isLoading)
-    {
+    if(!this.isLoading) {
       // this.toggleLoadingEvent.emit(true);
       switch(this.repeat) {
         case 0:
@@ -229,6 +234,14 @@ export class PlayerComponent implements OnInit, OnChanges {
       this.volume = 100;
     }
     this.volumeEvent.emit(this.volume);
+  }
+
+  loveTrack(): void {
+    if(!this.isLoading) {
+      this.spotifyService.loveTrack(this.currentlyPlaying.id).subscribe(data => {
+        this.isLoved = data;
+      });
+    }
   }
 
   // Listens for keyboard events to control the player
