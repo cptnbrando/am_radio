@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { faVolumeUp } from '@fortawesome/free-solid-svg-icons';
 import { SpotifyPlayerService } from 'src/app/services/spotify-player.service';
 import { Device } from 'src/app/shared/models/device.model';
@@ -15,6 +15,7 @@ export class AppSettingsComponent implements OnInit {
   @Input() isLoading: boolean = false;
 
   faVolumeUp = faVolumeUp;
+  @Output() fullscreenEvent = new EventEmitter<boolean>();
 
   constructor(private playerService: SpotifyPlayerService) {
   }
@@ -26,10 +27,12 @@ export class AppSettingsComponent implements OnInit {
 
   toggleFullscreen() {
     if(this.isFullscreen) {
+      this.fullscreenEvent.emit(false);
       document.exitFullscreen();
       window.scrollTo(0, 0);
     }
     else {
+      this.fullscreenEvent.emit(true);
       document.querySelector("body")?.requestFullscreen();
     }
   }

@@ -1,5 +1,5 @@
 import { trigger, transition, style, animate } from '@angular/animations';
-import { AfterViewChecked, AfterViewInit, Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output } from '@angular/core';
+import { AfterViewChecked, Component, EventEmitter, Input, OnChanges, OnInit, Output } from '@angular/core';
 import { AppComponent } from 'src/app/app.component';
 import { RadioService } from 'src/app/services/radio.service';
 import { SocketService } from 'src/app/services/socket.service';
@@ -34,6 +34,7 @@ export class ControlsComponent implements OnInit, AfterViewChecked, OnChanges {
   @Output() presetEvent = new EventEmitter<number>();
   @Output() changeStationEvent = new EventEmitter<number>();
   @Input() presets: Array<Preset> = [];
+  @Output() fullscreenEvent = new EventEmitter<boolean>();
 
   constructor(public socketService: SocketService, public radioService: RadioService) {
   }

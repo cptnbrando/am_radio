@@ -1,12 +1,12 @@
 window.onSpotifyWebPlaybackSDKReady = () => {
 
   // We will modify the attributes to notify the UI of player changes
-  let canvas;
+  let sdk;
 
   const player = new Spotify.Player({
     name: 'am_radio',
     getOAuthToken: cb => { 
-      canvas = document.querySelector("canvas");
+      sdk = document.querySelector("#sdk");
       cb(localStorage.getItem("accessToken"));
     }
   });
@@ -14,7 +14,7 @@ window.onSpotifyWebPlaybackSDKReady = () => {
   // Error handling
   const error = (message) => {
     console.error(message);
-    canvas.setAttribute("badState", "true");
+    sdk.setAttribute("badState", "true");
   }
   
   player.addListener('initialization_error', ({ message }) => {
@@ -24,17 +24,6 @@ window.onSpotifyWebPlaybackSDKReady = () => {
   player.addListener('authentication_error', ({ message }) => {
     console.log("authentication error:");
     error(message);
-    var xmlHttp = new XMLHttpRequest();
-    xmlHttp.onreadystatechange = function() { 
-      if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
-        localStorage.setItem("accessToken", xmlHttp.responseText);
-        player.getOAuthToken(cb => {
-          cb(xmlHttp.responseText);
-        });
-      }
-    }
-    xmlHttp.open( "GET", "/api/spotify/getTokens", true );
-    xmlHttp.send( null );
   });
   player.addListener('account_error', ({ message }) => {
     console.log("Account_error:");
@@ -47,24 +36,24 @@ window.onSpotifyWebPlaybackSDKReady = () => {
 
   player.addListener('player_state_changed', state => { 
     if(state) {
-      canvas.setAttribute("current", state.track_window.current_track.uri);
-      canvas.setAttribute("paused", state.paused);
-      canvas.setAttribute("duration", state.duration);
-      canvas.setAttribute("repeat", state.repeat_mode);
-      canvas.setAttribute("shuffle", state.shuffle);
+      sdk.setAttribute("current", state.track_window.current_track.uri);
+      sdk.setAttribute("paused", state.paused);
+      sdk.setAttribute("duration", state.duration);
+      sdk.setAttribute("repeat", state.repeat_mode);
+      sdk.setAttribute("shuffle", state.shuffle);
     }
   });
 
   // Ready
   player.addListener('ready', ({ device_id }) => {
     console.log('Ready with Device ID', device_id);
-    canvas.setAttribute("state", "true");
+    sdk.setAttribute("state", "true");
   });
 
   // Not Ready
   player.addListener('not_ready', ({ device_id }) => {
     console.log('Device ID has gone offline', device_id);
-    canvas.setAttribute("badState", "true");
+    sdk.setAttribute("badState", "true");
   });
 
   // Connect to the player!

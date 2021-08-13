@@ -58,17 +58,18 @@ export class RadioPageComponent implements OnInit {
   @Output() showPlaylistBar: boolean = false;
   @Output() showStationBar: boolean = false;
   @Output() showControls: boolean = false;
+  showNav: boolean = true;
 
   // isLoading
   @Output() isLoading: boolean = true;
 
   // isMobile
   @Output() isMobile: boolean = false;
+  wasMobile: boolean = false;
 
   // This is the canvas element
   // We update attributes of it to display changes to the player
-  canvas: any;
-  showNav: boolean = true;
+  sdk: any;
 
   @Output() selectedPreset: number = 3;
   @Output() mousePos: Array<number> = [0, 0];
@@ -106,17 +107,15 @@ export class RadioPageComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.canvas = document.querySelector("canvas");
-    if(window.innerWidth <= 960) {
+    this.sdk = document.querySelector("#sdk");
+    if(window.innerWidth <= 960 && !this.isMobile) {
       this.isMobile = true;
       this.showPlaylistBar = false;
       this.showControls = false;
       this.showStationBar = false;
       this.showNav = true;
 
-      document.getElementById("settingsBars")?.addEventListener("click", () => {
-        this.toggleNav(4);
-      }, true);
+      this.addNavMobileToggle();
     }
   }
 
@@ -254,13 +253,13 @@ export class RadioPageComponent implements OnInit {
 
   // Event callback for Spotify SDK script
   onPlaybackChange(event: any): void {
-    this.isPlaying = !(this.canvas.getAttribute("paused") === "true");
+    this.isPlaying = !(this.sdk.getAttribute("paused") === "true");
   }
 
   // Event callback for Spotify SDK script
   onCurrentChange(event: any): void {
     // This is the queue loop for an infinite station
-    let currentCanvas = this.canvas.getAttribute("current");
+    let currentCanvas = this.sdk.getAttribute("current");
     (<any>window).spotifyPlayer.getCurrentState().then((data: any) => {
       if(data) {
         if(data.track_window.current_track.uri != this.currentURI && !this.isLoading) {
@@ -280,12 +279,12 @@ export class RadioPageComponent implements OnInit {
 
   // Event callback for repeat changes detected by Spotify SDK player
   onRepeatChange(event: any): void {
-    this.repeat = parseInt(this.canvas.getAttribute("repeat"));
+    this.repeat = parseInt(this.sdk.getAttribute("repeat"));
   }
 
   // Event callback for shuffle changes detected by Spotify SDK player
   onShuffleChange(event: any): void {
-    this.shuffle = (this.canvas.getAttribute("shuffle") === "true");
+    this.shuffle = (this.sdk.getAttribute("shuffle") === "true");
   }
 
   // This will get the current player and set the data to the UI
@@ -508,7 +507,7 @@ export class RadioPageComponent implements OnInit {
    * @returns nothing lol
    */
   toggleNav(bar: number): void {
-    if(this.isLoading) return;
+    // if(this.isLoading) return;
     if(this.showNav) {
       switch(bar) {
         case 0:
@@ -526,21 +525,43 @@ export class RadioPageComponent implements OnInit {
           if(this.showPlaylistBar) return;
           if(this.showControls) return;
           if(this.showStationBar) return;
+          if(!this.isMobile) return;
           break;
+        }
       }
-    }
-
+      
     const overlay = Array.from(document.getElementsByClassName("disappear") as HTMLCollectionOf<HTMLElement>);
     if(this.showNav) {
       overlay.forEach(element => {
-        element.style.visibility = "hidden"
+        element.style.transition = "visibility 0.3s linear, opacity 0.3s linear";
+        element.style.opacity = "0";
+        element.style.visibility = "hidden";
       });
+      this.showNav = false;
     } else {
       overlay.forEach(element => {
-        element.style.visibility = "visible"
+        element.style.transition = "visibility 0.3s linear, opacity 0.3s linear";
+        element.style.opacity = "1";
+        element.style.visibility = "visible";
       });
+      this.showNav = true;
     }
-    this.showNav = !this.showNav;
+  }
+
+  // Event for when fullscreen is toggled
+  fullscreen(event: any) {
+    this.showNav = true;
+    this.showPlaylistBar = false;
+    this.showControls = false;
+    this.showStationBar = false;
+  }
+
+  // Adds a click event for toggling nav on mobile
+  addNavMobileToggle() {
+    document.getElementById("settingsBars")?.addEventListener("click", () => {
+      this.toggleNav(4);
+    }, true);
+    this.wasMobile = true;
   }
 
   @HostListener('window:unload', ['$event'])
@@ -561,24 +582,23 @@ export class RadioPageComponent implements OnInit {
 
   @HostListener('window:resize', ['$event'])
   onResize(event: any) {
-    if(event.target.innerWidth <= 960) {
-      this.isMobile = true;
-
-      document.getElementById("settingsBars")?.addEventListener("click", () => {
-        this.toggleNav(4);
-      }, true);
+    if(!this.wasMobile) {
+      if(event.target.innerWidth <= 800) {
+        this.isMobile = true;
+        this.addNavMobileToggle();
+      }
+      else {
+        document.getElementById("settingsBars")?.removeEventListener("click", () => {
+          this.toggleNav(4);
+        }, true);
+        this.isMobile = false;
+        this.wasMobile = false;
+      }
+      this.showPlaylistBar = false;
+      this.showControls = false;
+      this.showStationBar = false;
+      this.showNav = true;
     }
-    else {
-      document.getElementById("settingsBars")?.removeEventListener("click", () => {
-        this.toggleNav(4);
-      }, true);
-      this.isMobile = false;
-    }
-
-    this.showPlaylistBar = false;
-    this.showControls = false;
-    this.showStationBar = false;
-    this.showNav = true;
   }
 
   @HostListener('mousemove', ['$event'])

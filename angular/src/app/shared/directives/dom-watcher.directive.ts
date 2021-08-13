@@ -5,14 +5,10 @@ import { Directive, ElementRef, OnInit } from '@angular/core';
 })
 export class DomWatcherDirective implements OnInit {
 
-  canvas: any;
-  currentlyPlaying: string = "";
-
   constructor(private elRef: ElementRef) { }
 
   ngOnInit() {
     this.registerDomChangedEvent(this.elRef.nativeElement);
-    this.canvas = document.querySelector("canvas");
   }
   
   // This gets called whenever the canvas element has it's attributes changed

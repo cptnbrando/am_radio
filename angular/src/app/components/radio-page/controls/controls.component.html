@@ -15,7 +15,8 @@
             </div>
             <div id="controlsPanel">
                 <about *ngIf="selectedTab === 0"></about>
-                <app-settings *ngIf="selectedTab === 1" [isLoading]="isLoading"></app-settings>
+                <app-settings *ngIf="selectedTab === 1" [isLoading]="isLoading" (fullscreenEvent)="this.fullscreenEvent.emit($event)">
+                </app-settings>
                 <chat *ngIf="selectedTab === 2" [isLoading]="isLoading"></chat>
                 <visualizer-settings *ngIf="selectedTab === 3" [selectedPreset]="preset" (presetEvent)="changePreset($event)" [presets]="presets">
                 </visualizer-settings>

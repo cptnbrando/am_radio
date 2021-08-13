@@ -24,6 +24,9 @@ export class AppComponent {
    * @param offset optional extra space to minus container width by
    */
   static startScroll(scrollItem: Element, container: Element, offset?: number) {
+    // First reset scroll for item by removing .scroll
+    scrollItem.classList.remove("scroll");
+    // Then compare item width to container width
     const itemWidth = scrollItem.clientWidth;
     const containerWidth = (offset) ? container.clientWidth - offset : container.clientWidth;
     if(itemWidth > containerWidth) {

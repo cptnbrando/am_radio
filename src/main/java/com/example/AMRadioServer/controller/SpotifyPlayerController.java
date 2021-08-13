@@ -12,6 +12,7 @@ import com.wrapper.spotify.model_objects.specification.*;
 import com.wrapper.spotify.requests.data.player.AddItemToUsersPlaybackQueueRequest;
 import com.wrapper.spotify.requests.data.player.GetUsersCurrentlyPlayingTrackRequest;
 import com.wrapper.spotify.requests.data.player.SkipUsersPlaybackToNextTrackRequest;
+import com.wrapper.spotify.requests.data.playlists.GetListOfCurrentUsersPlaylistsRequest;
 import org.apache.hc.core5.http.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -291,17 +292,19 @@ public class SpotifyPlayerController {
         try {
             // Playback's already on am_radio, so we want to shuffle and repeat on a random recent playlist
             // and skip to the next track
-            PlaylistSimplified[] lists = this.spotifyApi.getListOfCurrentUsersPlaylists().limit(25).build().execute().getItems();
+            GetListOfCurrentUsersPlaylistsRequest request = this.spotifyApi.getListOfCurrentUsersPlaylists().limit(25).build();
+
             // toggle shuffle
             this.spotifyApi.toggleShuffleForUsersPlayback(true).build().executeAsync().get();
             // toggle context repeat
             this.spotifyApi.setRepeatModeOnUsersPlayback("context").build().executeAsync().get();
 
             // Get a random playlist and play a random track from it (so the queue gets reset)
-            PlaylistSimplified randomPlaylist = lists[new Random().nextInt((lists.length))];
-            PlaylistTrack[] tracks = spotifyApi.getPlaylistsItems(randomPlaylist.getId()).build().execute().getItems();
-            PlaylistTrack randomTrack = tracks[new Random().nextInt((tracks.length))];
             try {
+                PlaylistSimplified[] lists = request.executeAsync().get().getItems();
+                PlaylistSimplified randomPlaylist = lists[new Random().nextInt((lists.length))];
+                PlaylistTrack[] tracks = spotifyApi.getPlaylistsItems(randomPlaylist.getId()).build().execute().getItems();
+                PlaylistTrack randomTrack = tracks[new Random().nextInt((tracks.length))];
                 boolean played = this.playTrack(randomTrack.getTrack().getUri());
                 if(played) {
                     this.playPlaylist(randomPlaylist.getUri());
@@ -310,7 +313,7 @@ public class SpotifyPlayerController {
             } catch (Exception f) {
                 System.out.println("Start AMRadio failed");
                 System.out.println(f.getMessage());
-                return randomPlaylist;
+                return request.execute().getItems()[0];
             }
         }
         catch (IOException | ParseException | ForbiddenException | InterruptedException | ExecutionException e) {
