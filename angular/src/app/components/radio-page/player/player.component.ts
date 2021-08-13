@@ -1,5 +1,5 @@
 import { Component, EventEmitter, HostListener, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
-import { faAngleLeft, faAngleRight, faPause, faPlay, faRandom, faRecycle, faSync, faVolumeDown, faVolumeMute, faVolumeOff, faVolumeUp } from '@fortawesome/free-solid-svg-icons';
+import { faAngleLeft, faAngleRight, faPause, faPlay, faRandom, faRecordVinyl, faRecycle, faSync, faVolumeDown, faVolumeMute, faVolumeOff, faVolumeUp } from '@fortawesome/free-solid-svg-icons';
 import { faHeart as fasHeart } from '@fortawesome/free-solid-svg-icons';
 import { faHeart as farHeart } from '@fortawesome/free-regular-svg-icons';
 import { AppComponent } from 'src/app/app.component';
@@ -23,6 +23,7 @@ export class PlayerComponent implements OnInit, OnChanges {
   faRecycle = faRecycle;
   fasHeart = fasHeart;
   farHeart = farHeart;
+  faRecord = faRecordVinyl;
 
   faVolumeUp = faVolumeUp;
   faVolumeOff = faVolumeOff;
@@ -196,7 +197,6 @@ export class PlayerComponent implements OnInit, OnChanges {
   // Event for shuffle button, toggle shuffle
   shuffleChange(): void {
     if(!this.isLoading) {
-      // this.toggleLoadingEvent.emit(true);
       this.playerService.shuffle(!this.shuffle).subscribe();
     }
   }
@@ -204,7 +204,6 @@ export class PlayerComponent implements OnInit, OnChanges {
   // Event for repeat button, toggle repeat
   repeatChange(): void {
     if(!this.isLoading) {
-      // this.toggleLoadingEvent.emit(true);
       switch(this.repeat) {
         case 0:
           this.playerService.repeat("context").subscribe();
@@ -222,7 +221,6 @@ export class PlayerComponent implements OnInit, OnChanges {
   // Event for volume slider, change the volume
   changeVolume(): void {
     this.volumeEvent.emit(this.volume);
-    // this.playerService.volume(this.volume).subscribe();
   }
 
   // Event for clicking volume icon, toggle mute
@@ -236,11 +234,21 @@ export class PlayerComponent implements OnInit, OnChanges {
     this.volumeEvent.emit(this.volume);
   }
 
+  /**
+   * Event handler for heart button. Loves or unloves a track (saves to library)
+   */
   loveTrack(): void {
     if(!this.isLoading) {
-      this.spotifyService.loveTrack(this.currentlyPlaying.id).subscribe(data => {
-        this.isLoved = data;
-      });
+      if(this.isLoved) {
+        this.spotifyService.unloveTrack(this.currentlyPlaying.id).subscribe(data => {
+          this.isLoved = data;
+        });
+      }
+      else {
+        this.spotifyService.loveTrack(this.currentlyPlaying.id).subscribe(data => {
+          this.isLoved = data;
+        });
+      }
     }
   }
 

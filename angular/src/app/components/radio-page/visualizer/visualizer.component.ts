@@ -265,6 +265,9 @@ export class VisualizerComponent implements OnInit, OnChanges {
    * Start the visualizer with requestAnimationFrame
    */
   beginVisualizer(): void {
+    if(this.currentDevice?.name != "am_radio") {
+      return;
+    }
     if(!this.isAnimating && this.analysis && this.features && this.features.uri === this.currentlyPlaying.uri) {
       this.ctx.clearRect(0, 0, this.ctx.canvas.clientWidth, this.ctx.canvas.clientHeight);
       this.selectedSketch = this.sketches(this.selectedPreset, this.position, this.analysis);

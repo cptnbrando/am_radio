@@ -68,13 +68,8 @@ export class SeekerComponent implements OnInit, OnChanges {
     }
     // Disable the seeker on a station
     if(changes.currentStation) {
+      this.sliderDisabled = (this.currentStation.stationID !== 0);
       this.resetPosition(false);
-      if(changes.currentStation.currentValue.stationID === 0) {
-        this.sliderDisabled = false;
-      }
-      else {
-        this.sliderDisabled = true;
-      }
     }
   }
 

@@ -1,5 +1,6 @@
 import { Component, HostListener, OnInit, Output } from '@angular/core';
 import { faSpotify } from '@fortawesome/free-brands-svg-icons';
+import { resolve } from 'dns';
 import { AppComponent } from 'src/app/app.component';
 import { RadioService } from 'src/app/services/radio.service';
 import { Device } from 'src/app/shared/models/device.model';
@@ -155,7 +156,6 @@ export class RadioPageComponent implements OnInit {
         if(data) {
           this.currentDevice = data;
         }
-        // console.log(data);
         resolve(data);
       }, error => {
         reject(error);
@@ -172,6 +172,13 @@ export class RadioPageComponent implements OnInit {
     this.setPlayerData().then(data => {
       // Once the radio player is ready, we should prompt the user to swap to the new player
       // ...or we could change it automatically if there's nothing playing rn
+      if(data) {
+        if(data.is_playing) {
+          this.currentDevice = data;
+          this.toggleLoading(false);
+          return;
+        }
+      }
 
       // If nothing is playing, we set am_radio as the active device, then attempt to play the most recently played track
       // Also open the controls panel
@@ -245,7 +252,6 @@ export class RadioPageComponent implements OnInit {
             this.nextURI = data.nextURI;
             this.playerService.addToQueue(this.nextURI).subscribe();
             this.setPlayerData();
-            // console.log("Added to queue", data.nextURI);
           }
         }
       });
@@ -293,7 +299,6 @@ export class RadioPageComponent implements OnInit {
     return new Promise((resolve, reject) => {
       this.playerService.getPlayer().subscribe(data => {
         if(data) {
-          console.log(data);
           // Set the data
           this.position = data.progress_ms;
           this.currentlyPlaying = data.item;
@@ -302,25 +307,18 @@ export class RadioPageComponent implements OnInit {
           this.isPlaying = data.is_playing;
           
           // Get whether the track is loved or not
-          this.isLoved = this.checkLovedTrack(data.item.id);
+          this.spotifyService.checkLovedTrack(data.item.id).subscribe(love => {
+            this.isLoved = (love) ? love : false;
+            resolve(data);
+          });
         }
-        resolve(data);
+        else {
+          resolve(data);
+        }
       }, error => {
         reject(error);
       });
     })
-  }
-
-  /**
-   * Check whether a track is in a user's library or not
-   * @param trackID id of track to check
-   * @returns whether the track is loved or not
-   */
-  checkLovedTrack(trackID: string): boolean {
-    this.spotifyService.checkLovedTrack(trackID).subscribe(data => {
-      return data;
-    });
-    return false;
   }
 
   /**

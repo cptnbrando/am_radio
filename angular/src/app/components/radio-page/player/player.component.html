@@ -17,8 +17,8 @@
     </div>
 
     <div id="playerIcons" class="playerItem">
-        <div id="loved1" class="clickable" (click)="this.loveTrack()">
-            <fa-icon *ngIf="this.isLoved" size="2x" [icon]="fasHeart"></fa-icon>
+        <div id="loved" class="clickable" (click)="this.loveTrack()">
+            <fa-icon class="selected" *ngIf="this.isLoved" size="2x" [icon]="fasHeart"></fa-icon>
             <fa-icon *ngIf="!this.isLoved" size="2x" [icon]="farHeart"></fa-icon>
         </div>
         <div (click)="shuffleChange()" *ngIf="stationNum === 0" class="clickable">
@@ -39,10 +39,9 @@
             <fa-icon [icon]="faSync" size="2x" *ngIf="repeat === 1" class="selected"></fa-icon>
             <fa-icon [icon]="faRecycle" size="2x" *ngIf="repeat === 2" class="selected"></fa-icon>
         </div>
-        <div id="loved2" class="clickable" (click)="this.loveTrack()">
-            <fa-icon *ngIf="this.isLoved" size="2x" [icon]="fasHeart"></fa-icon>
-            <fa-icon *ngIf="!this.isLoved" size="2x" [icon]="farHeart"></fa-icon>
-        </div>
+        <fa-icon [icon]="faRecord" size="2x" (click)="toggleBar(1)" class="clickable selected" *ngIf="this.showStationBar"></fa-icon>
+        <fa-icon [icon]="faRecord" size="2x" (click)="toggleBar(1)" class="clickable" *ngIf="!this.showStationBar">
+        </fa-icon>
     </div>
 
     <div id="stationInfo" class="playerItem">

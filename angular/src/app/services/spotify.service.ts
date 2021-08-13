@@ -82,4 +82,8 @@ export class SpotifyService {
   loveTrack(trackID: string): Observable<any> {
     return this.httpCli.post<any>(`${this.serverURL}/${trackID}/love`, trackID);
   }
+
+  unloveTrack(trackID: string): Observable<any> {
+    return this.httpCli.post<any>(`${this.serverURL}/${trackID}/unlove`, trackID);
+  }
 }

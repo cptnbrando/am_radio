@@ -192,6 +192,34 @@ public class SpotifyController {
         }
     }
 
+    /**
+     * Checks a given track and returns whether it is in the user's library or not
+     * @param trackID ID of track
+     * @return whether the track is in the library or not
+     */
+    @GetMapping(value = "/{trackID}/checkLoved")
+    public boolean checkLoved(@PathVariable("trackID") String trackID) throws SpotifyWebApiException {
+        try {
+            Boolean[] checks = this.spotifyApi.checkUsersSavedTracks(trackID).build().execute();
+            if(checks.length > 0) {
+                return checks[checks.length - 1];
+            }
+            else {
+                return false;
+            }
+        } catch (IOException | ParseException e) {
+            System.out.println("Exception in Spotify/checkLoved");
+            System.out.println(e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Saves a track from the user's library
+     * @param trackID ID of track
+     * @return true if saved, false if failed
+     * @throws SpotifyWebApiException
+     */
     @PostMapping(value = "/{trackID}/love")
     public boolean love(@PathVariable("trackID") String trackID) throws SpotifyWebApiException {
         try {
@@ -204,14 +232,21 @@ public class SpotifyController {
         }
     }
 
-    @GetMapping(value = "/{trackID}/checkLoved")
-    public boolean checkLoved(@PathVariable("trackID") String trackID) throws SpotifyWebApiException {
+    /**
+     * Removes a track from the user's library
+     * @param trackID ID of track
+     * @return false if removed, true if still there
+     */
+    @PostMapping(value = "/{trackID}/unlove")
+    public boolean unlove(@PathVariable("trackID") String trackID) throws SpotifyWebApiException {
         try {
-            return this.spotifyApi.checkUsersSavedTracks(trackID).build().execute()[0];
-        } catch (IOException | ParseException e) {
-            System.out.println("Exception in Spotify/checkLoved");
-            System.out.println(e.getMessage());
+            this.spotifyApi.removeUsersSavedTracks(trackID).build().execute();
             return false;
+        } catch (IOException | ParseException e) {
+            System.out.println("Exception in Spotify/love");
+            System.out.println(e.getMessage());
+            return true;
         }
     }
+
 }
