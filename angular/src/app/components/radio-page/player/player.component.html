@@ -5,6 +5,10 @@
         <div id="currentImage" class="album column clickable noMobile" (click)="toggleBar(0)">
             <img [src]="currentlyPlaying.album.images[0].url" alt="image">
         </div>
+        <div id="loved" class="clickable" (click)="this.loveTrack()" *ngIf="this.isMobile">
+            <fa-icon class="selected" *ngIf="this.isLoved" size="2x" [icon]="fasHeart"></fa-icon>
+            <fa-icon *ngIf="!this.isLoved" size="2x" [icon]="farHeart"></fa-icon>
+        </div>
         <div id="currentInfo" class="info column clickable scrollContainer" (click)="toggleBar(0)">
             <div id="currentTrack" class="scrollCheck">
                 {{this.currentlyPlaying.artists[0].name}} - {{this.currentlyPlaying.name}}
@@ -17,7 +21,7 @@
     </div>
 
     <div id="playerIcons" class="playerItem">
-        <div id="loved" class="clickable" (click)="this.loveTrack()">
+        <div id="loved" class="clickable" (click)="this.loveTrack()" *ngIf="!this.isMobile">
             <fa-icon class="selected" *ngIf="this.isLoved" size="2x" [icon]="fasHeart"></fa-icon>
             <fa-icon *ngIf="!this.isLoved" size="2x" [icon]="farHeart"></fa-icon>
         </div>
@@ -39,19 +43,26 @@
             <fa-icon [icon]="faSync" size="2x" *ngIf="repeat === 1" class="selected"></fa-icon>
             <fa-icon [icon]="faRecycle" size="2x" *ngIf="repeat === 2" class="selected"></fa-icon>
         </div>
-        <fa-icon [icon]="faRecord" size="2x" (click)="toggleBar(1)" class="clickable selected" *ngIf="this.showStationBar"></fa-icon>
-        <fa-icon [icon]="faRecord" size="2x" (click)="toggleBar(1)" class="clickable" *ngIf="!this.showStationBar">
-        </fa-icon>
+        <div *ngIf="!this.isMobile" (click)="toggleBar(1)">
+            <fa-icon [icon]="faRecord" size="2x" class="clickable selected" *ngIf="this.showStationBar"></fa-icon>
+            <fa-icon [icon]="faRecord" size="2x" class="clickable" *ngIf="!this.showStationBar"></fa-icon>
+        </div>
     </div>
 
     <div id="stationInfo" class="playerItem">
         <div class="vertical">
-            <div class="clickable scrollContainer margin" (click)="toggleBar(1)">
-                <div id="stationName" class="scrollCheck">{{this.currentStation.stationName}}</div>
-                <div class="noMobile">{{this.user.displayName}}</div>
-                <div class="noMobile">{{this.currentDevice.name}}</div>
+            <div id="stationInfoDiv" class="clickable scrollContainer margin" (click)="toggleBar(1)">
+                <div id="stationNameDiv">
+                    <div id="stationName" class="scrollCheck">{{this.currentStation.stationName}}</div>
+                    <div class="noMobile">{{this.user.displayName}}</div>
+                    <div class="noMobile">{{this.currentDevice.name}}</div>
+                </div>
+                <div *ngIf="this.isMobile" id="record">
+                    <fa-icon [icon]="faRecord" size="2x" class="clickable selected" *ngIf="this.showStationBar"></fa-icon>
+                    <fa-icon [icon]="faRecord" size="2x" class="clickable" *ngIf="!this.showStationBar"></fa-icon>
+                </div>
             </div>
-            <div class="horizontal margin">
+            <div class="horizontal margin" id="volume">
                 <div class="clickable" (click)="toggleMute()" id="volumeIcon">
                     <fa-icon [icon]="faVolumeUp" *ngIf="this.volume > 50"></fa-icon>
                     <fa-icon [icon]="faVolumeOff" *ngIf="this.volume === 0"></fa-icon>

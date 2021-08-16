@@ -75,8 +75,8 @@ export class PlayerComponent implements OnInit, OnChanges {
       const album = document.querySelector("#currentAlbum");
       const playlist = document.querySelector("#currentPlaylist");
       const station = document.querySelector("#stationName");
-      const div = document.querySelector("#player");
-      const offset = (this.isMobile) ? 10 : 200;
+      const div = (this.isMobile) ? document.querySelector("#player") : document.querySelector("#currentDiv");
+      const offset = (this.isMobile) ? 65 : 100;
       if(div) {
         if(track) {
           setTimeout(() => {
@@ -94,9 +94,12 @@ export class PlayerComponent implements OnInit, OnChanges {
           }, 1000);
         }
         if(this.isMobile && station) {
-          setTimeout(() => {
-            AppComponent.startScroll(station, div, offset + div.clientWidth / 2);
-          }, 1000);
+          const stationInfoDiv = document.querySelector("#stationNameDiv");
+          if(stationInfoDiv) {
+            setTimeout(() => {
+              AppComponent.startScroll(station, stationInfoDiv);
+            }, 1000);
+          }
         }
       }
     }

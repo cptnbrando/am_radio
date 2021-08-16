@@ -1,7 +1,6 @@
 <div id="settingsPanel">
     <div class="setting padded">
         <h2>Fullscreen</h2>
-        <!-- <input id="fullscreen" class="toggle" type="checkbox" (click)="toggleFullscreen()" [(ngModel)]="isFullscreen"> -->
         <mat-slide-toggle [checked]="isFullscreen" (change)="toggleFullscreen()"></mat-slide-toggle>
     </div>
     <div class="settingList padded">
@@ -9,11 +8,15 @@
         <h5>(visualizer will not work on other devices)</h5>
         <div>
             <ul class="padded">
-                <li *ngFor="let device of devices" class="clickable device padded" (click)="changeDevice(device.id)">
+                <li *ngFor="let device of devices" class="clickable device padded" (click)="changeDevice(device)">
                     {{device.name}}
                     <fa-icon [icon]="faVolumeUp" *ngIf="device.is_active === true"></fa-icon>
                 </li>
             </ul>
         </div>
+    </div>
+    <div class="setting padded">
+        <h2>Sketch Info</h2>
+        <mat-slide-toggle [checked]="showSketchInfo" (change)="toggleSketchInfo()"></mat-slide-toggle>
     </div>
 </div>

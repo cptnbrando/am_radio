@@ -10,12 +10,15 @@ import { Device } from 'src/app/shared/models/device.model';
 })
 export class AppSettingsComponent implements OnInit {
   isFullscreen: boolean = false;
+  showSketchInfo: boolean = true;
   devices: Device[] = [];
 
   @Input() isLoading: boolean = false;
 
   faVolumeUp = faVolumeUp;
   @Output() fullscreenEvent = new EventEmitter<boolean>();
+  @Output() showSketchInfoEvent = new EventEmitter<boolean>();
+  @Output() changeDeviceEvent = new EventEmitter<any>();
 
   constructor(private playerService: SpotifyPlayerService) {
   }
@@ -37,15 +40,21 @@ export class AppSettingsComponent implements OnInit {
     }
   }
 
+  toggleSketchInfo() {
+    this.showSketchInfo = !this.showSketchInfo;
+    this.showSketchInfoEvent.emit(this.showSketchInfo);
+  }
+
   refreshDevices(): void {
     this.playerService.getDevices().subscribe(data => {
       this.devices = data;
     });
   }
 
-  changeDevice(id: string): void {
+  changeDevice(device: any): void {
     if(!this.isLoading) {
-      this.playerService.playOn(id).subscribe(data => {
+      this.changeDeviceEvent.emit(device);
+      this.playerService.playOn(device.id).subscribe(data => {
         this.refreshDevices();
       });
     }

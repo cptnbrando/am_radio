@@ -69,9 +69,13 @@ export class RadioPageComponent implements OnInit {
   @Output() isMobile: boolean = false;
   wasMobile: boolean = false;
 
+  // If am_radio is the active device
+  @Output() am_active: boolean = false;
+
   // This is the canvas element
   // We update attributes of it to display changes to the player
   sdk: any;
+  @Output() showSketchInfo: boolean = true;
 
   @Output() selectedPreset: number = 3;
   @Output() mousePos: Array<number> = [0, 0];
@@ -186,6 +190,7 @@ export class RadioPageComponent implements OnInit {
         // So that it doesn't sound awful loading up
         this.changeVolume(0);
         if(data) {
+          this.am_active = true;
           this.currentDevice = data;
         }
         this.beginAMRadio().then(success => {
@@ -452,6 +457,12 @@ export class RadioPageComponent implements OnInit {
     });
   }
 
+  changeDevice(event: any): void {
+    this.setPlayerData().then(data => {
+      this.am_active = (event.name === "am_radio");
+    });
+  }
+
   // Play a track on am_radio 000
   // track is actually an array: [track, element]
   playTrack(track: any) {
@@ -579,6 +590,10 @@ export class RadioPageComponent implements OnInit {
     this.wasMobile = true;
   }
 
+  changeSketchInfo(event: any): void {
+    this.showSketchInfo = event;
+  }
+
   @HostListener('window:unload', ['$event'])
   unloadHandler(event: any) {
     console.log("window unload buh bye");
@@ -613,6 +628,19 @@ export class RadioPageComponent implements OnInit {
       this.showControls = false;
       this.showStationBar = false;
       this.showNav = true;
+    }
+    else {
+      if(event.target.innerWidth > 800) {
+        document.getElementById("settingsBars")?.removeEventListener("click", () => {
+          this.toggleNav(4);
+        }, true);
+        this.isMobile = false;
+        this.wasMobile = false;
+        this.showPlaylistBar = false;
+        this.showControls = false;
+        this.showStationBar = false;
+        this.showNav = true;
+      }
     }
   }
 

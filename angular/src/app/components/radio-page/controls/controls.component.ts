@@ -35,6 +35,8 @@ export class ControlsComponent implements OnInit, AfterViewChecked, OnChanges {
   @Output() changeStationEvent = new EventEmitter<number>();
   @Input() presets: Array<Preset> = [];
   @Output() fullscreenEvent = new EventEmitter<boolean>();
+  @Output() showSketchInfoEvent = new EventEmitter<boolean>();
+  @Output() changeDeviceEvent = new EventEmitter<any>();
 
   constructor(public socketService: SocketService, public radioService: RadioService) {
   }
@@ -87,6 +89,10 @@ export class ControlsComponent implements OnInit, AfterViewChecked, OnChanges {
 
   changeStation(event: any): void {
     this.changeStationEvent.emit(event);
+  }
+
+  changeDevice(event: any): void {
+
   }
 
   // Logout from am_radio

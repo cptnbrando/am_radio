@@ -27,6 +27,21 @@
     column-gap: 15px;
     overflow: hidden;
 
+    #loved {
+        display: flex;
+        padding-left: 18px;
+        align-items: center;
+        justify-content: center;
+    }
+
+    #currentInfo {
+        flex: 1;
+    }
+
+    #currentTrack {
+        align-self: center;
+    }
+
     #currentImage img {
         border: solid;
         width: 100px;
@@ -58,8 +73,30 @@
         width: 100%;
     }
 
+    #volume {
+        flex: 1;
+    }
+
     .vertical {
         flex-direction: row;
+    }
+
+    #stationInfoDiv {
+        flex: 3;
+        display: flex;
+        align-items: center;
+        flex-direction: row;
+
+        #stationNameDiv {
+            display: flex;
+            flex: 1;
+            justify-content: flex-end;
+        }
+
+        #record {
+            padding-left: 10px;
+            flex: .25;
+        }
     }
 
     .horizontal {
@@ -109,6 +146,10 @@
 
     .noMobile {
       display: none;
+    }
+
+    .mat-slider-horizontal {
+        min-width: 100px;
     }
   }
 }

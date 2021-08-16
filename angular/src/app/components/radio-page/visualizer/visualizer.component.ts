@@ -1,5 +1,6 @@
 import { ElementRef, HostListener, Input, OnChanges, ViewChild } from '@angular/core';
 import { Component, OnInit } from '@angular/core';
+import { tickStep } from 'd3-array';
 import { SpotifyService } from 'src/app/services/spotify.service';
 import { Device } from 'src/app/shared/models/device.model';
 import { Sketch } from 'src/app/shared/models/sketch.model';
@@ -47,8 +48,9 @@ export class VisualizerComponent implements OnInit, OnChanges {
   currentSketch!: Sketch;
 
   @Input() isMobile: boolean = false;
-
+  @Input() am_active: boolean = false;
   @Input() mousePos: Array<number> = [0, 0];
+  @Input() showSketchInfo: boolean = true;
 
   constructor(private spotifyService: SpotifyService) {
     this.position = 0;
@@ -60,39 +62,55 @@ export class VisualizerComponent implements OnInit, OnChanges {
 
   // Start and stop the visualizer based on changes to input values
   ngOnChanges(changes: any): void {
+    // We don't care if the mousePos changed
+    if(Object.keys(changes).length === 1 && changes.mousePos) return;
     // We never want the visualizer to be playing when nothing's playing
-    if(this.currentlyPlaying.name != "Nothing Playing") {
-      // If there's a new track playing, get and set the new analysis/features data
-      if(changes.currentlyPlaying?.currentValue.id != changes.currentlyPlaying?.previousValue.id) {
-        this.stopVisualizer();
-        this.setAudioData(changes.currentlyPlaying?.currentValue.id).then(() => {
-          // If it's playing, start the visualizer
-          if(this.isPlaying) {
-            this.beginVisualizer();
-          }
-        });
-      }
-      // If isPlaying is changed to false, meaning the player was paused, stop the visualizer. Start it on true
-      if(changes.isPlaying?.currentValue === false && !this.isLoading) {
-        this.stopVisualizer();
-      }
-      else if(changes.isPlaying?.currentValue === true && !this.isLoading) {
-        this.beginVisualizer();
-      }
-      // If isLoading is changed to true, stop the visualizer. Start it if it's false
-      if(changes.isLoading?.currentValue === true) {
-        this.stopVisualizer();
-      }
-      else if(changes.isLoading?.currentValue === false && this.isPlaying) {
-        this.beginVisualizer();
-      }
-      // If the preset is changed, restart the visualizer loop
-      if(changes.selectedPreset) {
-        this.resetVisualizer();
-      }
-    } else {
+    if(this.currentlyPlaying.name === "Nothing Playing") {
+      this.stopVisualizer();
+      return;
+    }
+
+    // If there's a new track playing, get and set the new analysis/features data
+    if(changes.currentlyPlaying?.currentValue.id != changes.currentlyPlaying?.previousValue.id) {
+      this.stopVisualizer();
+      this.setAudioData(changes.currentlyPlaying?.currentValue.id).then(() => {
+        // If it's playing, start the visualizer
+        if(this.isPlaying) {
+          this.beginVisualizer();
+        }
+      });
+    }
+
+    if(changes.am_active) {
+      console.log(this.currentlyPlaying);
+      this.resetVisualizer();
+    }
+
+    // If isPlaying is changed to false, meaning the player was paused, stop the visualizer. Start it on true
+    if(changes.isPlaying?.currentValue === false && !this.isLoading) {
       this.stopVisualizer();
     }
+    else if(changes.isPlaying?.currentValue === true && !this.isLoading) {
+      this.beginVisualizer();
+    }
+
+    // If isLoading is changed to true, stop the visualizer. Start it if it's false
+    if(changes.isLoading?.currentValue === true) {
+      this.stopVisualizer();
+    }
+    else if(changes.isLoading?.currentValue === false && this.isPlaying) {
+      this.beginVisualizer();
+    }
+
+    // If the preset is changed, restart the visualizer loop
+    if(changes.selectedPreset) {
+      this.resetVisualizer();
+    }
+
+    // If the device has changed to something other than am_radio, stop the visualizer
+    // if(!this.am_active) {
+    //   this.stopVisualizer();
+    // }
   }
   
   /**
@@ -200,7 +218,14 @@ export class VisualizerComponent implements OnInit, OnChanges {
    * Game loop to render sketches
    */
   render(): void {
-    this.drawFrame();
+    switch(this.am_active) {
+      case true:
+        this.drawFrame();
+        break;
+      case false:
+        this.drawInactive();
+        break;
+    }
     this.animationLoopID = window.requestAnimationFrame(this.render.bind(this));
   }
 
@@ -211,25 +236,41 @@ export class VisualizerComponent implements OnInit, OnChanges {
   drawFrame(): void {
     // We can get the exact current position every frame from the spotify sdk web player
     const startTime = performance.now();
-    (<any>window).spotifyPlayer.getCurrentState().then((data: any) => {
-      if(!data) {
-        this.stopVisualizer();
-        return;
-      }
-      // It usually takes anywhere between 2 - 15ms to get the position from the player, idk why
-      let timeTaken = performance.now() - startTime;
-      // timeTaken = 0;
-      this.position = data.position + timeTaken;
-
-      const sketch = this.sketches(this.selectedPreset, this.position, this.analysis);
-      this.currentSketch = sketch;
-      
-      sketch.setValues(this.position, this.sectionMeasures, this.segmentMeasures).then(() => {
-        sketch.loop(this.ctx).then(() => {
-          this.drawInfo();
+    if(this.am_active) {
+      (<any>window).spotifyPlayer.getCurrentState().then((data: any) => {
+        if(!data) {
+          this.stopVisualizer();
+          return;
+        }
+        // It usually takes anywhere between 2 - 15ms to get the position from the player, idk why
+        const timeTaken = performance.now() - startTime;
+        // timeTaken = 0;
+        this.position = data.position + timeTaken;
+  
+        const sketch = this.sketches(this.selectedPreset, this.position, this.analysis);
+        this.currentSketch = sketch;
+        
+        sketch.setValues(this.position, this.sectionMeasures, this.segmentMeasures).then(() => {
+          sketch.loop(this.ctx).then(() => {
+            if(this.showSketchInfo) this.drawInfo();
+          });
         });
       });
-    });
+    }
+  }
+
+  /**
+   * Info to change device to activate visualizer
+   */
+  drawInactive(): void {
+    this.ctx.beginPath();
+    this.ctx.strokeStyle = "white";
+    this.ctx.fillStyle = "white";
+    this.ctx.font = '15px Source Code Pro';
+
+    this.ctx.fillText(`am_radio inactive`, 20, 100);
+    this.ctx.fillText(`(use settings to change device)`, 20, 130);
+    this.ctx.closePath();
   }
 
   /**
@@ -265,9 +306,6 @@ export class VisualizerComponent implements OnInit, OnChanges {
    * Start the visualizer with requestAnimationFrame
    */
   beginVisualizer(): void {
-    if(this.currentDevice?.name != "am_radio") {
-      return;
-    }
     if(!this.isAnimating && this.analysis && this.features && this.features.uri === this.currentlyPlaying.uri) {
       this.ctx.clearRect(0, 0, this.ctx.canvas.clientWidth, this.ctx.canvas.clientHeight);
       this.selectedSketch = this.sketches(this.selectedPreset, this.position, this.analysis);
