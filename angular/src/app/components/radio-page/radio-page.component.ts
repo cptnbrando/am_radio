@@ -1,6 +1,5 @@
 import { Component, HostListener, OnInit, Output } from '@angular/core';
 import { faSpotify } from '@fortawesome/free-brands-svg-icons';
-import { resolve } from 'dns';
 import { AppComponent } from 'src/app/app.component';
 import { RadioService } from 'src/app/services/radio.service';
 import { Device } from 'src/app/shared/models/device.model';

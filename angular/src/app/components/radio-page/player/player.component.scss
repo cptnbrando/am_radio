@@ -29,7 +29,6 @@
 
     #loved {
         display: flex;
-        padding-left: 17px;
         align-items: center;
         justify-content: center;
     }
@@ -119,7 +118,6 @@
         flex-direction: row;
         justify-content: center;
         align-items: flex-start;
-        margin-bottom: 3px;
     }
 
     #stationInfo {
@@ -147,7 +145,7 @@
             }
 
             #record {
-                padding-left: 10px;
+                padding-left: 7px;
                 flex: .25;
             }
         }

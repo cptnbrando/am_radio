@@ -1,6 +1,5 @@
 import { ElementRef, HostListener, Input, OnChanges, ViewChild } from '@angular/core';
 import { Component, OnInit } from '@angular/core';
-import { tickStep } from 'd3-array';
 import { SpotifyService } from 'src/app/services/spotify.service';
 import { Device } from 'src/app/shared/models/device.model';
 import { Sketch } from 'src/app/shared/models/sketch.model';
