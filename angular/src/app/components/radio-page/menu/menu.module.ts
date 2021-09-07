@@ -5,6 +5,7 @@ import { StationBarComponent } from './station-bar/station-bar.component';
 import { MenuComponent } from './menu.component';
 import { ControlsModule } from './controls/controls.module';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { FormsModule } from '@angular/forms';
 
 
 

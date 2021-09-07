@@ -1,18 +1,24 @@
 import * as d3 from 'd3-interpolate';
 import { Sketch } from "../../sketch.model";
 import { Time } from "../../time.model";
-import { Analysis, Features, Segment } from "../../track.model";
+import { Analysis, Features, Segment, Tatum } from "../../track.model";
 
 class Drop {
     x: number;
     y: number;
     size: number;
     color: string;
-    constructor(x: number, y: number, size: number, color: string) {
+    // AcidRain exclusive, speed dependant on tatum confidence and features energy value
+    speed: number;
+    // AcidRain exclusive, second color to gradient towards bottom
+    altColor: string;
+    constructor(x: number, y: number, size: number, color: string, speed: number, altColor: string) {
         this.x = x;
         this.y = y;
         this.size = size;
         this.color = color;
+        this.speed = speed;
+        this.altColor = altColor;
     }
 }
 
@@ -41,10 +47,9 @@ export class AcidRain extends Time implements Sketch {
             }
             else {
                 this.paintBlack(ctx, drop);
-                const speed = Math.ceil(this.features.danceability * 10);
-                drop.y += speed;
+                drop.y += drop.speed;
                 ctx.beginPath();
-                ctx.strokeStyle = drop.color;
+                ctx.strokeStyle = this.getGradient(drop, ctx.canvas.height);
                 ctx.moveTo(drop.x, drop.y);
                 ctx.lineTo(drop.x, drop.y + drop.size);
                 ctx.stroke();
@@ -72,7 +77,8 @@ export class AcidRain extends Time implements Sketch {
         const dropX = this.getRandomX(width);
         const dropSize = this.getLoudness(this.position, this.segment);
         const color = this.getRandomColor();
-        return new Drop(dropX, 0 - dropSize, dropSize, color);
+        const speed = this.getSpeed(this.tatum);
+        return new Drop(dropX, 0 - dropSize, dropSize, color, speed, this.getRandomColor());
     }
 
     static ctx: CanvasRenderingContext2D;
@@ -117,9 +123,9 @@ export class AcidRain extends Time implements Sketch {
         return AcidRain.allColors[Math.floor(Math.random()*AcidRain.allColors.length)];
     }
 
-    getGradient(drop: Drop): string {
-        const d3Black = d3.interpolateLab(drop.color, "black");
-        return "";
+    getGradient(drop: Drop, height: number): string {
+        const d3Black = d3.interpolateLab(drop.color, drop.altColor);
+        return d3Black(drop.y / height);
     }
 
     /**
@@ -143,5 +149,12 @@ export class AcidRain extends Time implements Sketch {
         const difference = Math.abs(pos) - segment.measure.start;
         let loudness_d3 = d3.interpolateNumber(segment.loudnessEnd, segment.loudnessStart);
         return Math.abs(loudness_d3(difference / segment.measure.duration));
+    }
+
+    getSpeed(tatum: Tatum): number {
+        const MAX_SPEED = 30;
+        const maxD3 = d3.interpolateNumber(5, MAX_SPEED);
+        const speedD3 = d3.interpolateNumber(2, maxD3(this.features.energy));
+        return speedD3(tatum.confidence);
     }
 }

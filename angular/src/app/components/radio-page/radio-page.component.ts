@@ -86,7 +86,7 @@ export class RadioPageComponent implements OnInit {
     new Preset(3, "Roller Coaster 🎢", "coaster.png"),
     new Preset(4, "Walkie Talkie", "walkie.png"),
     new Preset(5, "🌦 Rain 🌦", "rain.png"),
-    new Preset(6, "☔ Acid Rain ☔", "rain.png")
+    new Preset(6, "☔ nIaR bIcA ☔", "rain.png")
   ];
 
   constructor(private spotifyService: SpotifyService, private playerService: SpotifyPlayerService, private script: ScriptService, private radioService: RadioService) {
@@ -104,7 +104,7 @@ export class RadioPageComponent implements OnInit {
       this.setPlaylists();
       // Also set a random preset
       this.selectedPreset = Math.floor(Math.random() * this.presets.length);
-    }, onrejected => {
+    }, _onrejected => {
       // We don't have an access token, so redirect back to the homepage
       window.location.replace(AppComponent.webURL);
       throw new Error;
@@ -211,7 +211,7 @@ export class RadioPageComponent implements OnInit {
   // Man... hour 5:48:50 - 5:48:54 on Fireplace 10 hours full hd is nutty
   // This will set the current station to default 000 and get/startAMRadio
   beginAMRadio(): Promise<any> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, _reject) => {
       // So that the station bar doesn't tweak from missing fields
       this.currentStation = new Station();
       this.toggleLoading(true);
@@ -263,12 +263,12 @@ export class RadioPageComponent implements OnInit {
   }
 
   // Event callback for Spotify SDK script
-  onPlaybackChange(event: any): void {
+  onPlaybackChange(_event: any): void {
     this.isPlaying = !(this.sdk.getAttribute("paused") === "true");
   }
 
   // Event callback for Spotify SDK script
-  onCurrentChange(event: any): void {
+  onCurrentChange(_event: any): void {
     // This is the queue loop for an infinite station
     let currentCanvas = this.sdk.getAttribute("current");
     (<any>window).spotifyPlayer.getCurrentState().then((data: any) => {
@@ -289,12 +289,12 @@ export class RadioPageComponent implements OnInit {
   }
 
   // Event callback for repeat changes detected by Spotify SDK player
-  onRepeatChange(event: any): void {
+  onRepeatChange(_event: any): void {
     this.repeat = parseInt(this.sdk.getAttribute("repeat"));
   }
 
   // Event callback for shuffle changes detected by Spotify SDK player
-  onShuffleChange(event: any): void {
+  onShuffleChange(_event: any): void {
     this.shuffle = (this.sdk.getAttribute("shuffle") === "true");
   }
 
@@ -412,7 +412,7 @@ export class RadioPageComponent implements OnInit {
   }
 
   // Event callback for station bar createStation()
-  onCreatedStation(data: any): void {
+  onCreatedStation(_data: any): void {
     this.setStation(this.stationNum);
   }
 
@@ -450,14 +450,26 @@ export class RadioPageComponent implements OnInit {
     // get the tracks from the chosen playlist
     this.spotifyService.getPlaylistTracks(playlist.id).subscribe(data => {
       if(data) {
-        this.selectedPlaylistTracks = data;
+        // Some of my playlists had weird null tracks in them, probs from adding old donda leaks that got copystriked
+        // This invalid push on data map and foreach => splice stuff finds and removes them
+        const invalid: number[] = [];
+        data.map((item, index) => {
+          if(item.track === null) {
+            invalid.push(index);
+          }
+        });
+        const tracks = data;
+        invalid.forEach(num => {
+          tracks.splice(num, 1);
+        });
+        this.selectedPlaylistTracks = tracks;
         this.toggleLoading(false);
       }
     });
   }
 
   changeDevice(event: any): void {
-    this.setPlayerData().then(data => {
+    this.setPlayerData().then(_data => {
       this.am_active = (event.name === "am_radio");
     });
   }
@@ -470,7 +482,7 @@ export class RadioPageComponent implements OnInit {
       this.changeStation(0);
     }
 
-    this.playerService.playTrack(track[0].track.uri).subscribe(data => {
+    this.playerService.playTrack(track[0].track.uri).subscribe(_data => {
       this.toggleLoading(false);
       track[1].style.borderColor = "white";
     });
@@ -483,7 +495,7 @@ export class RadioPageComponent implements OnInit {
       this.changeStation(0);
     }
 
-    this.playerService.playPlaylist(this.selectedPlaylist.uri).subscribe(data => {
+    this.playerService.playPlaylist(this.selectedPlaylist.uri).subscribe(_data => {
       this.playingPlaylist = this.selectedPlaylist;
       this.currentStation.stationName = this.selectedPlaylist.name;
       this.toggleLoading(false);
@@ -501,7 +513,7 @@ export class RadioPageComponent implements OnInit {
           localStorage.setItem("accessToken", data.message);
           resolve(true);
         }
-      }, error => {
+      }, _error => {
         reject(false);
       });
     });
@@ -574,7 +586,7 @@ export class RadioPageComponent implements OnInit {
   }
 
   // Event for when fullscreen is toggled
-  fullscreen(event: any) {
+  fullscreen(_event: any) {
     this.showNav = true;
     this.showPlaylistBar = false;
     this.showControls = false;
@@ -594,7 +606,7 @@ export class RadioPageComponent implements OnInit {
   }
 
   @HostListener('window:unload', ['$event'])
-  unloadHandler(event: any) {
+  unloadHandler(_event: any) {
     console.log("window unload buh bye");
     if(this.stationNum > 0) {
       this.radioService.leaveStation(this.stationNum).subscribe();
@@ -602,7 +614,7 @@ export class RadioPageComponent implements OnInit {
   }
 
   @HostListener('window:beforeunload', ['$event'])
-  beforeUnloadHandler(event: any) {
+  beforeUnloadHandler(_event: any) {
     console.log("window before unload");
     if(this.stationNum > 0) {
       this.radioService.leaveStation(this.stationNum).subscribe();

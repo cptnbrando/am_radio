@@ -48,6 +48,11 @@ export class MenuComponent implements OnInit {
   ngOnInit(): void {
   }
 
+  // These functions are all middle men actions
+  // They take the event emitted from one of the bar components and relay it back to the radio page
+  // I think they have to be their own functions because the event can't come back in a raw in-line function...
+  // I think so anyways lol
+
   toggleNav(menuNum: number): void {
     this.toggleNavEvent.emit(menuNum);
   }
@@ -86,6 +91,10 @@ export class MenuComponent implements OnInit {
 
   playPlaylist(): void {
     this.playPlaylistEvent.emit();
+  }
+
+  changePreset(event: any): void {
+    this.presetEvent.emit(event);
   }
 
 }

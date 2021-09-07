@@ -13,6 +13,25 @@ export interface Analysis {
 
 /**
  * A Features object for a track from Spotify
+ * 
+ * acousticness: 0.7
+ * analysisUrl: "https://api.spotify.com/v1/audio-analysis/3okk47CKOqAm1TXmVPzNYf"
+ * danceability: 0.441
+ * durationMs: 233197
+ * energy: 0.326
+ * id: "3okk47CKOqAm1TXmVPzNYf"
+ * instrumentalness: 0.00696
+ * key: 7
+ * liveness: 0.109
+ * loudness: -15.957
+ * mode: "MINOR"
+ * speechiness: 0.0685
+ * tempo: 78.526
+ * timeSignature: 4
+ * trackHref: "https://api.spotify.com/v1/tracks/3okk47CKOqAm1TXmVPzNYf"
+ * type: "AUDIO_FEATURES"
+ * uri: "spotify:track:3okk47CKOqAm1TXmVPzNYf"
+ * valence: 0.348
  */
 export interface Features {
     acousticness: number;

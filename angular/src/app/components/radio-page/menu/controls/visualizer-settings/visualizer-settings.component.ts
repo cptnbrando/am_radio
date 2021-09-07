@@ -31,25 +31,25 @@ export class VisualizerSettingsComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     // Remove .selected from all presets
-    let allTabs = document.querySelectorAll(".preset");
+    const allTabs = document.querySelectorAll(".preset");
     allTabs.forEach(theTab => {
       theTab.classList.remove("selected");
     });
 
     // Add .selected to the selected tab and set it to the panel
-    let preset = document.getElementById(`preset${this.selectedPreset}`);
+    const preset = document.getElementById(`preset${this.selectedPreset}`);
     preset?.classList.add("selected");
   }  
 
   change(num: number): void {
     // Remove .selected from all presets
-    let allTabs = document.querySelectorAll(".preset");
+    const allTabs = document.querySelectorAll(".preset");
     allTabs.forEach(theTab => {
       theTab.classList.remove("selected");
     });
 
     // Add .selected to the selected tab and set it to the panel
-    let preset = document.getElementById(`preset${num}`);
+    const preset = document.getElementById(`preset${num}`);
     preset?.classList.add("selected");
     
     this.presetEvent.emit(num);

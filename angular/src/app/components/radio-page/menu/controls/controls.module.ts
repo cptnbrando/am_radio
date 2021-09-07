@@ -31,7 +31,6 @@ import { BrowserModule } from '@angular/platform-browser';
     CommonModule,
     MatTableModule,
     MatSlideToggleModule,
-    BrowserModule,
     FontAwesomeModule,
     FormsModule
   ],

@@ -51,8 +51,8 @@ export class SpotifyService {
     return this.httpCli.get<any>(this.serverURL + `/getUserPlaylists`);
   }
 
-  getPlaylistTracks(playlistID: string): Observable<any>{
-    return this.httpCli.get<any>(this.serverURL + `/getPlaylistTracks/?playlistID=${playlistID}`);
+  getPlaylistTracks(playlistID: string): Observable<any[]>{
+    return this.httpCli.get<any[]>(this.serverURL + `/getPlaylistTracks/?playlistID=${playlistID}`);
   }
 
   getDevices(): Observable<any>{

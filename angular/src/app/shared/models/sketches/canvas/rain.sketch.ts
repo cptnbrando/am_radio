@@ -1,13 +1,15 @@
 import * as d3 from 'd3-interpolate';
 import { Sketch } from "../../sketch.model";
 import { Time } from "../../time.model";
-import { Analysis, Features, Segment } from "../../track.model";
+import { Analysis, Features, Segment, Tatum } from "../../track.model";
+import { colors } from './colors';
 
 class Drop {
     x: number;
     y: number;
     size: number;
     color: string;
+
     constructor(x: number, y: number, size: number, color: string) {
         this.x = x;
         this.y = y;
@@ -28,7 +30,7 @@ export class Rain extends Time implements Sketch {
 
     static allDrops: Drop[] = [];
     static segmentCount: number = 0;
-    static allColors: string[] = ["red", "blue", "yellow", "green", "white", "purple", "orange", "aqua", "crimson", "cyan", "chocolate", "DarkSalmon", "ForestGreen", "Gainsboro", "LavenderBlush", "LemonChiffon", "LightSkyBlue", "MidnightBlue", "Silver", "SeaGreen", "Sienna", "SlateBlue", "Gold", "Khaki", "DarkOrange", "Aquamarine"];
+    static allColors: string[] = colors;
 
     paint(ctx: CanvasRenderingContext2D): void {
         let dropsToRemove: Drop[] = [];
@@ -71,7 +73,7 @@ export class Rain extends Time implements Sketch {
     makeDrop(width: number): Drop {
         const dropX = this.getRandomX(width);
         const dropSize = this.getLoudness(this.position, this.segment);
-        const color = this.getRandomColor();
+        const color = this.getConfidenceColor(this.tatum);
         return new Drop(dropX, 0 - dropSize, dropSize, color);
     }
 
@@ -106,27 +108,37 @@ export class Rain extends Time implements Sketch {
      * @returns xPos 0-width inclusive value representative of pitch to key
      */
     getRandomX(width: number): number {
-        const i = 0;
         const key = this.features.key + 1;
         const max = Math.max(...this.segment.pitches);
         const maxIndex = this.segment.pitches.indexOf(max);
         const keyDistance = Math.abs(maxIndex - key);
-        const d3Width = d3.interpolateNumber(0.5, width);
+        const d3Width = d3.interpolateNumber(0, width);
         const randomExtra = (Math.random() < Math.random()) ? Math.floor(Math.random() * 100) : -Math.floor(Math.random() * 100);
-        return d3Width(keyDistance / 12) + randomExtra;
+        const xPos = d3Width(keyDistance / 12) + randomExtra;
+        if(xPos < 1) return Math.abs(randomExtra);
+        else return (xPos > width) ? (width - Math.abs(randomExtra)) : xPos;
     }
 
     /**
      * Returns a random color from the allColors array
-     * @param check array of available colors
+     * @returns a random color
      */
     getRandomColor(): string {
         return Rain.allColors[Math.floor(Math.random()*Rain.allColors.length)];
     }
 
-    getGradient(drop: Drop): string {
-        const d3Black = d3.interpolateLab(drop.color, "black");
-        return "";
+    /**
+     * Returns a color based on the confidence of the segment
+     * @returns color based on segment confidence
+     */
+    getConfidenceColor(tatum: Tatum): string {
+        const d3Color = d3.interpolateRgbBasis(Rain.allColors);
+        return d3Color(tatum.confidence);
+    }
+
+    getGradient(drop: Drop, height: number): string {
+        const d3Black = d3.interpolateLab(drop.color, "#424242");
+        return d3Black((drop.y - (height / 4)) / height);
     }
 
     /**

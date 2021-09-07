@@ -5,7 +5,7 @@
         (playTrackEvent)="playTrack($event)" (toggleLoadingEvent)="toggleLoading($event)" (click)="toggleNav(0)"
         [isLoading]="isLoading"></app-playlist-bar>
     <app-controls class="mid setting" [showControls]="showControls" [isLoading]="isLoading" (click)="toggleNav(1)"
-        [stationNum]="stationNum" [selectedPreset]="selectedPreset" (presetEvent)="this.selectedPreset = $event"
+        [stationNum]="stationNum" [selectedPreset]="selectedPreset" (presetEvent)="changePreset($event)"
         [isMobile]="isMobile" (changeStationEvent)="changeStation($event)" [presets]="presets"
         (fullscreenEvent)="fullscreen($event)" (changeDeviceEvent)="changeDevice($event)"
         (showSketchInfoEvent)="changeSketchInfo($event)">
