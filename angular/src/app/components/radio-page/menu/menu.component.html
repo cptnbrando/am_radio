@@ -1,0 +1,17 @@
+<div id="settingsBars">
+    <app-playlist-bar class="side setting" [showPlaylistBar]="showPlaylistBar" [selectedPlaylist]="selectedPlaylist"
+        [selectedPlaylistTracks]="selectedPlaylistTracks" [userPlaylists]="userPlaylists"
+        (changePlaylistEvent)="changePlaylist($event)" (playPlaylistEvent)="playPlaylist()"
+        (playTrackEvent)="playTrack($event)" (toggleLoadingEvent)="toggleLoading($event)" (click)="toggleNav(0)"
+        [isLoading]="isLoading"></app-playlist-bar>
+    <app-controls class="mid setting" [showControls]="showControls" [isLoading]="isLoading" (click)="toggleNav(1)"
+        [stationNum]="stationNum" [selectedPreset]="selectedPreset" (presetEvent)="this.selectedPreset = $event"
+        [isMobile]="isMobile" (changeStationEvent)="changeStation($event)" [presets]="presets"
+        (fullscreenEvent)="fullscreen($event)" (changeDeviceEvent)="changeDevice($event)"
+        (showSketchInfoEvent)="changeSketchInfo($event)">
+    </app-controls>
+    <app-station-bar class="side setting" [stationNum]="stationNum" [showStationBar]="showStationBar"
+        [currentStation]="currentStation" [selectedPlaylist]="selectedPlaylist"
+        (createdStation)="onCreatedStation($event)" [isLoading]="isLoading" (toggleLoadingEvent)="toggleLoading($event)"
+        (click)="toggleNav(2)"></app-station-bar>
+</div>

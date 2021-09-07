@@ -7,7 +7,7 @@ import { Station } from 'src/app/shared/models/station.model';
 import { ScriptService } from '../../services/script.service';
 import { SpotifyPlayerService } from '../../services/spotify-player.service'
 import { SpotifyService } from '../../services/spotify.service';
-import { Preset } from './controls/visualizer-settings/visualizer-settings.component';
+import { Preset } from './menu/controls/visualizer-settings/visualizer-settings.component';
 
 @Component({
   selector: 'app-radio-page',

@@ -1,0 +1,22 @@
+// Utilities
+@use "src/app/global"as global;
+
+#settingsBars {
+  display: flex;
+  justify-content: center;
+  height: 100%;
+
+  .side {
+    flex: 1;
+  }
+
+  .mid {
+    flex: 3;
+  }
+}
+
+@media only screen and (max-width: global.$mobileWidth) {
+    #settingsBars {
+        display: block;
+    }
+}

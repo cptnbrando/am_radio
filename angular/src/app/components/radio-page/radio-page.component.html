@@ -1,36 +1,34 @@
 <div id="overlay">
   <app-header (click)="toggleNav(3)" [showControls]=" showControls" (toggleBarEvent)="toggleBar($event)"
-    [stationNum]="stationNum" (changeStationEvent)="changeStation($event)" [isLoading]="isLoading" 
+    [stationNum]="stationNum" (changeStationEvent)="changeStation($event)" [isLoading]="isLoading"
     (toggleLoadingEvent)="toggleLoading($event)">
   </app-header>
 
-  <div id="settingsBars">
-    <app-playlist-bar class="side setting" [showPlaylistBar]="showPlaylistBar" [selectedPlaylist]="selectedPlaylist"
-      [selectedPlaylistTracks]="selectedPlaylistTracks" [userPlaylists]="userPlaylists"
-      (changePlaylistEvent)="changePlaylist($event)" (playPlaylistEvent)="playPlaylist()"
-      (playTrackEvent)="playTrack($event)" (toggleLoadingEvent)="toggleLoading($event)" (click)="toggleNav(0)"
-      [isLoading]="isLoading"></app-playlist-bar>
-    <app-controls class="mid setting" [showControls]="showControls" [isLoading]="isLoading" (click)="toggleNav(1)"
-      [stationNum]="stationNum" [selectedPreset]="selectedPreset" (presetEvent)="this.selectedPreset = $event"
-      [isMobile]="isMobile" (changeStationEvent)="changeStation($event)" [presets]="presets" (fullscreenEvent)="fullscreen($event)" (changeDeviceEvent)="changeDevice($event)" (showSketchInfoEvent)="changeSketchInfo($event)">
-    </app-controls>
-    <app-station-bar class="side setting" [stationNum]="stationNum" [showStationBar]="showStationBar"
-      [currentStation]="currentStation" [selectedPlaylist]="selectedPlaylist"
-      (createdStation)="onCreatedStation($event)"
-      [isLoading]="isLoading" (toggleLoadingEvent)="toggleLoading($event)" (click)="toggleNav(2)"></app-station-bar>
-  </div>
+  <app-menu [showPlaylistBar]="showPlaylistBar" [showControls]="showControls" [showStationBar]="showStationBar"
+    [stationNum]="stationNum" [selectedPlaylist]="selectedPlaylist" [selectedPlaylistTracks]="selectedPlaylistTracks"
+    [userPlaylists]="userPlaylists" [isLoading]="isLoading" [selectedPreset]="selectedPreset"
+    [currentStation]="currentStation" (changePlaylistEvent)="changePlaylist($event)"
+    (playPlaylistEvent)="playPlaylist()" (playTrackEvent)="playTrack($event)"
+    (toggleLoadingEvent)="toggleLoading($event)" (presetEvent)="this.selectedPreset
+    = $event" [isMobile]="isMobile" (changeStationEvent)="changeStation($event)" [presets]="presets"
+    (fullscreenEvent)="fullscreen($event)" (changeDeviceEvent)="changeDevice($event)"
+    (showSketchInfoEvent)="changeSketchInfo($event)" (createdStationEvent)="onCreatedStation($event)"
+    (toggleNavEvent)="toggleNav($event)">
+  </app-menu>
 
   <app-player (click)="toggleNav(3)" id="appPlayer" [stationNum]="stationNum" [currentDevice]="currentDevice"
-    [showPlaylistBar]="showPlaylistBar" [showStationBar]="showStationBar" [showControls]="showControls" (toggleBarEvent)="toggleBar($event)" [currentlyPlaying]="currentlyPlaying" [isPlaying]="isPlaying" [position]="position" [user]="user"
-    [currentStation]="currentStation" [repeat]="repeat" [shuffle]="shuffle" [playingPlaylist]="playingPlaylist"
-    (toggleLoadingEvent)="toggleLoading($event)" [isLoading]="isLoading" (volumeEvent)="changeVolume($event)"
-    (volumeEvent)="changeVolume($event)"(setPlayerEvent)="setPlayerData()" [volume]="volume" [isMobile]="isMobile" [isLoved]="isLoved">
-    </app-player>
+    [showPlaylistBar]="showPlaylistBar" [showStationBar]="showStationBar" [showControls]="showControls"
+    (toggleBarEvent)="toggleBar($event)" [currentlyPlaying]="currentlyPlaying" [isPlaying]="isPlaying"
+    [position]="position" [user]="user" [currentStation]="currentStation" [repeat]="repeat" [shuffle]="shuffle"
+    [playingPlaylist]="playingPlaylist" (toggleLoadingEvent)="toggleLoading($event)" [isLoading]="isLoading"
+    (volumeEvent)="changeVolume($event)" (volumeEvent)="changeVolume($event)" (setPlayerEvent)="setPlayerData()"
+    [volume]="volume" [isMobile]="isMobile" [isLoved]="isLoved">
+  </app-player>
 </div>
 
-<app-visualizer id="visualizer" [isLoading]="isLoading" [currentlyPlaying]="currentlyPlaying"
-  [isPlaying]="isPlaying" [selectedPreset]="selectedPreset" [isMobile]="isMobile" [mousePos]="mousePos"
-  [currentStation]="currentStation" [am_active]="am_active" [showSketchInfo]="showSketchInfo">
+<app-visualizer id="visualizer" [isLoading]="isLoading" [currentlyPlaying]="currentlyPlaying" [isPlaying]="isPlaying"
+  [selectedPreset]="selectedPreset" [isMobile]="isMobile" [mousePos]="mousePos" [currentStation]="currentStation"
+  [am_active]="am_active" [showSketchInfo]="showSketchInfo">
 </app-visualizer>
 <div id="sdk" hidden appDomWatcher (ready)="onPlayerReady($event)" (currentChange)="onCurrentChange($event)"
   (playbackChange)="onPlaybackChange($event)" (shuffleChange)="onShuffleChange($event)"

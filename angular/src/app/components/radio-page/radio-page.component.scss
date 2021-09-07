@@ -15,19 +15,6 @@
   left: 0;
   overflow: hidden;
   transition: 0.5s;
-
-  #settingsBars {
-    display: flex;
-    justify-content: center;
-
-    .side {
-      flex: 1;
-    }
-
-    .mid {
-      flex: 3;
-    }
-  }
 }
 
 app-player {
