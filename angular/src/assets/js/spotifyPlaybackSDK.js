@@ -36,9 +36,12 @@ window.onSpotifyWebPlaybackSDKReady = () => {
 
   player.addListener('player_state_changed', state => { 
     if(state) {
-      sdk.setAttribute("current", state.track_window.current_track.uri);
+      // console.log(state);
+      sdk.setAttribute("current", state.track_window.current_track);
+      sdk.setAttribute("currentURI", state.track_window.current_track.uri);
+      sdk.setAttribute("position", state.position);
       sdk.setAttribute("paused", state.paused);
-      sdk.setAttribute("duration", state.duration);
+      sdk.setAttribute("duration", state.track_window.current_track.duration);
       sdk.setAttribute("repeat", state.repeat_mode);
       sdk.setAttribute("shuffle", state.shuffle);
     }
@@ -48,6 +51,13 @@ window.onSpotifyWebPlaybackSDKReady = () => {
   player.addListener('ready', ({ device_id }) => {
     console.log('Ready with Device ID', device_id);
     sdk.setAttribute("state", "true");
+    sdk.setAttribute("current", "");
+    sdk.setAttribute("currentURI", "");
+    sdk.setAttribute("position", "");
+    sdk.setAttribute("paused", "");
+    sdk.setAttribute("duration", "");
+    sdk.setAttribute("repeat", "");
+    sdk.setAttribute("shuffle", "");
   });
 
   // Not Ready

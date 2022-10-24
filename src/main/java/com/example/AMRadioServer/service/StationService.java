@@ -3,13 +3,15 @@ package com.example.AMRadioServer.service;
 import com.example.AMRadioServer.model.ResponseMessage;
 import com.example.AMRadioServer.model.Station;
 import com.example.AMRadioServer.repository.StationRepository;
-import com.wrapper.spotify.SpotifyApi;
-import com.wrapper.spotify.exceptions.SpotifyWebApiException;
-import com.wrapper.spotify.model_objects.credentials.ClientCredentials;
-import com.wrapper.spotify.model_objects.specification.PlaylistSimplified;
-import com.wrapper.spotify.model_objects.specification.PlaylistTrack;
-import com.wrapper.spotify.model_objects.specification.User;
-import com.wrapper.spotify.requests.authorization.client_credentials.ClientCredentialsRequest;
+import org.hibernate.JDBCException;
+import se.michaelthelin.spotify.SpotifyApi;
+import se.michaelthelin.spotify.exceptions.SpotifyWebApiException;
+import se.michaelthelin.spotify.model_objects.credentials.ClientCredentials;
+import se.michaelthelin.spotify.model_objects.specification.PlaylistSimplified;
+
+import se.michaelthelin.spotify.model_objects.specification.PlaylistTrack;
+import se.michaelthelin.spotify.model_objects.specification.User;
+import se.michaelthelin.spotify.requests.authorization.client_credentials.ClientCredentialsRequest;
 import lombok.Data;
 import org.apache.hc.core5.http.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,7 +89,7 @@ public class StationService {
 
             System.out.println("Station transients filled in");
 
-        } catch (IOException | ParseException | SpotifyWebApiException e) {
+        } catch (Exception e) {
             System.out.println("Unable to fill in stations. Using blank maps.");
             e.printStackTrace();
             this.allStations = new HashMap<>();

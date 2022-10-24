@@ -1,13 +1,13 @@
 package com.example.AMRadioServer.model;
 
-import com.wrapper.spotify.SpotifyApi;
-import com.wrapper.spotify.exceptions.SpotifyWebApiException;
-import com.wrapper.spotify.model_objects.IPlaylistItem;
-import com.wrapper.spotify.model_objects.miscellaneous.PlaylistTracksInformation;
-import com.wrapper.spotify.model_objects.specification.Playlist;
-import com.wrapper.spotify.model_objects.specification.PlaylistSimplified;
-import com.wrapper.spotify.model_objects.specification.PlaylistTrack;
-import com.wrapper.spotify.model_objects.specification.User;
+import se.michaelthelin.spotify.SpotifyApi;
+import se.michaelthelin.spotify.exceptions.SpotifyWebApiException;
+import se.michaelthelin.spotify.model_objects.IPlaylistItem;
+import se.michaelthelin.spotify.model_objects.miscellaneous.PlaylistTracksInformation;
+import se.michaelthelin.spotify.model_objects.specification.Playlist;
+import se.michaelthelin.spotify.model_objects.specification.PlaylistSimplified;
+import se.michaelthelin.spotify.model_objects.specification.PlaylistTrack;
+import se.michaelthelin.spotify.model_objects.specification.User;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.hc.core5.http.ParseException;

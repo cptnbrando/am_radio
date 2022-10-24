@@ -75,7 +75,8 @@
               "proxyConfig": "src/proxy.conf.js"
             },
             "development": {
-              "browserTarget": "amradio:build:development"
+              "browserTarget": "amradio:build:development",
+              "proxyConfig": "src/proxy.conf.dev.js"
             }
           },
           "defaultConfiguration": "development"

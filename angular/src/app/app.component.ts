@@ -14,7 +14,13 @@ export class AppComponent {
   public static webURL: string = environment.appURL;
   public static appURL: string = environment.appURL + "/app";
 
-  constructor() {}
+  // public static serverRoot: string = "http://localhost:443";
+  // public static webURL: string = "http://localhost:443";
+  // public static appURL: string = "http://localhost:443" + "/app";
+
+  constructor() {
+    console.log("yeet");
+  }
 
   /**
    * If the item width is greater than the container width - offset, this will add the class .scroll to the item

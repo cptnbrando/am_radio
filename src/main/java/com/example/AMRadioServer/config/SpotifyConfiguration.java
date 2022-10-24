@@ -1,7 +1,7 @@
 package com.example.AMRadioServer.config;
 
-import com.wrapper.spotify.SpotifyApi;
-import com.wrapper.spotify.SpotifyHttpManager;
+import se.michaelthelin.spotify.SpotifyApi;
+import se.michaelthelin.spotify.SpotifyHttpManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.context.annotation.SessionScope;

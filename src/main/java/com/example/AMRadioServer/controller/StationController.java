@@ -3,10 +3,10 @@ package com.example.AMRadioServer.controller;
 import com.example.AMRadioServer.model.ResponseMessage;
 import com.example.AMRadioServer.model.Station;
 import com.example.AMRadioServer.service.StationService;
-import com.wrapper.spotify.exceptions.SpotifyWebApiException;
-import com.wrapper.spotify.model_objects.specification.PlaylistSimplified;
-import com.wrapper.spotify.model_objects.specification.User;
-import com.wrapper.spotify.requests.data.player.GetUsersCurrentlyPlayingTrackRequest;
+import se.michaelthelin.spotify.exceptions.SpotifyWebApiException;
+import se.michaelthelin.spotify.model_objects.specification.PlaylistSimplified;
+import se.michaelthelin.spotify.model_objects.specification.User;
+import se.michaelthelin.spotify.requests.data.player.GetUsersCurrentlyPlayingTrackRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

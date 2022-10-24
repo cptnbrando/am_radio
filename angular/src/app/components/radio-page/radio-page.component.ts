@@ -300,7 +300,28 @@ export class RadioPageComponent implements OnInit {
 
   // This will get the current player and set the data to the UI
   setPlayerData(): Promise<any> {
+    // console.log(this.sdk);
+    // console.log("device: " + this.sdk.getCurrentDevice());
+    // console.log("paused: " + this.sdk.getAttribute("paused"));
+    // this.position = this.sdk.getAttribute("position").value;
+    // this.currentlyPlaying = this.sdk.getAttribute("current").value;
+    // this.currentURI = this.sdk.getAttribute("currentURI").value;
+    // this.currentDevice = this.sdk.getCurrentDevice();
+    // this.isPlaying = !(this.sdk.getAttribute("paused") === "true");
+    // console.log(this.currentlyPlaying);
+
     return new Promise((resolve, reject) => {
+      // if(this.sdk.getAttribute("position")) {
+      //   console.log(this.sdk.getAttribute("position"));
+      //   // this.position = this.sdk.getAttribute("position").value;
+      // }
+      // this.currentlyPlaying = this.sdk.getAttribute("current").value;
+      // this.currentURI = this.sdk.getAttribute("currentURI").value;
+      // this.currentDevice = this.sdk.getCurrentDevice();
+      // this.isPlaying = !(this.sdk.getAttribute("paused") === "true");
+      // resolve(this.currentlyPlaying);
+
+      // this.sdk.getAttribute("position")
       this.playerService.getPlayer().subscribe(data => {
         if(data) {
           // Set the data

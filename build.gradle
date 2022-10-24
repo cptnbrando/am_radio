@@ -1,5 +1,5 @@
 plugins {
-	id 'org.springframework.boot' version '2.5.1'
+	id 'org.springframework.boot' version '2.7.5'
 	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
 	id 'java'
 
@@ -44,7 +44,10 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
 	// https://mvnrepository.com/artifact/se.michaelthelin.spotify/spotify-web-api-java
-	implementation group: 'se.michaelthelin.spotify', name: 'spotify-web-api-java', version: '6.5.4'
+	implementation group: 'se.michaelthelin.spotify', name: 'spotify-web-api-java', version: '7.2.2'
+
+	// Firebase https://mvnrepository.com/artifact/com.google.firebase/firebase-admin
+	//	runtimeOnly group: 'com.google.firebase', name: 'firebase-admin', version: '9.1.0'
 }
 
 test {
@@ -63,7 +66,30 @@ task compileAngular(type: NpmTask, dependsOn: npmInstall) {
 	args = ['run', "buildProd"]
 }
 
+task compileAngularDev(type: NpmTask, dependsOn: npmInstall) {
+	def inputFiles = project.fileTree(dir: "${angularDir}", exclude: "**/karma-test-results.xml")
+	inputs.files(inputFiles)
+
+	def outputFile = "${angularDir}/dist/${angularAppName}" as Object
+	outputs.dir outputFile
+
+	group "build"
+	description = 'Compile client side assets for dev'
+	args = ['run', "buildDev"]
+}
+
 task copyAngular(type: Copy, dependsOn: compileAngular) {
+	def inputFiles = project.fileTree(dir: "${angularDir}/dist/${angularAppName}")
+	inputs.files(inputFiles)
+
+	def outputFile = "${projectDir}/src/main/resources/static/" as Object
+	outputs.dir outputFile
+
+	from "${angularDir}/dist/${angularAppName}"
+	into "${projectDir}/src/main/resources/static"
+}
+
+task copyAngularDev(type: Copy, dependsOn: compileAngularDev) {
 	def inputFiles = project.fileTree(dir: "${angularDir}/dist/${angularAppName}")
 	inputs.files(inputFiles)
 
@@ -76,4 +102,8 @@ task copyAngular(type: Copy, dependsOn: compileAngular) {
 
 if (System.getenv("SPRING_PROFILES_ACTIVE") == "prod") {
 	tasks.processResources.dependsOn(copyAngular)
+}
+
+if (System.getenv("SPRING_PROFILES_ACTIVE") == "dev") {
+	tasks.processResources.dependsOn(copyAngularDev)
 }
